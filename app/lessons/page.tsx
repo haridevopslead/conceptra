@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
+import { db } from "@/lib/db";
 import LessonsClient from "@/components/lessons/lessons-client";
 
 export const metadata = {
@@ -12,5 +13,11 @@ export default async function LessonsPage() {
   if (!session) redirect("/login");
   const plan = session.user.plan ?? "FREE";
 
-  return <LessonsClient plan={plan} />;
+  const progress = await db.userLessonProgress.findMany({
+    where: { userId: session.user.id },
+    select: { lessonSlug: true },
+  });
+  const visitedSlugs = progress.map((p) => p.lessonSlug);
+
+  return <LessonsClient plan={plan} visitedSlugs={visitedSlugs} />;
 }

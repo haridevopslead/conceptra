@@ -32,7 +32,7 @@ model User {
   email          String    @unique
   emailVerified  DateTime?
   image          String?
-  hashedPassword String?   // null when using OAuth-only sign-in
+  hashedPassword String?
 
   role           Role      @default(USER)
   plan           Plan      @default(FREE)
@@ -41,10 +41,10 @@ model User {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
-  // NextAuth relations
   accounts          Account[]
   sessions          Session[]
   interviewSessions InterviewSession[]
+  lessonProgress    UserLessonProgress[]
 }
 
 model Session {
@@ -113,4 +113,15 @@ model InterviewSession {
 
   @@index([userId])
   @@index([userId, createdAt])
+}
+
+model UserLessonProgress {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonSlug String
+  visitedAt  DateTime @default(now())
+
+  @@unique([userId, lessonSlug])
+  @@index([userId])
 }

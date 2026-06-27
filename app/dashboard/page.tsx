@@ -81,6 +81,8 @@ export default async function DashboardPage() {
     orderBy: { createdAt: "desc" },
   });
 
+  const lessonCount = await db.userLessonProgress.count({ where: { userId: user.id } });
+
   const interviewCount = interviews.length;
   const avgScore =
     interviewCount > 0
@@ -94,8 +96,8 @@ export default async function DashboardPage() {
   const STATS = [
     {
       label: "Lessons Completed",
-      value: "0",
-      sub: "Start your first lesson",
+      value: String(lessonCount),
+      sub: lessonCount === 0 ? "Start your first lesson" : `${lessonCount} lesson${lessonCount !== 1 ? "s" : ""} visited`,
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />

@@ -20,7 +20,7 @@ const ALL_CATEGORIES = [
   "SRE",
 ] as const;
 
-type Props = { plan: string };
+type Props = { plan: string; visitedSlugs: string[] };
 
 function LockIcon() {
   return (
@@ -40,17 +40,20 @@ function ClockIcon() {
   );
 }
 
-function LessonCard({ lesson, plan }: { lesson: Lesson; plan: string }) {
+function LessonCard({ lesson, plan, visited }: { lesson: Lesson; plan: string; visited: boolean }) {
   const locked = !lesson.isFree && plan === "FREE";
   const categoryColor = CATEGORY_COLOR[lesson.category];
   const difficultyColor = DIFFICULTY_COLOR[lesson.difficulty];
 
   return (
     <div
-      className="relative flex flex-col rounded-xl border border-white/10 p-5 gap-4 transition-colors hover:border-white/20"
-      style={{ backgroundColor: "#111827" }}
+      className="relative flex flex-col rounded-xl border p-5 gap-4 transition-colors hover:border-white/20"
+      style={{
+        backgroundColor: "#111827",
+        borderColor: visited && !locked ? "rgba(16,185,129,0.3)" : "rgba(255,255,255,0.1)",
+      }}
     >
-      {/* Pro lock overlay badge */}
+      {/* Badges — top-right corner */}
       {locked && (
         <div
           className="absolute top-4 right-4 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
@@ -58,6 +61,14 @@ function LessonCard({ lesson, plan }: { lesson: Lesson; plan: string }) {
         >
           <LockIcon />
           Pro
+        </div>
+      )}
+      {visited && !locked && (
+        <div
+          className="absolute top-4 right-4 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
+          style={{ backgroundColor: "rgba(16,185,129,0.15)", color: "#10B981", border: "1px solid rgba(16,185,129,0.3)" }}
+        >
+          ✓ Done
         </div>
       )}
 
@@ -131,7 +142,8 @@ function LessonCard({ lesson, plan }: { lesson: Lesson; plan: string }) {
   );
 }
 
-export default function LessonsClient({ plan }: Props) {
+export default function LessonsClient({ plan, visitedSlugs }: Props) {
+  const visitedSet = new Set(visitedSlugs);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("All");
 
@@ -241,7 +253,7 @@ export default function LessonsClient({ plan }: Props) {
       {filtered.length > 0 ? (
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((lesson) => (
-            <LessonCard key={lesson.id} lesson={lesson} plan={plan} />
+            <LessonCard key={lesson.id} lesson={lesson} plan={plan} visited={visitedSet.has(lesson.slug)} />
           ))}
         </div>
       ) : (

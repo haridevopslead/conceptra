@@ -5,15 +5,93 @@ import Link from "next/link";
 
 // ── Question bank ─────────────────────────────────────────────────────────────
 
-const QUESTIONS = [
-  "What is the difference between a Docker image and a Docker container? How would you explain this to a junior engineer joining your team?",
-  "Your Kubernetes pod is stuck in CrashLoopBackOff. Walk me through exactly how you would debug it in production.",
-  "Explain the difference between horizontal and vertical scaling. When would you choose one over the other in a real production system?",
-  "How would you design a zero-downtime deployment pipeline for a stateful service that requires a database schema migration?",
-  "What is a service mesh and when would you actually introduce one — versus when would it be overkill?",
-  "A microservice is responding slowly in production. Walk me through your entire debugging process from alert to resolution.",
-  "What is the difference between a Deployment and a StatefulSet in Kubernetes, and when would you use each?",
-];
+const QUESTION_BANK: Record<string, string[]> = {
+  Docker: [
+    "What is the difference between a Docker image and a container? How would you explain this to a junior engineer joining your team?",
+    "Walk me through what happens when you run `docker build -t myapp .` — from Dockerfile parsing to the final image.",
+    "What is a multi-stage Docker build and when would you use one? Give a real example.",
+    "Your container is OOMKilling in production. How do you investigate and fix it?",
+    "Explain Docker layer caching. How would you structure a Dockerfile to maximize cache hits during CI builds?",
+    "What is the difference between COPY and ADD in a Dockerfile? What are the security implications of each?",
+    "Explain Docker networking modes — bridge, host, and overlay. When would you choose each?",
+  ],
+  Kubernetes: [
+    "Your Kubernetes pod is stuck in CrashLoopBackOff. Walk me through exactly how you debug it in production.",
+    "What is the difference between a Deployment and a StatefulSet? When would you use each?",
+    "Explain Kubernetes resource requests vs limits. What happens if a pod exceeds its memory limit?",
+    "How does the Kubernetes scheduler decide which node to place a pod on? What mechanisms can you use to influence placement?",
+    "What is a Kubernetes Ingress and how does it differ from a Service of type LoadBalancer?",
+    "Walk me through how you would perform a zero-downtime rolling deployment in Kubernetes.",
+    "What is a PodDisruptionBudget and when would you use one?",
+  ],
+  "CI/CD": [
+    "How would you design a zero-downtime deployment pipeline for a service that requires a database schema migration?",
+    "Explain the difference between a blue-green deployment and a canary deployment. When would you use each?",
+    "What is the difference between continuous delivery and continuous deployment? Which should teams aim for?",
+    "Your CI pipeline takes 45 minutes. Walk me through how you would optimize it.",
+    "How would you handle secret management in a CI/CD pipeline safely?",
+    "What is a feature flag and how does it complement CI/CD practices?",
+    "Describe how you would implement a rollback strategy for a failed deployment.",
+  ],
+  AWS: [
+    "What is the difference between an IAM role and an IAM policy? How do you follow least-privilege principles?",
+    "Explain the difference between SQS and SNS. When would you use each or combine them?",
+    "How would you design a highly available, multi-region architecture for a critical API?",
+    "Explain VPC peering vs Transit Gateway — what are the limits and cost implications of each?",
+    "Your EC2 costs doubled this month unexpectedly. Walk me through how you'd investigate and reduce them.",
+    "What is the difference between ECS and EKS? When would you choose one over the other?",
+    "Explain S3 storage classes. How would you design a lifecycle policy for logs that must be retained for 7 years?",
+  ],
+  Terraform: [
+    "What is Terraform state and why is it important? What are the risks of losing it?",
+    "Explain the difference between `terraform plan` and `terraform apply`. What can go wrong if you skip plan?",
+    "What are Terraform modules? How would you structure a module for a reusable VPC component?",
+    "How do you manage secrets in Terraform? What approaches should you avoid?",
+    "Explain Terraform workspaces vs directory-based environment separation. Which do you prefer and why?",
+    "What happens when two engineers run `terraform apply` simultaneously? How do you prevent it?",
+    "How would you import existing AWS infrastructure into Terraform without destroying it?",
+  ],
+  Linux: [
+    "Walk me through what happens when you run a command in the Linux shell — from pressing Enter to process creation.",
+    "A Linux server is unresponsive but you can still SSH in. How do you diagnose what's consuming all resources?",
+    "Explain the difference between a hard link and a soft link. When would you use each?",
+    "What is the difference between `kill`, `kill -9`, and `killall`? What are the risks of using SIGKILL?",
+    "How does Linux memory management work? Explain the difference between free, cached, and used memory in `htop`.",
+    "Explain Linux file permissions. What does `chmod 644` mean and how does `setuid` work?",
+    "Your Linux server's disk is full but `df -h` and `du -sh *` don't add up. How do you find the missing space?",
+  ],
+  Git: [
+    "Explain the difference between `git merge` and `git rebase`. When would you use each on a team?",
+    "What is the difference between `git reset`, `git revert`, and `git restore`? When is each appropriate?",
+    "Walk me through what happens during a `git pull` — from network fetch to working tree update.",
+    "What is a Git hook and how would you use one to enforce commit message standards?",
+    "You accidentally committed secrets to main and pushed. Walk me through the full remediation process.",
+    "Explain trunk-based development vs Gitflow. Which would you recommend for a team shipping 10 times a day?",
+    "What is `git bisect` and how would you use it to find a regression introduced in the last 200 commits?",
+  ],
+  Observability: [
+    "What is the difference between metrics, logs, and traces? When do you need each?",
+    "Explain the RED method and the USE method for measuring service health. When do you apply each?",
+    "Your SLO is breaching but all your dashboards look healthy. How do you debug this discrepancy?",
+    "What is distributed tracing? How would you add it to a microservice that currently has none?",
+    "Explain cardinality in metrics. What happens to Prometheus when you have high-cardinality labels?",
+    "How would you design an alerting strategy that minimizes both false positives and missed incidents?",
+    "What is an error budget and how would you explain burn rate to a non-technical stakeholder?",
+  ],
+};
+
+const TOPIC_META: Record<string, { emoji: string; desc: string }> = {
+  Docker:        { emoji: "🐳", desc: "Containers & images" },
+  Kubernetes:    { emoji: "☸️", desc: "Orchestration & scheduling" },
+  "CI/CD":       { emoji: "🔄", desc: "Pipelines & deployments" },
+  AWS:           { emoji: "☁️", desc: "Cloud infrastructure" },
+  Terraform:     { emoji: "🏗️", desc: "Infrastructure as Code" },
+  Linux:         { emoji: "🐧", desc: "Systems & shell" },
+  Git:           { emoji: "🌿", desc: "Version control" },
+  Observability: { emoji: "📊", desc: "Metrics, logs & traces" },
+};
+
+const DIFFICULTIES = ["Beginner", "Intermediate", "Senior"] as const;
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -106,6 +184,90 @@ function ResultBox({
   );
 }
 
+// ── Topic selector screen ─────────────────────────────────────────────────────
+
+function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: string) => void }) {
+  const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const [difficulty, setDifficulty] = useState("Intermediate");
+
+  return (
+    <div className="p-8 w-full max-w-[860px] space-y-8">
+      <div>
+        <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623" }}>MOCK INTERVIEW</p>
+        <h1 className="text-2xl font-bold text-white mt-1">Choose your focus area</h1>
+        <p className="text-sm text-gray-400 mt-1">
+          Select a topic and difficulty. Claude will ask 7 questions and grade your answers like a senior engineer.
+        </p>
+      </div>
+
+      <div>
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Topic</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {Object.entries(TOPIC_META).map(([id, meta]) => {
+            const isSelected = selectedTopic === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setSelectedTopic(id)}
+                className="flex flex-col items-start gap-2 p-4 rounded-xl border text-left transition-all"
+                style={{
+                  backgroundColor: isSelected ? "rgba(245,166,35,0.1)" : "#111827",
+                  borderColor: isSelected ? "#F5A623" : "rgba(255,255,255,0.1)",
+                }}
+              >
+                <span className="text-2xl">{meta.emoji}</span>
+                <div>
+                  <p className="text-sm font-semibold" style={{ color: isSelected ? "#F5A623" : "#ffffff" }}>
+                    {id}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">{meta.desc}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div>
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Difficulty</p>
+        <div className="flex gap-3">
+          {DIFFICULTIES.map((d) => {
+            const isSelected = difficulty === d;
+            return (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className="px-5 py-2.5 rounded-xl text-sm font-semibold border transition-all"
+                style={{
+                  backgroundColor: isSelected ? "rgba(245,166,35,0.1)" : "#111827",
+                  borderColor: isSelected ? "#F5A623" : "rgba(255,255,255,0.1)",
+                  color: isSelected ? "#F5A623" : "#9CA3AF",
+                }}
+              >
+                {d}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <button
+        onClick={() => selectedTopic && onStart(selectedTopic, difficulty)}
+        disabled={!selectedTopic}
+        className="w-full py-4 rounded-xl font-bold text-sm transition-all"
+        style={{
+          backgroundColor: selectedTopic ? "#F5A623" : "#2D2A1F",
+          color: selectedTopic ? "#0A0E1A" : "#6B5E2A",
+          border: selectedTopic ? "none" : "1px solid rgba(245,166,35,0.15)",
+          cursor: selectedTopic ? "pointer" : "not-allowed",
+        }}
+      >
+        {selectedTopic ? `Start ${selectedTopic} Interview →` : "Select a topic to begin"}
+      </button>
+    </div>
+  );
+}
+
 // ── Session summary screen ────────────────────────────────────────────────────
 
 type SessionScore = {
@@ -118,9 +280,13 @@ type SessionScore = {
 function SessionSummary({
   scores,
   onRestart,
+  topic,
+  difficulty,
 }: {
   scores: SessionScore[];
   onRestart: () => void;
+  topic: string;
+  difficulty: string;
 }) {
   const avg = (arr: number[]) =>
     arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
@@ -146,7 +312,11 @@ function SessionSummary({
           SESSION COMPLETE
         </p>
         <h1 className="text-3xl font-black text-white">{scores.length} Questions Done</h1>
-        <p className="text-sm text-gray-400">Here's how you performed across the session.</p>
+        <div className="flex items-center justify-center gap-2 mt-1">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "#F5A623" }}>{topic}</span>
+          <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full" style={{ backgroundColor: "#1F2937" }}>{difficulty}</span>
+        </div>
+        <p className="text-sm text-gray-400 mt-1">Here's how you performed across the session.</p>
       </div>
 
       {/* Big score */}
@@ -248,6 +418,8 @@ function SessionSummary({
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function Evaluator() {
+  const [topic, setTopic] = useState<string | null>(null);
+  const [difficulty, setDifficulty] = useState("Intermediate");
   const [qIndex, setQIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
@@ -257,13 +429,13 @@ export default function Evaluator() {
   const [sessionScores, setSessionScores] = useState<SessionScore[]>([]);
   const [sessionDone, setSessionDone] = useState(false);
 
-  // refs so callbacks always see current values without stale closure
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-  const baseTextRef = useRef("");      // text in textarea when mic was pressed
-  const finalTranscriptRef = useRef(""); // confirmed words from this session
+  const baseTextRef = useRef("");
+  const finalTranscriptRef = useRef("");
 
-  const question = QUESTIONS[qIndex];
-  const isLast = qIndex === QUESTIONS.length - 1;
+  const questions = topic ? (QUESTION_BANK[topic] ?? []) : [];
+  const question = questions[qIndex] ?? "";
+  const isLast = qIndex === questions.length - 1;
 
   // ── Voice input ─────────────────────────────────────────────────────────────
 
@@ -345,7 +517,7 @@ export default function Evaluator() {
       const res = await fetch("/api/interview/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question, answer }),
+        body: JSON.stringify({ question, answer, topic: topic ?? "General DevOps", difficulty }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: EvalResult = await res.json();
@@ -385,6 +557,8 @@ export default function Evaluator() {
 
   function restart() {
     if (isListening) stopListening();
+    setTopic(null);
+    setDifficulty("Intermediate");
     setQIndex(0);
     setAnswer("");
     setResult(null);
@@ -397,8 +571,12 @@ export default function Evaluator() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
+  if (!topic) {
+    return <TopicSelector onStart={(t, d) => { setTopic(t); setDifficulty(d); }} />;
+  }
+
   if (sessionDone) {
-    return <SessionSummary scores={sessionScores} onRestart={restart} />;
+    return <SessionSummary scores={sessionScores} onRestart={restart} topic={topic} difficulty={difficulty} />;
   }
 
   return (
@@ -408,9 +586,26 @@ export default function Evaluator() {
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white">AI Mock Interview</h1>
-          <p className="text-sm text-gray-400 mt-1">
-            Answer the question as you would in a real interview. Claude grades like a senior engineer.
-          </p>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span
+              className="text-xs font-semibold px-2.5 py-1 rounded-full"
+              style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "#F5A623" }}
+            >
+              {topic}
+            </span>
+            <span
+              className="text-xs font-medium px-2.5 py-1 rounded-full"
+              style={{ backgroundColor: "#1F2937", color: "#9CA3AF" }}
+            >
+              {difficulty}
+            </span>
+            <button
+              onClick={restart}
+              className="text-xs text-gray-600 hover:text-gray-400 transition-colors underline"
+            >
+              Change
+            </button>
+          </div>
         </div>
         <Link
           href="/interview/session?topic=General+DevOps&level=Mid-level+%282%E2%80%935+yrs%29&count=5"
@@ -426,7 +621,7 @@ export default function Evaluator() {
         style={{ backgroundColor: "#111827", borderLeft: "3px solid #F5A623" }}
       >
         <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623" }}>
-          QUESTION {qIndex + 1} OF {QUESTIONS.length}
+          QUESTION {qIndex + 1} OF {questions.length}
         </p>
         <p className="text-base font-medium text-white leading-relaxed">{question}</p>
       </div>

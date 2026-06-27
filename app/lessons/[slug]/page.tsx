@@ -2,6 +2,7 @@ import { LESSONS, CATEGORY_COLOR, DIFFICULTY_COLOR } from "@/lib/data/lessons";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import LessonTracker from "@/components/lessons/lesson-tracker";
 
 export async function generateStaticParams() {
   return LESSONS.map((l) => ({ slug: l.slug }));
@@ -262,6 +263,7 @@ export default async function LessonDetailPage({
 
   return (
     <div className="p-8 w-full max-w-[860px]">
+      <LessonTracker slug={params.slug} />
       {/* Back */}
       <Link
         href="/lessons"

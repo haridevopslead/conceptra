@@ -8,12 +8,25 @@ export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { question, answer } = await req.json();
+  const { question, answer, topic, difficulty } = await req.json();
   if (!question?.trim() || !answer?.trim()) {
     return NextResponse.json({ error: "Missing question or answer" }, { status: 400 });
   }
 
-  const prompt = `You are a senior DevOps interviewer at a top tech company evaluating a candidate's spoken answer.
+  const topicCtx = topic ?? "General DevOps";
+  const difficultyCtx = difficulty ?? "Intermediate";
+
+  const difficultyGuidance =
+    difficultyCtx === "Beginner"
+      ? "This is a Beginner candidate. Reward correct fundamentals and be encouraging. Do not penalize for missing advanced edge cases or production-specific nuance — focus on whether they understand the core concept."
+      : difficultyCtx === "Senior"
+      ? "This is a Senior candidate. Hold them to a high bar. Expect production-grade answers with specific trade-offs, failure modes, real numbers, and incident-level reasoning. Generic or surface-level answers should score 4 or below."
+      : "This is an Intermediate candidate. Expect practical usage and some production knowledge. Penalize vague hand-waving but reward correct practical examples.";
+
+  const prompt = `You are a senior DevOps interviewer at a top tech company evaluating a candidate's answer on the topic of ${topicCtx}.
+
+Difficulty level: ${difficultyCtx}
+${difficultyGuidance}
 
 QUESTION: ${question}
 

@@ -106,6 +106,145 @@ function ResultBox({
   );
 }
 
+// ── Session summary screen ────────────────────────────────────────────────────
+
+type SessionScore = {
+  depth: number;
+  accuracy: number;
+  production: number;
+  overall: number;
+};
+
+function SessionSummary({
+  scores,
+  onRestart,
+}: {
+  scores: SessionScore[];
+  onRestart: () => void;
+}) {
+  const avg = (arr: number[]) =>
+    arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
+
+  const avgOverall = avg(scores.map((s) => s.overall));
+  const avgDepth = avg(scores.map((s) => s.depth));
+  const avgAccuracy = avg(scores.map((s) => s.accuracy));
+  const avgProduction = avg(scores.map((s) => s.production));
+
+  const dims = [
+    { label: "Depth", val: avgDepth },
+    { label: "Accuracy", val: avgAccuracy },
+    { label: "Production Awareness", val: avgProduction },
+  ];
+  const strongest = dims.reduce((a, b) => (b.val > a.val ? b : a));
+  const weakest = dims.reduce((a, b) => (b.val < a.val ? b : a));
+
+  return (
+    <div className="p-8 w-full max-w-[860px] space-y-6">
+      {/* Heading */}
+      <div className="text-center space-y-1">
+        <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623" }}>
+          SESSION COMPLETE
+        </p>
+        <h1 className="text-3xl font-black text-white">{scores.length} Questions Done</h1>
+        <p className="text-sm text-gray-400">Here's how you performed across the session.</p>
+      </div>
+
+      {/* Big score */}
+      <div
+        className="rounded-2xl border border-white/10 p-8 text-center space-y-2"
+        style={{ backgroundColor: "#111827" }}
+      >
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Average Score</p>
+        <div className="text-6xl font-black mt-1" style={{ color: scoreColor(avgOverall) }}>
+          {avgOverall}
+          <span className="text-3xl font-bold text-gray-500">/10</span>
+        </div>
+        <p className="text-lg font-semibold mt-1" style={{ color: scoreColor(avgOverall) }}>
+          {scoreLabel(avgOverall)}
+        </p>
+      </div>
+
+      {/* Dimension breakdown */}
+      <div className="grid grid-cols-3 gap-3">
+        {dims.map((d) => (
+          <SubScore key={d.label} label={d.label} score={d.val} />
+        ))}
+      </div>
+
+      {/* Strongest / Weakest */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div
+          className="rounded-xl border p-5 space-y-1"
+          style={{ backgroundColor: "rgba(16,185,129,0.07)", borderColor: "rgba(16,185,129,0.2)" }}
+        >
+          <p className="text-xs font-bold tracking-wider" style={{ color: "#10B981" }}>
+            ✓ STRONGEST DIMENSION
+          </p>
+          <p className="text-base font-bold text-white">{strongest.label}</p>
+          <p className="text-sm text-gray-400">Avg {strongest.val}/10 — this is your confidence zone</p>
+        </div>
+        <div
+          className="rounded-xl border p-5 space-y-1"
+          style={{ backgroundColor: "rgba(239,68,68,0.07)", borderColor: "rgba(239,68,68,0.2)" }}
+        >
+          <p className="text-xs font-bold tracking-wider" style={{ color: "#EF4444" }}>
+            ⚠ WEAKEST DIMENSION
+          </p>
+          <p className="text-base font-bold text-white">{weakest.label}</p>
+          <p className="text-sm text-gray-400">Avg {weakest.val}/10 — focus your next study session here</p>
+        </div>
+      </div>
+
+      {/* Per-question scores */}
+      <div
+        className="rounded-xl border border-white/10 overflow-hidden"
+        style={{ backgroundColor: "#111827" }}
+      >
+        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-5 py-3 border-b border-white/5">
+          Question breakdown
+        </p>
+        {scores.map((s, i) => {
+          const color = scoreColor(s.overall);
+          return (
+            <div
+              key={i}
+              className="flex items-center justify-between px-5 py-3 border-b border-white/5 last:border-0"
+            >
+              <span className="text-sm text-gray-400">Question {i + 1}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-500">{s.depth}/{s.accuracy}/{s.production}</span>
+                <span
+                  className="text-sm font-bold px-2.5 py-0.5 rounded-full"
+                  style={{ backgroundColor: `${color}20`, color }}
+                >
+                  {s.overall}/10
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Actions */}
+      <div className="flex gap-3">
+        <button
+          onClick={onRestart}
+          className="flex-1 py-3.5 rounded-xl font-bold text-sm transition-opacity hover:opacity-90"
+          style={{ backgroundColor: "#F5A623", color: "#0A0E1A" }}
+        >
+          Start New Session
+        </button>
+        <Link
+          href="/dashboard"
+          className="flex-1 py-3.5 rounded-xl font-bold text-sm text-center border border-white/20 text-white hover:border-white/40 transition-colors"
+        >
+          Go to Dashboard
+        </Link>
+      </div>
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function Evaluator() {
@@ -115,6 +254,8 @@ export default function Evaluator() {
   const [result, setResult] = useState<EvalResult | null>(null);
   const [error, setError] = useState("");
   const [isListening, setIsListening] = useState(false);
+  const [sessionScores, setSessionScores] = useState<SessionScore[]>([]);
+  const [sessionDone, setSessionDone] = useState(false);
 
   // refs so callbacks always see current values without stale closure
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
@@ -209,6 +350,15 @@ export default function Evaluator() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: EvalResult = await res.json();
       setResult(data);
+      setSessionScores((prev) => [
+        ...prev,
+        {
+          overall: data.overall_score,
+          depth: data.depth_score,
+          accuracy: data.accuracy_score,
+          production: data.production_awareness_score,
+        },
+      ]);
       setPhase("done");
     } catch {
       setError("Evaluation failed. Please check your connection and try again.");
@@ -216,11 +366,16 @@ export default function Evaluator() {
     }
   }
 
-  // ── Next question ───────────────────────────────────────────────────────────
+  // ── Next question / session end ─────────────────────────────────────────────
 
   function next() {
     if (isListening) stopListening();
-    setQIndex((i) => (i + 1) % QUESTIONS.length);
+    if (isLast) {
+      setSessionDone(true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    setQIndex((i) => i + 1);
     setAnswer("");
     setResult(null);
     setPhase("idle");
@@ -228,7 +383,23 @@ export default function Evaluator() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  function restart() {
+    if (isListening) stopListening();
+    setQIndex(0);
+    setAnswer("");
+    setResult(null);
+    setPhase("idle");
+    setError("");
+    setSessionScores([]);
+    setSessionDone(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   // ── Render ──────────────────────────────────────────────────────────────────
+
+  if (sessionDone) {
+    return <SessionSummary scores={sessionScores} onRestart={restart} />;
+  }
 
   return (
     <div className="p-8 w-full max-w-[860px] space-y-6">
@@ -324,24 +495,44 @@ export default function Evaluator() {
           </p>
         )}
 
-        {phase === "idle" && (
+        {(phase === "idle" || phase === "submitting") && (
           <button
             onClick={submit}
-            disabled={!answer.trim()}
-            className="w-full py-3.5 rounded-xl font-bold text-sm transition-opacity disabled:opacity-40 hover:opacity-90"
-            style={{ backgroundColor: "#F5A623", color: "#0A0E1A" }}
+            disabled={phase === "submitting" || !answer.trim()}
+            className="w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+            style={{
+              backgroundColor:
+                phase === "submitting"
+                  ? "#1F2937"
+                  : answer.trim()
+                  ? "#F5A623"
+                  : "#2D2A1F",
+              color:
+                phase === "submitting"
+                  ? "#9CA3AF"
+                  : answer.trim()
+                  ? "#0A0E1A"
+                  : "#6B5E2A",
+              border:
+                phase === "submitting"
+                  ? "1px solid rgba(255,255,255,0.1)"
+                  : answer.trim()
+                  ? "none"
+                  : "1px solid rgba(245,166,35,0.15)",
+            }}
           >
-            Submit Answer
+            {phase === "submitting" ? (
+              <>
+                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+                Evaluating your answer…
+              </>
+            ) : (
+              "Submit Answer"
+            )}
           </button>
-        )}
-
-        {phase === "submitting" && (
-          <div
-            className="w-full py-3.5 rounded-xl text-sm font-bold text-center border border-white/10 text-gray-400"
-            style={{ backgroundColor: "#111827" }}
-          >
-            <span className="animate-pulse">Evaluating your answer…</span>
-          </div>
         )}
       </div>
 
@@ -391,7 +582,7 @@ export default function Evaluator() {
             className="w-full py-3.5 rounded-xl font-bold text-sm transition-opacity hover:opacity-90"
             style={{ backgroundColor: "#F5A623", color: "#0A0E1A" }}
           >
-            {isLast ? "Restart from Q1 →" : "Next Question →"}
+            {isLast ? "See Session Results →" : "Next Question →"}
           </button>
         </div>
       )}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { anthropic } from "@/lib/ai";
+import { db } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -45,16 +46,23 @@ Be honest and specific. Vague praise or criticism is useless to the candidate.`;
 
   const raw = message.content[0].type === "text" ? message.content[0].text : "";
 
-  // Extract JSON robustly — Claude occasionally wraps in markdown fences
   const match = raw.match(/\{[\s\S]*\}/);
   if (!match) {
     return NextResponse.json({ error: "Malformed evaluation response" }, { status: 500 });
   }
 
+  let result: Record<string, unknown>;
   try {
-    const result = JSON.parse(match[0]);
-    return NextResponse.json(result);
+    result = JSON.parse(match[0]);
   } catch {
     return NextResponse.json({ error: "Failed to parse evaluation JSON" }, { status: 500 });
   }
+
+  // Save the interview result — fire-and-forget so a DB error never blocks the response
+  const score = typeof result.overall_score === "number" ? result.overall_score : 0;
+  db.interviewSession.create({
+    data: { userId: session.user.id, score },
+  }).catch(() => { /* silent — don't break the UX for a logging failure */ });
+
+  return NextResponse.json(result);
 }

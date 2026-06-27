@@ -36,27 +36,43 @@ function scoreLabel(avg: number): string {
   return "Keep Practicing";
 }
 
+const STREAM_TIMEOUT_MS = 45_000;
+
 async function streamFromAPI(
   body: object,
   onChunk: (t: string) => void,
 ): Promise<string> {
-  const res = await fetch("/api/interview/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok || !res.body) throw new Error("Stream failed");
+  const abort = new AbortController();
+  const timer = setTimeout(() => abort.abort(), STREAM_TIMEOUT_MS);
+
+  let res: Response;
+  try {
+    res = await fetch("/api/interview/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: abort.signal,
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+
+  if (!res.ok || !res.body) throw new Error(`API error ${res.status}`);
 
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
   let full = "";
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    const chunk = decoder.decode(value, { stream: true });
-    full += chunk;
-    onChunk(chunk);
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      full += chunk;
+      onChunk(chunk);
+    }
+  } finally {
+    reader.releaseLock();
   }
   return full;
 }
@@ -285,8 +301,11 @@ export default function InterviewSession() {
         });
         setPhase("answering");
         setTimeout(() => answerRef.current?.focus(), 50);
-      } catch {
-        setError("Could not reach the AI. Check your ANTHROPIC_API_KEY and try again.");
+      } catch (e) {
+        const msg = e instanceof Error && e.name === "AbortError"
+          ? "Request timed out. Check your connection and try again."
+          : "Could not reach the AI. Check your connection and try again.";
+        setError(msg);
         setPhase("answering");
       }
     },
@@ -386,8 +405,14 @@ export default function InterviewSession() {
 
       {/* Error */}
       {error && (
-        <div className="rounded-lg px-4 py-3 text-sm text-red-400 bg-red-400/10 border border-red-400/20">
-          {error}
+        <div className="rounded-lg px-4 py-3 text-sm text-red-400 bg-red-400/10 border border-red-400/20 flex items-center justify-between gap-3">
+          <span>{error}</span>
+          <button
+            onClick={() => { setError(""); askQuestion(currentIndex); }}
+            className="shrink-0 text-xs font-bold underline hover:no-underline"
+          >
+            Retry
+          </button>
         </div>
       )}
 

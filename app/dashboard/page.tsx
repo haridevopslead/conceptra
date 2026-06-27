@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
+import { db } from "@/lib/db";
 import Link from "next/link";
 
 function greeting() {
@@ -10,59 +11,28 @@ function greeting() {
   return "Good evening";
 }
 
-const STATS = [
-  {
-    label: "Lessons Completed",
-    value: "0",
-    sub: "Start your first lesson",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-      </svg>
-    ),
-  },
-  {
-    label: "Mock Interviews",
-    value: "0",
-    sub: "Practice makes perfect",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-        <line x1="12" y1="19" x2="12" y2="23" />
-        <line x1="8" y1="23" x2="16" y2="23" />
-      </svg>
-    ),
-  },
-  {
-    label: "Day Streak",
-    value: "0",
-    sub: "Log in daily to build it",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-      </svg>
-    ),
-  },
-  {
-    label: "Avg. Mock Score",
-    value: "—",
-    sub: "Complete an interview to score",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-      </svg>
-    ),
-  },
-];
+// Count consecutive days (today or yesterday counts as streak-active)
+function calcStreak(dates: Date[]): number {
+  if (!dates.length) return 0;
+  const days = new Set(dates.map((d) => d.toISOString().slice(0, 10)));
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const yesterdayStr = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  if (!days.has(todayStr) && !days.has(yesterdayStr)) return 0;
+
+  let streak = 0;
+  let cursor = days.has(todayStr) ? new Date() : new Date(Date.now() - 86_400_000);
+  while (days.has(cursor.toISOString().slice(0, 10))) {
+    streak++;
+    cursor = new Date(cursor.getTime() - 86_400_000);
+  }
+  return streak;
+}
 
 const QUICK_ACTIONS = [
   {
     href: "/interview",
     title: "Start Mock Interview",
-    description:
-      "Jump into an AI-powered session that simulates a real DevOps hiring panel.",
+    description: "Jump into an AI-powered session that simulates a real DevOps hiring panel.",
     cta: "Start Now",
     primary: true,
     icon: (
@@ -77,8 +47,7 @@ const QUICK_ACTIONS = [
   {
     href: "/lessons",
     title: "Browse Lessons",
-    description:
-      "Explore structured modules on Kubernetes, CI/CD, cloud platforms, and SRE.",
+    description: "Explore structured modules on Kubernetes, CI/CD, cloud platforms, and SRE.",
     cta: "Browse",
     primary: false,
     icon: (
@@ -104,6 +73,70 @@ export default async function DashboardPage() {
   if (!session) redirect("/login");
   const user = session.user;
   const isFreePlan = !user.plan || user.plan === "FREE";
+
+  // Fetch interview stats
+  const interviews = await db.interviewSession.findMany({
+    where: { userId: user.id },
+    select: { score: true, createdAt: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const interviewCount = interviews.length;
+  const avgScore =
+    interviewCount > 0
+      ? Math.round(interviews.reduce((sum, s) => sum + s.score, 0) / interviewCount)
+      : null;
+  const streak = calcStreak(interviews.map((i) => i.createdAt));
+
+  // Recent 5 for activity feed
+  const recent = interviews.slice(0, 5);
+
+  const STATS = [
+    {
+      label: "Lessons Completed",
+      value: "0",
+      sub: "Start your first lesson",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Mock Interviews",
+      value: String(interviewCount),
+      sub: interviewCount === 0 ? "Practice makes perfect" : `${interviewCount} session${interviewCount !== 1 ? "s" : ""} total`,
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+          <line x1="12" y1="19" x2="12" y2="23" />
+          <line x1="8" y1="23" x2="16" y2="23" />
+        </svg>
+      ),
+    },
+    {
+      label: "Day Streak",
+      value: streak > 0 ? `${streak}🔥` : "0",
+      sub: streak > 0 ? "Keep it up!" : "Log in daily to build it",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+        </svg>
+      ),
+    },
+    {
+      label: "Avg. Mock Score",
+      value: avgScore !== null ? `${avgScore}/10` : "—",
+      sub: avgScore !== null ? scoreLabel(avgScore) : "Complete an interview to score",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+      ),
+    },
+  ];
 
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-8">
@@ -132,11 +165,11 @@ export default async function DashboardPage() {
       {isFreePlan && (
         <div
           className="flex items-center justify-between gap-4 rounded-xl px-5 py-4 border"
-          style={{ backgroundColor: "#F5A623/5", borderColor: "#F5A623/30", background: "rgba(245,166,35,0.07)" }}
+          style={{ background: "rgba(245,166,35,0.07)", borderColor: "rgba(245,166,35,0.3)" }}
         >
           <div>
             <p className="text-sm font-semibold text-white">
-              Unlock unlimited interviews & all lessons
+              Unlock unlimited interviews &amp; all lessons
             </p>
             <p className="text-xs text-gray-400 mt-0.5">
               Upgrade to Pro to get full AI coaching and priority feedback.
@@ -193,11 +226,7 @@ export default async function DashboardPage() {
                 style={
                   a.primary
                     ? { backgroundColor: "#F5A623", color: "#0A0E1A" }
-                    : {
-                        backgroundColor: "transparent",
-                        color: "#F5A623",
-                        border: "1px solid #F5A623",
-                      }
+                    : { backgroundColor: "transparent", color: "#F5A623", border: "1px solid #F5A623" }
                 }
               >
                 {a.cta}
@@ -230,33 +259,79 @@ export default async function DashboardPage() {
         <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-3">
           Recent Activity
         </h2>
-        <div
-          className="rounded-xl border border-white/10 flex flex-col items-center justify-center py-14 text-center"
-          style={{ backgroundColor: "#111827" }}
-        >
-          <svg
-            className="w-10 h-10 text-gray-600 mb-3"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            viewBox="0 0 24 24"
+        {recent.length === 0 ? (
+          <div
+            className="rounded-xl border border-white/10 flex flex-col items-center justify-center py-14 text-center"
+            style={{ backgroundColor: "#111827" }}
           >
-            <path d="M12 8v4l3 3" />
-            <circle cx="12" cy="12" r="9" />
-          </svg>
-          <p className="text-sm font-medium text-gray-400">No activity yet</p>
-          <p className="text-xs text-gray-600 mt-1">
-            Complete a lesson or interview to see your history here.
-          </p>
-          <Link
-            href="/lessons"
-            className="mt-4 text-xs font-semibold hover:underline"
-            style={{ color: "#F5A623" }}
-          >
-            Start your first lesson →
-          </Link>
-        </div>
+            <svg className="w-10 h-10 text-gray-600 mb-3" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path d="M12 8v4l3 3" />
+              <circle cx="12" cy="12" r="9" />
+            </svg>
+            <p className="text-sm font-medium text-gray-400">No activity yet</p>
+            <p className="text-xs text-gray-600 mt-1">
+              Complete a lesson or interview to see your history here.
+            </p>
+            <Link href="/lessons" className="mt-4 text-xs font-semibold hover:underline" style={{ color: "#F5A623" }}>
+              Start your first lesson →
+            </Link>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-white/10 overflow-hidden" style={{ backgroundColor: "#111827" }}>
+            {recent.map((s, i) => {
+              const color = scoreColor(s.score);
+              return (
+                <div
+                  key={i}
+                  className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 last:border-0"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+                      style={{ backgroundColor: `${color}18` }}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke={color} strokeWidth={2} viewBox="0 0 24 24">
+                        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                        <line x1="12" y1="19" x2="12" y2="23" />
+                        <line x1="8" y1="23" x2="16" y2="23" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-white">Mock Interview</p>
+                      <p className="text-xs text-gray-500">{formatDate(s.createdAt)}</p>
+                    </div>
+                  </div>
+                  <span
+                    className="text-sm font-bold px-2.5 py-1 rounded-full"
+                    style={{ backgroundColor: `${color}20`, color }}
+                  >
+                    {s.score}/10
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
+}
+
+function scoreColor(n: number) {
+  if (n >= 8) return "#F5A623";
+  if (n >= 6) return "#10B981";
+  if (n >= 4) return "#F59E0B";
+  return "#EF4444";
+}
+
+function scoreLabel(n: number) {
+  if (n >= 8) return "Excellent";
+  if (n >= 6) return "Good";
+  if (n >= 4) return "Needs Work";
+  return "Keep Practicing";
+}
+
+function formatDate(d: Date) {
+  return new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(d);
 }

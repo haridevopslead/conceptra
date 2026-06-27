@@ -25,7 +25,7 @@ Improve: <2–3 sentences on concrete gaps — name the specific tools, flags, c
 
 Keep the entire evaluation under 100 words. Be direct and honest.`;
 
-  const stream = anthropic.messages.stream({
+  const msgStream = anthropic.messages.stream({
     model: "claude-sonnet-4-6",
     max_tokens: 512,
     system: systemPrompt,
@@ -33,23 +33,27 @@ Keep the entire evaluation under 100 words. Be direct and honest.`;
   });
 
   const encoder = new TextEncoder();
+
+  // Use the SDK's event-emitter API instead of async iteration.
+  // This avoids potential race conditions where error/end events fire
+  // before the async iterator's listeners are registered, causing hangs.
   const readable = new ReadableStream({
-    async start(controller) {
-      try {
-        for await (const chunk of stream) {
-          if (
-            chunk.type === "content_block_delta" &&
-            chunk.delta.type === "text_delta"
-          ) {
-            controller.enqueue(encoder.encode(chunk.delta.text));
-          }
-        }
-      } finally {
+    start(controller) {
+      msgStream.on("text", (text) => {
+        controller.enqueue(encoder.encode(text));
+      });
+      msgStream.on("end", () => {
         controller.close();
-      }
+      });
+      msgStream.on("error", (err) => {
+        controller.error(err);
+      });
+      msgStream.on("abort", (err) => {
+        controller.error(err);
+      });
     },
     cancel() {
-      stream.abort();
+      msgStream.abort();
     },
   });
 

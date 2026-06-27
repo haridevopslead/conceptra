@@ -85,3 +85,20 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+// ---------------------------------------------------------------------------
+// Content models
+// ---------------------------------------------------------------------------
+
+model Lesson {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  content     Json
+  tier        Plan     @default(FREE)
+  order       Int      @default(0)
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

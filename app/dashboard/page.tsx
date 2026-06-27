@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
 
@@ -100,7 +101,8 @@ const TOPICS = [
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
-  const user = session!.user;
+  if (!session) redirect("/login");
+  const user = session.user;
   const isFreePlan = !user.plan || user.plan === "FREE";
 
   return (

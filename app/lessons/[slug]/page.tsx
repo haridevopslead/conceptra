@@ -1,19 +1,35 @@
-import { LESSONS } from "@/lib/data/lessons";
+import { LESSONS, CATEGORY_COLOR, DIFFICULTY_COLOR } from "@/lib/data/lessons";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { CATEGORY_COLOR, DIFFICULTY_COLOR } from "@/lib/data/lessons";
+import { db } from "@/lib/db";
 
 export async function generateStaticParams() {
   return LESSONS.map((l) => ({ slug: l.slug }));
 }
 
-export default function LessonDetailPage({
+type Layer = {
+  type: string;
+  title: string;
+  content: string;
+};
+
+const LAYER_CONFIG: Record<string, { color: string; label: string }> = {
+  story:         { color: "#F5A623", label: "THE STORY" },
+  concept:       { color: "#3B82F6", label: "THE CONCEPT" },
+  pressure_test: { color: "#EF4444", label: "PRESSURE TEST" },
+};
+
+export default async function LessonDetailPage({
   params,
 }: {
   params: { slug: string };
 }) {
   const lesson = LESSONS.find((l) => l.slug === params.slug);
   if (!lesson) notFound();
+
+  const dbLesson = await db.lesson.findUnique({ where: { slug: params.slug } });
+  const layers: Layer[] =
+    (dbLesson?.content as { layers?: Layer[] } | null)?.layers ?? [];
 
   const categoryColor = CATEGORY_COLOR[lesson.category];
   const difficultyColor = DIFFICULTY_COLOR[lesson.difficulty];
@@ -70,26 +86,49 @@ export default function LessonDetailPage({
         </div>
       </div>
 
-      {/* Placeholder content area */}
-      <div
-        className="rounded-2xl border border-white/10 flex flex-col items-center justify-center py-20 text-center"
-        style={{ backgroundColor: "#111827" }}
-      >
-        <svg
-          className="w-10 h-10 text-gray-600 mb-3"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={1.5}
-          viewBox="0 0 24 24"
+      {/* Content layers */}
+      {layers.length > 0 ? (
+        <div className="space-y-4">
+          {layers.map((layer, i) => {
+            const cfg = LAYER_CONFIG[layer.type] ?? { color: "#6B7280", label: layer.type.toUpperCase() };
+            return (
+              <div
+                key={i}
+                className="rounded-2xl border border-white/10 p-6 space-y-3"
+                style={{ backgroundColor: "#111827", borderLeft: `3px solid ${cfg.color}` }}
+              >
+                <p className="text-xs font-bold tracking-widest" style={{ color: cfg.color }}>
+                  {cfg.label}
+                </p>
+                <h2 className="text-lg font-bold text-white">{layer.title}</h2>
+                <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-line">
+                  {layer.content}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div
+          className="rounded-2xl border border-white/10 flex flex-col items-center justify-center py-20 text-center"
+          style={{ backgroundColor: "#111827" }}
         >
-          <path d="M14.752 11.168l-3.197-2.132A1 1 0 0 0 10 9.87v4.263a1 1 0 0 0 1.555.832l3.197-2.132a1 1 0 0 0 0-1.664z" />
-          <circle cx="12" cy="12" r="9" />
-        </svg>
-        <p className="text-sm font-medium text-gray-400">Lesson content coming soon</p>
-        <p className="text-xs text-gray-600 mt-1">
-          Full AI-guided lesson content will appear here.
-        </p>
-      </div>
+          <svg
+            className="w-10 h-10 text-gray-600 mb-3"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            viewBox="0 0 24 24"
+          >
+            <path d="M14.752 11.168l-3.197-2.132A1 1 0 0 0 10 9.87v4.263a1 1 0 0 0 1.555.832l3.197-2.132a1 1 0 0 0 0-1.664z" />
+            <circle cx="12" cy="12" r="9" />
+          </svg>
+          <p className="text-sm font-medium text-gray-400">Lesson content coming soon</p>
+          <p className="text-xs text-gray-600 mt-1">
+            Full AI-guided lesson content will appear here.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

@@ -184,6 +184,72 @@ function ResultBox({
   );
 }
 
+// ── Question nav ──────────────────────────────────────────────────────────────
+
+function QuestionNav({
+  total,
+  completedCount,
+  viewIndex,
+  onView,
+}: {
+  total: number;
+  completedCount: number;
+  viewIndex: number | null;
+  onView: (i: number | null) => void;
+}) {
+  return (
+    <div className="flex items-center gap-1.5 flex-wrap">
+      {Array.from({ length: total }, (_, i) => {
+        const isDone = i < completedCount;
+        const isActive = i === completedCount;
+        const isFuture = i > completedCount;
+        const isSelected = viewIndex === null ? isActive : i === viewIndex;
+
+        return (
+          <button
+            key={i}
+            disabled={isFuture}
+            onClick={() => {
+              if (isDone) onView(i);
+              else if (isActive) onView(null);
+            }}
+            className="text-xs font-bold px-2.5 py-1 rounded-lg transition-all"
+            style={{
+              backgroundColor: isSelected
+                ? "#F5A623"
+                : isDone
+                ? "rgba(16,185,129,0.12)"
+                : isActive
+                ? "rgba(245,166,35,0.08)"
+                : "#111827",
+              color: isSelected
+                ? "#0A0E1A"
+                : isDone
+                ? "#10B981"
+                : isActive
+                ? "#F5A623"
+                : "#374151",
+              border: isSelected
+                ? "none"
+                : isDone
+                ? "1px solid rgba(16,185,129,0.25)"
+                : isActive
+                ? "1px solid rgba(245,166,35,0.25)"
+                : "1px solid rgba(255,255,255,0.05)",
+              cursor: isFuture ? "not-allowed" : "pointer",
+            }}
+          >
+            Q{i + 1}
+          </button>
+        );
+      })}
+      <span className="text-xs text-gray-600 ml-1">
+        {completedCount}/{total} done
+      </span>
+    </div>
+  );
+}
+
 // ── Topic selector screen ─────────────────────────────────────────────────────
 
 function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: string) => void }) {
@@ -275,6 +341,12 @@ type SessionScore = {
   accuracy: number;
   production: number;
   overall: number;
+};
+
+type HistoryEntry = {
+  question: string;
+  answer: string;
+  result: EvalResult;
 };
 
 function SessionSummary({
@@ -420,6 +492,8 @@ function SessionSummary({
 export default function Evaluator() {
   const [topic, setTopic] = useState<string | null>(null);
   const [difficulty, setDifficulty] = useState("Intermediate");
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [viewIndex, setViewIndex] = useState<number | null>(null);
   const [qIndex, setQIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
@@ -542,6 +616,8 @@ export default function Evaluator() {
 
   function next() {
     if (isListening) stopListening();
+    const r = result;
+    if (r) setHistory((prev) => [...prev, { question, answer, result: r }]);
     if (isLast) {
       setSessionDone(true);
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -552,6 +628,7 @@ export default function Evaluator() {
     setResult(null);
     setPhase("idle");
     setError("");
+    setViewIndex(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -559,6 +636,8 @@ export default function Evaluator() {
     if (isListening) stopListening();
     setTopic(null);
     setDifficulty("Intermediate");
+    setHistory([]);
+    setViewIndex(null);
     setQIndex(0);
     setAnswer("");
     setResult(null);
@@ -579,41 +658,86 @@ export default function Evaluator() {
     return <SessionSummary scores={sessionScores} onRestart={restart} topic={topic} difficulty={difficulty} />;
   }
 
+  const headerBlock = (
+    <div className="flex items-start justify-between gap-4">
+      <div>
+        <h1 className="text-2xl font-bold text-white">AI Mock Interview</h1>
+        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "#F5A623" }}>{topic}</span>
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "#1F2937", color: "#9CA3AF" }}>{difficulty}</span>
+          <button onClick={restart} className="text-xs text-gray-600 hover:text-gray-400 transition-colors underline">Change</button>
+        </div>
+      </div>
+      <Link href="/interview/session?topic=General+DevOps&level=Mid-level+%282%E2%80%935+yrs%29&count=5" className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg border border-white/20 text-gray-400 hover:text-white hover:border-white/40 transition-colors">Full session →</Link>
+    </div>
+  );
+
+  if (viewIndex !== null && history[viewIndex]) {
+    const entry = history[viewIndex];
+    const r = entry.result;
+    return (
+      <div className="p-8 w-full max-w-[860px] space-y-6">
+        {headerBlock}
+        <QuestionNav total={questions.length} completedCount={history.length} viewIndex={viewIndex} onView={setViewIndex} />
+
+        {/* Reviewed question */}
+        <div className="rounded-2xl border border-white/10 p-6 space-y-2" style={{ backgroundColor: "#111827", borderLeft: "3px solid #10B981" }}>
+          <p className="text-xs font-bold tracking-widest" style={{ color: "#10B981" }}>
+            QUESTION {viewIndex + 1} OF {questions.length} · REVIEW
+          </p>
+          <p className="text-base font-medium text-white leading-relaxed">{entry.question}</p>
+        </div>
+
+        {/* Read-only answer */}
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Your Answer</label>
+          <div
+            className="w-full rounded-xl px-4 py-3 text-sm text-gray-300 border border-white/10 leading-relaxed whitespace-pre-wrap min-h-[80px]"
+            style={{ backgroundColor: "#111827" }}
+          >
+            {entry.answer}
+          </div>
+        </div>
+
+        {/* Score */}
+        <div className="rounded-2xl border border-white/10 p-6" style={{ backgroundColor: "#111827" }}>
+          <div className="flex items-center gap-6 flex-wrap">
+            <div className="text-center shrink-0">
+              <div className="text-5xl font-black leading-none" style={{ color: scoreColor(r.overall_score) }}>
+                {r.overall_score}<span className="text-2xl font-bold text-gray-500">/10</span>
+              </div>
+              <p className="text-sm font-semibold mt-1" style={{ color: scoreColor(r.overall_score) }}>{scoreLabel(r.overall_score)}</p>
+            </div>
+            <div className="w-px h-14 bg-white/10 shrink-0 hidden sm:block" />
+            <div className="flex-1 grid grid-cols-3 gap-3">
+              <SubScore label="Depth" score={r.depth_score} />
+              <SubScore label="Accuracy" score={r.accuracy_score} />
+              <SubScore label="Production Awareness" score={r.production_awareness_score} />
+            </div>
+          </div>
+        </div>
+        <ResultBox color="#EF4444" bg="rgba(239,68,68,0.07)" border="rgba(239,68,68,0.2)" icon="⚠" label="WHAT WAS WEAK" body={r.what_was_weak} />
+        <ResultBox color="#10B981" bg="rgba(16,185,129,0.07)" border="rgba(16,185,129,0.2)" icon="✓" label="WHAT WAS STRONG" body={r.what_was_strong} />
+        <ResultBox color="#F5A623" bg="rgba(245,166,35,0.07)" border="rgba(245,166,35,0.25)" icon="⚡" label="THE 9/10 ANSWER" body={r.ideal_answer} />
+
+        <button
+          onClick={() => setViewIndex(null)}
+          className="w-full py-3.5 rounded-xl font-bold text-sm border border-white/20 text-white hover:border-white/40 transition-colors"
+        >
+          ← Back to Question {history.length + 1}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 w-full max-w-[860px] space-y-6">
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-white">AI Mock Interview</h1>
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <span
-              className="text-xs font-semibold px-2.5 py-1 rounded-full"
-              style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "#F5A623" }}
-            >
-              {topic}
-            </span>
-            <span
-              className="text-xs font-medium px-2.5 py-1 rounded-full"
-              style={{ backgroundColor: "#1F2937", color: "#9CA3AF" }}
-            >
-              {difficulty}
-            </span>
-            <button
-              onClick={restart}
-              className="text-xs text-gray-600 hover:text-gray-400 transition-colors underline"
-            >
-              Change
-            </button>
-          </div>
-        </div>
-        <Link
-          href="/interview/session?topic=General+DevOps&level=Mid-level+%282%E2%80%935+yrs%29&count=5"
-          className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg border border-white/20 text-gray-400 hover:text-white hover:border-white/40 transition-colors"
-        >
-          Full session →
-        </Link>
-      </div>
+      {headerBlock}
+
+      {/* Question nav */}
+      <QuestionNav total={questions.length} completedCount={history.length} viewIndex={viewIndex} onView={setViewIndex} />
 
       {/* Question card */}
       <div

@@ -16,44 +16,58 @@ const BRANDS = ["Razorpay", "PhonePe", "Swiggy", "Flipkart"];
 
 export default function HomePage() {
   return (
-    <main style={{ minHeight: "100vh", background: "#1C1917", fontFamily: "'Hanken Grotesk', system-ui, sans-serif" }}>
+    <main className="min-h-screen" style={{ background: "#1C1917", fontFamily: "'Hanken Grotesk', system-ui, sans-serif" }}>
+
       {/* Nav */}
-      <nav style={{ position: "fixed", top: 0, left: 0, right: 0, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 44px", zIndex: 50, background: "rgba(28,25,23,0.82)", backdropFilter: "blur(14px)", borderBottom: "1px solid rgba(253,246,227,0.06)" }}>
-        <span style={{ fontFamily: "'Newsreader', serif", fontSize: 25, fontWeight: 600, color: "#F5A623" }}>Conceptra</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 30 }}>
-          <Link href="/login" style={{ background: "none", border: "none", color: "#B3A799", fontSize: 15, cursor: "pointer", textDecoration: "none" }}>
-            Sign In
-          </Link>
-          <Link href="/register" style={{ background: "#F5A623", color: "#1C1917", fontWeight: 600, fontSize: 15, border: "none", padding: "11px 22px", borderRadius: 10, cursor: "pointer", textDecoration: "none" }}>
-            Get Started
-          </Link>
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
+        style={{
+          padding: "18px 20px",
+          background: "rgba(28,25,23,0.82)",
+          backdropFilter: "blur(14px)",
+          borderBottom: "1px solid rgba(253,246,227,0.06)",
+        }}
+      >
+        <span style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 600, color: "#F5A623" }}>Conceptra</span>
+        <div className="flex items-center gap-4 sm:gap-8">
+          <Link href="/login" style={{ color: "#B3A799", fontSize: 14, textDecoration: "none" }}>Sign In</Link>
+          <Link href="/register" style={{ background: "#F5A623", color: "#1C1917", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 9, textDecoration: "none" }}>Get Started</Link>
         </div>
       </nav>
 
       {/* Hero */}
-      <div style={{ position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", top: 30, left: "50%", transform: "translateX(-50%)", width: 940, height: 600, borderRadius: "50%", background: "radial-gradient(ellipse at center, rgba(245,166,35,0.17) 0%, rgba(245,166,35,0.055) 38%, rgba(28,25,23,0) 70%)", pointerEvents: "none" }} />
-        <div style={{ position: "relative", maxWidth: 1080, margin: "0 auto", padding: "182px 44px 70px", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 32 }}>
-            <span style={{ width: 30, height: 1, background: "rgba(245,166,35,0.5)" }} />
-            <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.24em", textTransform: "uppercase", color: "#F5A623" }}>AI-Powered DevOps Coaching</span>
-            <span style={{ width: 30, height: 1, background: "rgba(245,166,35,0.5)" }} />
+      <div className="relative overflow-hidden">
+        <div className="absolute pointer-events-none" style={{ top: 30, left: "50%", transform: "translateX(-50%)", width: "min(940px, 140vw)", height: 600, borderRadius: "50%", background: "radial-gradient(ellipse at center, rgba(245,166,35,0.17) 0%, rgba(245,166,35,0.055) 38%, rgba(28,25,23,0) 70%)" }} />
+        <div className="relative mx-auto flex flex-col items-center text-center px-5 sm:px-10" style={{ maxWidth: 1080, paddingTop: 150, paddingBottom: 60 }}>
+
+          <div className="flex items-center gap-3 mb-8">
+            <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
+            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#F5A623" }}>AI-Powered DevOps Coaching</span>
+            <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
           </div>
-          <h1 style={{ fontFamily: "'Newsreader', serif", fontWeight: 500, fontSize: 76, lineHeight: 1.04, color: "#FDF6E3", letterSpacing: "-0.015em", marginBottom: 28, maxWidth: 860 }}>
-            Ace Your DevOps <em style={{ fontStyle: "italic", color: "#F5A623" }}>Interview</em>
+
+          <h1
+            className="mb-6"
+            style={{ fontFamily: "'Newsreader', serif", fontWeight: 500, fontSize: "clamp(38px, 9vw, 76px)", lineHeight: 1.06, color: "#FDF6E3", letterSpacing: "-0.015em", maxWidth: 860 }}
+          >
+            Ace Your DevOps{" "}
+            <em style={{ fontStyle: "italic", color: "#F5A623" }}>Interview</em>
           </h1>
-          <p style={{ fontSize: 20, lineHeight: 1.6, color: "#C9BFB2", maxWidth: 600, marginBottom: 20 }}>
+
+          <p className="mb-5" style={{ fontSize: "clamp(15px, 3vw, 20px)", lineHeight: 1.6, color: "#C9BFB2", maxWidth: 560 }}>
             Coached by a Lead Engineer with 10+ years at top Indian tech companies.
           </p>
-          <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 44, textAlign: "left" }}>
-            <div style={{ width: 44, height: 44, borderRadius: "50%", flexShrink: 0, background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 16, fontWeight: 600, color: "#F5A623" }}>HK</div>
-            <p style={{ fontFamily: "'Newsreader', serif", fontStyle: "italic", fontSize: 18, color: "#8A8073", maxWidth: 470, lineHeight: 1.5 }}>&ldquo;Built by the engineer who&rsquo;s been on both sides of the interview table.&rdquo;</p>
+
+          <div className="flex items-center gap-3 mb-10 text-left">
+            <div className="shrink-0" style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 14, fontWeight: 600, color: "#F5A623" }}>HK</div>
+            <p style={{ fontFamily: "'Newsreader', serif", fontStyle: "italic", fontSize: "clamp(14px, 2.5vw, 17px)", color: "#8A8073", maxWidth: 420, lineHeight: 1.5 }}>&ldquo;Built by the engineer who&rsquo;s been on both sides of the interview table.&rdquo;</p>
           </div>
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center" }}>
-            <Link href="/register" style={{ background: "#F5A623", color: "#1C1917", fontWeight: 600, fontSize: 16, border: "none", padding: "16px 34px", borderRadius: 12, cursor: "pointer", textDecoration: "none" }}>
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:justify-center">
+            <Link href="/register" className="text-center font-semibold" style={{ background: "#F5A623", color: "#1C1917", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
               Start Free Trial
             </Link>
-            <Link href="/lessons" style={{ background: "transparent", color: "#FDF6E3", fontWeight: 500, fontSize: 16, border: "1px solid rgba(253,246,227,0.18)", padding: "16px 34px", borderRadius: 12, cursor: "pointer", textDecoration: "none" }}>
+            <Link href="/lessons" className="text-center font-medium" style={{ background: "transparent", color: "#FDF6E3", fontSize: 16, border: "1px solid rgba(253,246,227,0.18)", padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
               Browse Lessons
             </Link>
           </div>
@@ -61,34 +75,34 @@ export default function HomePage() {
       </div>
 
       {/* 01 02 03 cards */}
-      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "30px 44px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }}>
+      <div className="mx-auto px-5 sm:px-10" style={{ maxWidth: 1080, paddingBottom: 30 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {CARDS.map(({ n, text }) => (
-            <div key={n} style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: "34px 30px", textAlign: "left" }}>
-              <div style={{ fontFamily: "'Newsreader', serif", fontSize: 32, color: "rgba(245,166,35,0.5)", fontWeight: 500, marginBottom: 20 }}>{n}</div>
-              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 23, lineHeight: 1.35, color: "#FDF6E3", fontWeight: 500 }}>{text}</p>
+            <div key={n} style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: "30px 26px" }}>
+              <div style={{ fontFamily: "'Newsreader', serif", fontSize: 30, color: "rgba(245,166,35,0.5)", fontWeight: 500, marginBottom: 18 }}>{n}</div>
+              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 21, lineHeight: 1.35, color: "#FDF6E3", fontWeight: 500 }}>{text}</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Testimonials */}
-      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "60px 44px 10px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 40 }}>
-          <span style={{ width: 30, height: 1, background: "rgba(245,166,35,0.5)" }} />
-          <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.24em", textTransform: "uppercase", color: "#F5A623" }}>What engineers say</span>
-          <span style={{ width: 30, height: 1, background: "rgba(245,166,35,0.5)" }} />
+      <div className="mx-auto px-5 sm:px-10" style={{ maxWidth: 1080, paddingTop: 50, paddingBottom: 10 }}>
+        <div className="flex items-center gap-3 justify-center mb-8">
+          <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#F5A623" }}>What engineers say</span>
+          <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24 }}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           {TESTIMONIALS.map(({ quote, initials, name, role }) => (
-            <div key={name} style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: "30px 28px" }}>
-              <div style={{ fontFamily: "'Newsreader', serif", fontSize: 46, lineHeight: 0.4, color: "rgba(245,166,35,0.4)", height: 22 }}>&ldquo;</div>
-              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 18, lineHeight: 1.5, color: "#FDF6E3", marginBottom: 22 }}>{quote}</p>
-              <div style={{ display: "flex", alignItems: "center", gap: 11 }}>
-                <div style={{ width: 36, height: 36, borderRadius: "50%", flexShrink: 0, background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 14, color: "#F5A623" }}>{initials}</div>
+            <div key={name} style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: "26px 24px" }}>
+              <div style={{ fontFamily: "'Newsreader', serif", fontSize: 44, lineHeight: 0.4, color: "rgba(245,166,35,0.4)", height: 20 }}>&ldquo;</div>
+              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 17, lineHeight: 1.5, color: "#FDF6E3", marginBottom: 20, marginTop: 12 }}>{quote}</p>
+              <div className="flex items-center gap-3">
+                <div className="shrink-0" style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 13, color: "#F5A623" }}>{initials}</div>
                 <div>
-                  <p style={{ fontSize: 13.5, color: "#FDF6E3", fontWeight: 600 }}>{name}</p>
-                  <p style={{ fontSize: 12, color: "#8A8073" }}>{role}</p>
+                  <p style={{ fontSize: 13, color: "#FDF6E3", fontWeight: 600 }}>{name}</p>
+                  <p style={{ fontSize: 11.5, color: "#8A8073" }}>{role}</p>
                 </div>
               </div>
             </div>
@@ -97,18 +111,18 @@ export default function HomePage() {
       </div>
 
       {/* Brand logos */}
-      <div style={{ maxWidth: 1080, margin: "0 auto", padding: "64px 44px 30px", display: "flex", flexDirection: "column", alignItems: "center", gap: 26 }}>
-        <p style={{ fontSize: 12, letterSpacing: "0.24em", textTransform: "uppercase", color: "#8A8073", fontWeight: 600 }}>Join engineers preparing for</p>
-        <div style={{ display: "flex", gap: 52, flexWrap: "wrap", justifyContent: "center", alignItems: "center" }}>
+      <div className="mx-auto px-5 sm:px-10 flex flex-col items-center gap-6" style={{ maxWidth: 1080, paddingTop: 56, paddingBottom: 28 }}>
+        <p style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "#8A8073", fontWeight: 600 }}>Join engineers preparing for</p>
+        <div className="flex flex-wrap gap-6 sm:gap-12 justify-center items-center">
           {BRANDS.map(b => (
-            <span key={b} style={{ fontFamily: "'Newsreader', serif", fontSize: 27, color: "#C9BFB2", fontWeight: 500 }}>{b}</span>
+            <span key={b} style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(18px, 4vw, 26px)", color: "#C9BFB2", fontWeight: 500 }}>{b}</span>
           ))}
         </div>
       </div>
 
       {/* Footer */}
-      <footer style={{ maxWidth: 1080, margin: "40px auto 0", padding: "46px 44px", textAlign: "center", borderTop: "1px solid rgba(253,246,227,0.06)" }}>
-        <span style={{ fontSize: 13, color: "#6E665C" }}>© 2026 Conceptra · Crafted for engineers who refuse to wing it.</span>
+      <footer className="mx-auto px-5 sm:px-10 text-center" style={{ maxWidth: 1080, marginTop: 32, paddingTop: 40, paddingBottom: 40, borderTop: "1px solid rgba(253,246,227,0.06)" }}>
+        <span style={{ fontSize: 12.5, color: "#6E665C" }}>© 2026 Conceptra · Crafted for engineers who refuse to wing it.</span>
       </footer>
     </main>
   );

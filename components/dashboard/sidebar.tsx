@@ -51,7 +51,7 @@ export default function Sidebar({ user }: Props) {
 
   return (
     <aside
-      className="flex flex-col shrink-0"
+      className="hidden md:flex flex-col shrink-0"
       style={{ width: 248, background: "#17130F", borderRight: "1px solid rgba(253,246,227,0.06)", position: "sticky", top: 0, height: "100vh" }}
     >
       {/* Logo */}

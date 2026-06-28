@@ -23,6 +23,32 @@ body {
   border-color: rgba(245,166,35,0.4) !important;
 }
 
+/* ── Dashboard mobile responsive ── */
+@media (max-width: 767px) {
+  .dash-page { padding: 32px 20px 80px !important; }
+  .dash-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+  .dash-streak-inner { flex-direction: column !important; gap: 20px !important; }
+  .dash-streak-meta { max-width: 100% !important; }
+  .dash-quick-grid { grid-template-columns: 1fr !important; }
+  .dash-journey-stats { gap: 24px !important; }
+  .dash-focus-inner { flex-direction: column !important; align-items: flex-start !important; gap: 16px !important; }
+  .dash-focus-inner a { width: 100% !important; text-align: center !important; }
+  .dash-upgrade-inner { flex-direction: column !important; align-items: flex-start !important; gap: 14px !important; }
+  .dash-upgrade-inner a { width: 100% !important; text-align: center !important; }
+}
+
+/* ── Interview mobile responsive ── */
+@media (max-width: 767px) {
+  .interview-page { padding: 24px 16px !important; }
+  .interview-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+}
+
+/* ── Lesson detail mobile responsive ── */
+@media (max-width: 767px) {
+  .lesson-detail-page { padding: 24px 16px !important; max-width: 100% !important; }
+  .lesson-header-card { padding: 20px !important; }
+}
+
 @layer utilities {
   .text-balance { text-wrap: balance; }
   .font-newsreader { font-family: 'Newsreader', Georgia, serif; }

@@ -83,10 +83,10 @@ export default async function DashboardPage() {
   const dayLabel = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
   return (
-    <div style={{ maxWidth: 920, margin: "0 auto", padding: "56px 64px 80px", display: "flex", flexDirection: "column", gap: 26 }}>
+    <div className="dash-page" style={{ maxWidth: 920, margin: "0 auto", padding: "56px 64px 80px", display: "flex", flexDirection: "column", gap: 26 }}>
 
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20 }}>
+      <div className="dash-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20 }}>
         <div>
           <p style={{ fontSize: 13, letterSpacing: "0.16em", textTransform: "uppercase", color: "#8A8073", fontWeight: 600, marginBottom: 10 }}>
             {dayLabel}{streak > 0 ? ` · Day ${streak} of your streak` : ""}
@@ -105,7 +105,7 @@ export default async function DashboardPage() {
 
       {/* Upgrade banner */}
       {isFreePlan && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "rgba(245,166,35,0.07)", border: "1px solid rgba(245,166,35,0.28)", borderRadius: 16, padding: "20px 24px" }}>
+        <div className="dash-upgrade-inner" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "rgba(245,166,35,0.07)", border: "1px solid rgba(245,166,35,0.28)", borderRadius: 16, padding: "20px 24px" }}>
           <div>
             <p style={{ fontSize: 15, fontWeight: 600, color: "#FDF6E3" }}>Unlock every lesson and unlimited mock interviews</p>
             <p style={{ fontSize: 13.5, color: "#B3A799", marginTop: 3 }}>Go Pro for full AI coaching and priority feedback.</p>
@@ -118,7 +118,7 @@ export default async function DashboardPage() {
 
       {/* Streak tracker */}
       <div style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 20, padding: "30px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 36, flexWrap: "wrap" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+        <div className="dash-streak-inner" style={{ display: "flex", alignItems: "center", gap: 22 }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
             <span style={{ fontFamily: "'Newsreader', serif", fontSize: 64, fontWeight: 600, color: "#F5A623", lineHeight: 1 }}>{streak}</span>
             <span style={{ fontSize: 16, color: "#B3A799", fontWeight: 500, lineHeight: 1.2 }}>day<br />streak</span>
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Today's focus */}
-      <div style={{ background: "#2C2420", border: "1px solid rgba(245,166,35,0.22)", borderLeft: "3px solid #F5A623", borderRadius: 18, padding: "26px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
+      <div className="dash-focus-inner" style={{ background: "#2C2420", border: "1px solid rgba(245,166,35,0.22)", borderLeft: "3px solid #F5A623", borderRadius: 18, padding: "26px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
         <div style={{ maxWidth: 560 }}>
           <p style={{ fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "#F5A623", fontWeight: 600, marginBottom: 9 }}>Today&rsquo;s focus</p>
           <p style={{ fontFamily: "'Newsreader', serif", fontSize: 20, color: "#FDF6E3", lineHeight: 1.35, marginBottom: 6 }}>
@@ -162,7 +162,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Quick actions */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <div className="dash-quick-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         <Link href="/interview" style={{ textDecoration: "none", textAlign: "left", background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: 28, cursor: "pointer", display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ color: "#F5A623" }}>
             <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
@@ -196,7 +196,7 @@ export default async function DashboardPage() {
       {/* Journey */}
       <div style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 20, padding: "30px 32px" }}>
         <p style={{ fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "#8A8073", fontWeight: 600, marginBottom: 22 }}>Your journey so far</p>
-        <div style={{ display: "flex", gap: 48, flexWrap: "wrap", marginBottom: 26 }}>
+        <div className="dash-journey-stats" style={{ display: "flex", gap: 48, flexWrap: "wrap", marginBottom: 26 }}>
           <div>
             <p style={{ fontFamily: "'Newsreader', serif", fontSize: 38, fontWeight: 500, color: "#FDF6E3", lineHeight: 1 }}>{lessonCount}</p>
             <p style={{ fontSize: 13.5, color: "#8A8073", marginTop: 6 }}>Lessons completed</p>

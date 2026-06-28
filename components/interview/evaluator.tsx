@@ -257,10 +257,10 @@ function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: strin
   const [difficulty, setDifficulty] = useState("Intermediate");
 
   return (
-    <div className="p-8 w-full max-w-[860px] space-y-8">
+    <div className="interview-page p-4 sm:p-8 w-full max-w-[860px] space-y-8">
       <div>
         <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623", letterSpacing: "0.22em", textTransform: "uppercase" }}>Today&apos;s coaching session</p>
-        <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 38, fontWeight: 500, color: "#FDF6E3", letterSpacing: "-0.01em", marginTop: 14 }}>Choose your focus for today</h1>
+        <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(26px, 6vw, 38px)", fontWeight: 500, color: "#FDF6E3", letterSpacing: "-0.01em", marginTop: 14 }}>Choose your focus for today</h1>
         <p className="text-sm mt-2.5 max-w-lg leading-relaxed" style={{ color: "#C9BFB2" }}>
           Pick a topic and difficulty. Your coach will ask seven questions and give honest, specific feedback — the way a senior engineer would.
         </p>
@@ -375,7 +375,7 @@ function SessionSummary({
   const weakest = dims.reduce((a, b) => (b.val < a.val ? b : a));
 
   return (
-    <div className="p-8 w-full max-w-[860px] space-y-6">
+    <div className="p-4 sm:p-8 w-full max-w-[860px] space-y-6">
       {/* Heading */}
       <div className="text-center space-y-2">
         <div className="text-5xl">🎉</div>
@@ -655,16 +655,15 @@ export default function Evaluator() {
   }
 
   const headerBlock = (
-    <div className="flex items-start justify-between gap-4">
+    <div className="interview-header flex items-start justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-bold text-white">AI Mock Interview</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-white">AI Mock Interview</h1>
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "#F5A623" }}>{topic}</span>
           <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "#1F2937", color: "#9CA3AF" }}>{difficulty}</span>
           <button onClick={restart} className="text-xs text-gray-600 hover:text-gray-400 transition-colors underline">Change</button>
         </div>
       </div>
-      <Link href="/interview/session?topic=General+DevOps&level=Mid-level+%282%E2%80%935+yrs%29&count=5" className="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg border border-white/20 text-gray-400 hover:text-white hover:border-white/40 transition-colors">Full session →</Link>
     </div>
   );
 
@@ -672,7 +671,7 @@ export default function Evaluator() {
     const entry = history[viewIndex];
     const r = entry.result;
     return (
-      <div className="p-8 w-full max-w-[860px] space-y-6">
+      <div className="p-4 sm:p-8 w-full max-w-[860px] space-y-6">
         {headerBlock}
         <QuestionNav total={questions.length} completedCount={history.length} viewIndex={viewIndex} onView={setViewIndex} />
 
@@ -727,7 +726,7 @@ export default function Evaluator() {
   }
 
   return (
-    <div className="p-8 w-full max-w-[860px] space-y-6">
+    <div className="p-4 sm:p-8 w-full max-w-[860px] space-y-6">
 
       {/* Header */}
       {headerBlock}

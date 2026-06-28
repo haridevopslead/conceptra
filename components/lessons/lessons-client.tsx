@@ -172,12 +172,12 @@ export default function LessonsClient({ plan, visitedSlugs }: Props) {
   const proCount = filtered.filter((l) => !l.isFree).length;
 
   return (
-    <div className="p-8 max-w-5xl mx-auto space-y-6">
+    <div className="p-4 sm:p-8 max-w-5xl mx-auto space-y-6">
 
       {/* ── Header ── */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Lessons</h1>
-        <p className="text-sm text-gray-400 mt-1">
+        <h1 className="text-2xl font-bold" style={{ color: "#FDF6E3", fontFamily: "'Newsreader', serif", fontWeight: 500 }}>Lessons</h1>
+        <p className="text-sm mt-1" style={{ color: "#B3A799" }}>
           {LESSONS.length} lessons across 6 DevOps domains
         </p>
       </div>
@@ -260,8 +260,8 @@ export default function LessonsClient({ plan, visitedSlugs }: Props) {
         </div>
       ) : (
         <div
-          className="rounded-xl border border-white/10 flex flex-col items-center justify-center py-16 text-center"
-          style={{ backgroundColor: "#111827" }}
+          className="rounded-xl border flex flex-col items-center justify-center py-16 text-center"
+          style={{ backgroundColor: "#2C2420", borderColor: "rgba(253,246,227,0.07)" }}
         >
           <svg
             className="w-10 h-10 text-gray-600 mb-3"

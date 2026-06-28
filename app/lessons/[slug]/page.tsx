@@ -262,7 +262,7 @@ export default async function LessonDetailPage({
   const difficultyColor = DIFFICULTY_COLOR[lesson.difficulty];
 
   return (
-    <div className="p-8 w-full max-w-[860px]">
+    <div className="lesson-detail-page p-4 sm:p-8 w-full max-w-[860px]">
       <LessonTracker slug={params.slug} />
       {/* Back */}
       <Link
@@ -277,7 +277,7 @@ export default async function LessonDetailPage({
 
       {/* Header card */}
       <div
-        className="rounded-2xl border border-white/10 p-8 space-y-4 mb-6"
+        className="lesson-header-card rounded-2xl border border-white/10 p-5 sm:p-8 space-y-4 mb-6"
         style={{ backgroundColor: "#111827" }}
       >
         <div className="flex items-center gap-2 flex-wrap">

@@ -2,7 +2,10 @@ import { LESSONS, CATEGORY_COLOR, DIFFICULTY_COLOR } from "@/lib/data/lessons";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 import LessonTracker from "@/components/lessons/lesson-tracker";
+import LessonComplete from "@/components/lessons/lesson-complete";
 
 export async function generateStaticParams() {
   return LESSONS.map((l) => ({ slug: l.slug }));
@@ -251,14 +254,26 @@ export default async function LessonDetailPage({
 }: {
   params: { slug: string };
 }) {
-  const lesson = LESSONS.find((l) => l.slug === params.slug);
-  if (!lesson) notFound();
+  const lessonIndex = LESSONS.findIndex((l) => l.slug === params.slug);
+  if (lessonIndex === -1) notFound();
+  const lesson = LESSONS[lessonIndex];
+  const nextLesson = lessonIndex < LESSONS.length - 1 ? LESSONS[lessonIndex + 1] : null;
+
+  const session = await getServerSession(authOptions);
 
   let dbLesson = null;
+  let isCompleted = false;
   try {
-    dbLesson = await db.lesson.findUnique({ where: { slug: params.slug } });
+    [dbLesson] = await Promise.all([
+      db.lesson.findUnique({ where: { slug: params.slug } }),
+      session?.user?.id
+        ? db.userLessonProgress
+            .findUnique({ where: { userId_lessonSlug: { userId: session.user.id, lessonSlug: params.slug } } })
+            .then((p) => { isCompleted = p?.completed ?? false; })
+        : Promise.resolve(),
+    ]);
   } catch {
-    // DB unavailable — fall through to "coming soon" placeholder
+    // DB unavailable — show content without completion state
   }
   const layers: Layer[] =
     (dbLesson?.content as { layers?: Layer[] } | null)?.layers ?? [];
@@ -338,6 +353,11 @@ export default async function LessonDetailPage({
               </div>
             );
           })}
+          <LessonComplete
+            slug={params.slug}
+            nextSlug={nextLesson?.slug ?? null}
+            initialCompleted={isCompleted}
+          />
         </div>
       ) : (
         <div

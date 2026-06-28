@@ -116,11 +116,13 @@ model InterviewSession {
 }
 
 model UserLessonProgress {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lessonSlug String
-  visitedAt  DateTime @default(now())
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lessonSlug  String
+  visitedAt   DateTime  @default(now())
+  completed   Boolean   @default(false)
+  completedAt DateTime?
 
   @@unique([userId, lessonSlug])
   @@index([userId])

@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const TESTIMONIALS = [
   { quote: "I went from failing Kubernetes rounds to getting an offer at PhonePe in six weeks.", initials: "AR", name: "Ananya R.", role: "SRE · hired at PhonePe" },
@@ -14,7 +17,10 @@ const CARDS = [
 
 const BRANDS = ["Razorpay", "PhonePe", "Swiggy", "Flipkart"];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await getServerSession(authOptions);
+  if (session) redirect("/dashboard");
+
   return (
     <main className="min-h-screen" style={{ background: "#1C1917", fontFamily: "'Hanken Grotesk', system-ui, sans-serif" }}>
 

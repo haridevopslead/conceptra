@@ -9,11 +9,11 @@ const NAV = [
     href: "/dashboard",
     label: "Dashboard",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-        <rect x="3" y="3" width="7" height="7" rx="1" />
-        <rect x="14" y="3" width="7" height="7" rx="1" />
-        <rect x="3" y="14" width="7" height="7" rx="1" />
-        <rect x="14" y="14" width="7" height="7" rx="1" />
+      <svg width="19" height="19" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+        <rect x="14" y="14" width="7" height="7" rx="1.5" />
       </svg>
     ),
   },
@@ -21,7 +21,7 @@ const NAV = [
     href: "/lessons",
     label: "Lessons",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+      <svg width="19" height="19" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
       </svg>
@@ -31,7 +31,7 @@ const NAV = [
     href: "/interview",
     label: "Interview",
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+      <svg width="19" height="19" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
         <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
         <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
         <line x1="12" y1="19" x2="12" y2="23" />
@@ -42,41 +42,39 @@ const NAV = [
 ];
 
 type Props = {
-  user: {
-    name?: string | null;
-    email?: string | null;
-    plan?: string | null;
-  };
+  user: { name?: string | null; email?: string | null; plan?: string | null };
 };
 
 export default function Sidebar({ user }: Props) {
   const pathname = usePathname();
+  const isFreePlan = !user.plan || user.plan === "FREE";
 
   return (
     <aside
-      className="flex flex-col w-60 min-h-screen border-r border-white/10 shrink-0"
-      style={{ backgroundColor: "#0D1117" }}
+      className="flex flex-col shrink-0"
+      style={{ width: 248, background: "#17130F", borderRight: "1px solid rgba(253,246,227,0.06)", position: "sticky", top: 0, height: "100vh" }}
     >
       {/* Logo */}
-      <div className="px-6 py-5 border-b border-white/10">
-        <Link href="/" className="text-xl font-bold" style={{ color: "#F5A623" }}>
+      <div style={{ padding: "28px 26px 22px", borderBottom: "1px solid rgba(253,246,227,0.06)" }}>
+        <Link href="/" style={{ fontFamily: "'Newsreader', serif", fontSize: 23, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>
           Conceptra
         </Link>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
+      <nav style={{ flex: 1, padding: "22px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
         {NAV.map(({ href, label, icon }) => {
           const active = pathname === href;
           return (
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                active
-                  ? "text-[#F5A623] bg-[#F5A623]/10"
-                  : "text-gray-400 hover:text-white hover:bg-white/5"
-              }`}
+              style={{
+                display: "flex", alignItems: "center", gap: 12, padding: "11px 14px", borderRadius: 11,
+                fontSize: 15, fontWeight: 500, textDecoration: "none", transition: "all .15s",
+                background: active ? "rgba(245,166,35,0.12)" : "transparent",
+                color: active ? "#F5A623" : "#9C9286",
+              }}
             >
               {icon}
               {label}
@@ -86,46 +84,37 @@ export default function Sidebar({ user }: Props) {
       </nav>
 
       {/* Footer */}
-      <div className="px-4 py-4 border-t border-white/10 space-y-3">
+      <div style={{ padding: "18px 18px 22px", borderTop: "1px solid rgba(253,246,227,0.06)", display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Plan badge */}
-        <div className="flex items-center justify-between px-2">
-          <span className="text-xs text-gray-500">Plan</span>
-          <span
-            className="text-xs font-bold px-2 py-0.5 rounded-full"
-            style={{
-              backgroundColor: user.plan === "FREE" ? "#374151" : "#F5A623",
-              color: user.plan === "FREE" ? "#9CA3AF" : "#0A0E1A",
-            }}
-          >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px" }}>
+          <span style={{ fontSize: 12, color: "#8A8073" }}>Current plan</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.04em", padding: "3px 9px", borderRadius: 999, background: isFreePlan ? "#2C2420" : "#F5A623", color: isFreePlan ? "#B3A799" : "#1C1917", border: isFreePlan ? "1px solid rgba(253,246,227,0.08)" : "none" }}>
             {user.plan ?? "FREE"}
           </span>
         </div>
 
         {/* User info */}
-        <div className="flex items-center gap-3 px-2">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
-            style={{ backgroundColor: "#F5A623", color: "#0A0E1A" }}
-          >
+        <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "0 4px" }}>
+          <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#F5A623", color: "#1C1917", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 15, flexShrink: 0 }}>
             {user.name?.[0]?.toUpperCase() ?? user.email?.[0]?.toUpperCase() ?? "?"}
           </div>
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-white truncate">{user.name ?? "User"}</p>
-            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+          <div style={{ minWidth: 0 }}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "#FDF6E3", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name ?? "User"}</p>
+            <p style={{ fontSize: 12, color: "#8A8073", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</p>
           </div>
         </div>
 
         {/* Sign out */}
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+          style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", borderRadius: 10, background: "none", border: "none", color: "#8A8073", fontSize: 14, cursor: "pointer", width: "100%", fontFamily: "inherit" }}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
             <polyline points="16 17 21 12 16 7" />
             <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
-          Sign Out
+          Sign out
         </button>
       </div>
     </aside>

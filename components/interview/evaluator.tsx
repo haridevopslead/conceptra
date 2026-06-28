@@ -80,15 +80,15 @@ const QUESTION_BANK: Record<string, string[]> = {
   ],
 };
 
-const TOPIC_META: Record<string, { emoji: string; desc: string }> = {
-  Docker:        { emoji: "🐳", desc: "Containers & images" },
-  Kubernetes:    { emoji: "☸️", desc: "Orchestration & scheduling" },
-  "CI/CD":       { emoji: "🔄", desc: "Pipelines & deployments" },
-  AWS:           { emoji: "☁️", desc: "Cloud infrastructure" },
-  Terraform:     { emoji: "🏗️", desc: "Infrastructure as Code" },
-  Linux:         { emoji: "🐧", desc: "Systems & shell" },
-  Git:           { emoji: "🌿", desc: "Version control" },
-  Observability: { emoji: "📊", desc: "Metrics, logs & traces" },
+const TOPIC_META: Record<string, { code: string; desc: string }> = {
+  Docker:        { code: "DO", desc: "Containers & images" },
+  Kubernetes:    { code: "K8", desc: "Orchestration & scheduling" },
+  "CI/CD":       { code: "CD", desc: "Pipelines & deployments" },
+  AWS:           { code: "AW", desc: "Cloud infrastructure" },
+  Terraform:     { code: "TF", desc: "Infrastructure as Code" },
+  Linux:         { code: "LX", desc: "Systems & shell" },
+  Git:           { code: "GT", desc: "Version control" },
+  Observability: { code: "OB", desc: "Metrics, logs & traces" },
 };
 
 const DIFFICULTIES = ["Beginner", "Intermediate", "Senior"] as const;
@@ -259,10 +259,10 @@ function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: strin
   return (
     <div className="p-8 w-full max-w-[860px] space-y-8">
       <div>
-        <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623" }}>MOCK INTERVIEW</p>
-        <h1 className="text-2xl font-bold text-white mt-1">Choose your focus area</h1>
-        <p className="text-sm text-gray-400 mt-1">
-          Select a topic and difficulty. Claude will ask 7 questions and grade your answers like a senior engineer.
+        <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623", letterSpacing: "0.22em", textTransform: "uppercase" }}>Today&apos;s coaching session</p>
+        <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 38, fontWeight: 500, color: "#FDF6E3", letterSpacing: "-0.01em", marginTop: 14 }}>Choose your focus for today</h1>
+        <p className="text-sm mt-2.5 max-w-lg leading-relaxed" style={{ color: "#C9BFB2" }}>
+          Pick a topic and difficulty. Your coach will ask seven questions and give honest, specific feedback — the way a senior engineer would.
         </p>
       </div>
 
@@ -277,16 +277,14 @@ function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: strin
                 onClick={() => setSelectedTopic(id)}
                 className="flex flex-col items-start gap-2 p-4 rounded-xl border text-left transition-all"
                 style={{
-                  backgroundColor: isSelected ? "rgba(245,166,35,0.1)" : "#111827",
-                  borderColor: isSelected ? "#F5A623" : "rgba(255,255,255,0.1)",
+                  backgroundColor: isSelected ? "rgba(245,166,35,0.1)" : "#2C2420",
+                  borderColor: isSelected ? "#F5A623" : "rgba(253,246,227,0.07)",
                 }}
               >
-                <span className="text-2xl">{meta.emoji}</span>
+                <span style={{ fontFamily: "ui-monospace, monospace", fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(245,166,35,0.14)", color: "#F5A623" }}>{meta.code}</span>
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: isSelected ? "#F5A623" : "#ffffff" }}>
-                    {id}
-                  </p>
-                  <p className="text-xs text-gray-500 mt-0.5">{meta.desc}</p>
+                  <p style={{ fontSize: 14, fontFamily: "'Newsreader', serif", fontWeight: 500, color: isSelected ? "#F5A623" : "#FDF6E3" }}>{id}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "#8A8073" }}>{meta.desc}</p>
                 </div>
               </button>
             );
@@ -714,9 +712,9 @@ export default function Evaluator() {
             </div>
           </div>
         </div>
-        <ResultBox color="#EF4444" bg="rgba(239,68,68,0.07)" border="rgba(239,68,68,0.2)" icon="⚠" label="WHAT WAS WEAK" body={r.what_was_weak} />
-        <ResultBox color="#10B981" bg="rgba(16,185,129,0.07)" border="rgba(16,185,129,0.2)" icon="✓" label="WHAT WAS STRONG" body={r.what_was_strong} />
-        <ResultBox color="#F5A623" bg="rgba(245,166,35,0.07)" border="rgba(245,166,35,0.25)" icon="⚡" label="THE 9/10 ANSWER" body={r.ideal_answer} />
+        <ResultBox color="#9CAE86" bg="rgba(156,174,134,0.06)" border="rgba(156,174,134,0.2)" icon="✓" label="WHAT LANDED WELL" body={r.what_was_strong} />
+        <ResultBox color="#C57B6B" bg="rgba(197,123,107,0.06)" border="rgba(197,123,107,0.22)" icon="⚠" label="WHERE YOU CAN GROW" body={r.what_was_weak} />
+        <ResultBox color="#F5A623" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)" icon="⚡" label="HOW A SENIOR ENGINEER WOULD ANSWER" body={r.ideal_answer} />
 
         <button
           onClick={() => setViewIndex(null)}
@@ -771,7 +769,7 @@ export default function Evaluator() {
           placeholder="Type your answer here — or use the mic below to speak it. Aim for the depth a senior engineer would give: trade-offs, failure modes, production consequences."
           className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 border focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent resize-none disabled:opacity-50 transition-all"
           style={{
-            backgroundColor: "#111827",
+            backgroundColor: "#2C2420",
             borderColor: isListening ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.1)",
           }}
         />
@@ -882,16 +880,16 @@ export default function Evaluator() {
           </div>
 
           <ResultBox
-            color="#EF4444" bg="rgba(239,68,68,0.07)" border="rgba(239,68,68,0.2)"
-            icon="⚠" label="WHAT WAS WEAK" body={result.what_was_weak}
+            color="#9CAE86" bg="rgba(156,174,134,0.06)" border="rgba(156,174,134,0.2)"
+            icon="✓" label="WHAT LANDED WELL" body={result.what_was_strong}
           />
           <ResultBox
-            color="#10B981" bg="rgba(16,185,129,0.07)" border="rgba(16,185,129,0.2)"
-            icon="✓" label="WHAT WAS STRONG" body={result.what_was_strong}
+            color="#C57B6B" bg="rgba(197,123,107,0.06)" border="rgba(197,123,107,0.22)"
+            icon="⚠" label="WHERE YOU CAN GROW" body={result.what_was_weak}
           />
           <ResultBox
-            color="#F5A623" bg="rgba(245,166,35,0.07)" border="rgba(245,166,35,0.25)"
-            icon="⚡" label="THE 9/10 ANSWER" body={result.ideal_answer}
+            color="#F5A623" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
+            icon="⚡" label="HOW A SENIOR ENGINEER WOULD ANSWER" body={result.ideal_answer}
           />
 
           <button

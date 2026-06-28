@@ -12,7 +12,7 @@ export default async function DashboardLayout({
   if (!session) redirect("/login");
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#0A0E1A" }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: "#1C1917" }}>
       <Sidebar user={session.user} />
       <main className="flex-1 overflow-auto">{children}</main>
     </div>

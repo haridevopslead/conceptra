@@ -2,26 +2,28 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: #FDF6E3;
+  background: #1C1917;
+  font-family: 'Hanken Grotesk', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgba(245, 166, 35, 0.3);
+}
+
+::-webkit-scrollbar { width: 11px; height: 11px; }
+::-webkit-scrollbar-track { background: #1C1917; }
+::-webkit-scrollbar-thumb { background: #3A322C; border-radius: 6px; border: 3px solid #1C1917; }
+
+.lesson-card:hover {
+  transform: translateY(-4px);
+  box-shadow: inset 3px 0 0 #F5A623, 0 14px 32px rgba(0,0,0,0.32);
+  border-color: rgba(245,166,35,0.4) !important;
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  .text-balance { text-wrap: balance; }
+  .font-newsreader { font-family: 'Newsreader', Georgia, serif; }
 }

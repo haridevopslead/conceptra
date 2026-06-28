@@ -21,18 +21,18 @@ export type Lesson = {
 };
 
 export const CATEGORY_COLOR: Record<Category, string> = {
-  Kubernetes: "#3B82F6",
-  "CI/CD": "#8B5CF6",
-  Cloud: "#06B6D4",
-  "Infrastructure as Code": "#F97316",
-  Monitoring: "#10B981",
-  SRE: "#EF4444",
+  Kubernetes: "#8AA0B8",
+  "CI/CD": "#A593B5",
+  Cloud: "#8FB0B5",
+  "Infrastructure as Code": "#C99A6A",
+  Monitoring: "#9CAE86",
+  SRE: "#C57B6B",
 };
 
 export const DIFFICULTY_COLOR: Record<Difficulty, string> = {
-  Beginner: "#10B981",
-  Intermediate: "#F59E0B",
-  Advanced: "#EF4444",
+  Beginner: "#9CAE86",
+  Intermediate: "#D6A24E",
+  Advanced: "#C57B6B",
 };
 
 export const LESSONS: Lesson[] = [

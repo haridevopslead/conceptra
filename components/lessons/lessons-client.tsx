@@ -47,17 +47,18 @@ function LessonCard({ lesson, plan, visited }: { lesson: Lesson; plan: string; v
 
   return (
     <div
-      className="relative flex flex-col rounded-xl border p-5 gap-4 transition-colors hover:border-white/20"
+      className="lesson-card relative flex flex-col rounded-xl border p-5 gap-4 transition-all duration-200"
       style={{
-        backgroundColor: "#111827",
-        borderColor: visited && !locked ? "rgba(16,185,129,0.3)" : "rgba(255,255,255,0.1)",
+        backgroundColor: "#2C2420",
+        borderColor: visited && !locked ? "rgba(156,174,134,0.35)" : "rgba(253,246,227,0.07)",
       }}
     >
+
       {/* Badges — top-right corner */}
       {locked && (
         <div
           className="absolute top-4 right-4 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
-          style={{ backgroundColor: "#F5A623", color: "#0A0E1A" }}
+          style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
         >
           <LockIcon />
           Pro
@@ -66,7 +67,7 @@ function LessonCard({ lesson, plan, visited }: { lesson: Lesson; plan: string; v
       {visited && !locked && (
         <div
           className="absolute top-4 right-4 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
-          style={{ backgroundColor: "rgba(16,185,129,0.15)", color: "#10B981", border: "1px solid rgba(16,185,129,0.3)" }}
+          style={{ backgroundColor: "rgba(156,174,134,0.18)", color: "#A7C48F", border: "1px solid rgba(156,174,134,0.45)" }}
         >
           ✓ Done
         </div>
@@ -90,10 +91,10 @@ function LessonCard({ lesson, plan, visited }: { lesson: Lesson; plan: string; v
 
       {/* Title + description */}
       <div className="flex-1">
-        <h3 className={`font-semibold text-base leading-snug ${locked ? "text-gray-400" : "text-white"}`}>
+        <h3 className="font-newsreader font-medium text-base leading-snug" style={{ color: locked ? "#8A8073" : "#FDF6E3", fontFamily: "'Newsreader', serif" }}>
           {lesson.title}
         </h3>
-        <p className="text-sm text-gray-400 mt-1.5 line-clamp-2">{lesson.description}</p>
+        <p className="text-sm mt-1.5 line-clamp-2" style={{ color: "#B3A799" }}>{lesson.description}</p>
       </div>
 
       {/* Topics */}
@@ -101,22 +102,22 @@ function LessonCard({ lesson, plan, visited }: { lesson: Lesson; plan: string; v
         {lesson.topics.slice(0, 3).map((t) => (
           <span
             key={t}
-            className="text-xs px-2 py-0.5 rounded border border-white/10 text-gray-500"
-            style={{ backgroundColor: "#1F2937" }}
+            className="text-xs px-2 py-0.5 rounded"
+            style={{ backgroundColor: "#211C18", border: "1px solid rgba(253,246,227,0.06)", color: "#8A8073" }}
           >
             {t}
           </span>
         ))}
         {lesson.topics.length > 3 && (
-          <span className="text-xs text-gray-600 self-center">
+          <span className="text-xs self-center" style={{ color: "#6E665C" }}>
             +{lesson.topics.length - 3} more
           </span>
         )}
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-1 border-t border-white/10">
-        <span className="flex items-center gap-1.5 text-xs text-gray-500">
+      <div className="flex items-center justify-between pt-3" style={{ borderTop: "1px solid rgba(253,246,227,0.06)" }}>
+        <span className="flex items-center gap-1.5 text-xs" style={{ color: "#8A8073" }}>
           <ClockIcon />
           {lesson.durationMinutes} min
         </span>
@@ -125,16 +126,17 @@ function LessonCard({ lesson, plan, visited }: { lesson: Lesson; plan: string; v
           <Link
             href="/pricing"
             className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
-            style={{ backgroundColor: "#F5A623", color: "#0A0E1A" }}
+            style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
           >
             Upgrade to unlock
           </Link>
         ) : (
           <Link
             href={`/lessons/${lesson.slug}`}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-white/20 text-white hover:border-white/40 transition-colors"
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
+            style={{ border: "1px solid rgba(253,246,227,0.18)", color: "#FDF6E3" }}
           >
-            Start lesson →
+            {visited ? "Review →" : "Start lesson →"}
           </Link>
         )}
       </div>
@@ -197,8 +199,8 @@ export default function LessonsClient({ plan, visitedSlugs }: Props) {
           placeholder="Search lessons, topics…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm text-white placeholder-gray-500 border border-white/10 focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent"
-          style={{ backgroundColor: "#111827" }}
+          className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent"
+          style={{ backgroundColor: "#2C2420", border: "1px solid rgba(253,246,227,0.08)", color: "#FDF6E3" }}
         />
       </div>
 

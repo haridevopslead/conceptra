@@ -221,9 +221,9 @@ function QuestionNav({
                 ? "rgba(16,185,129,0.12)"
                 : isActive
                 ? "rgba(245,166,35,0.08)"
-                : "#111827",
+                : "#211C18",
               color: isSelected
-                ? "#0A0E1A"
+                ? "#1C1917"
                 : isDone
                 ? "#10B981"
                 : isActive
@@ -303,7 +303,7 @@ function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: strin
                 onClick={() => setDifficulty(d)}
                 className="px-5 py-2.5 rounded-xl text-sm font-semibold border transition-all"
                 style={{
-                  backgroundColor: isSelected ? "rgba(245,166,35,0.1)" : "#111827",
+                  backgroundColor: isSelected ? "rgba(245,166,35,0.1)" : "#211C18",
                   borderColor: isSelected ? "#F5A623" : "rgba(255,255,255,0.1)",
                   color: isSelected ? "#F5A623" : "#9CA3AF",
                 }}
@@ -321,7 +321,7 @@ function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: strin
         className="w-full py-4 rounded-xl font-bold text-sm transition-all"
         style={{
           backgroundColor: selectedTopic ? "#F5A623" : "#2D2A1F",
-          color: selectedTopic ? "#0A0E1A" : "#6B5E2A",
+          color: selectedTopic ? "#1C1917" : "#6B5E2A",
           border: selectedTopic ? "none" : "1px solid rgba(245,166,35,0.15)",
           cursor: selectedTopic ? "pointer" : "not-allowed",
         }}
@@ -382,15 +382,15 @@ function SessionSummary({
         <h1 className="text-3xl font-black text-white">Session Complete!</h1>
         <div className="flex items-center justify-center gap-2">
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "#F5A623" }}>{topic}</span>
-          <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full" style={{ backgroundColor: "#1F2937" }}>{difficulty}</span>
-          <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full" style={{ backgroundColor: "#1F2937" }}>{scores.length} questions</span>
+          <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full" style={{ backgroundColor: "#2C2420" }}>{difficulty}</span>
+          <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full" style={{ backgroundColor: "#2C2420" }}>{scores.length} questions</span>
         </div>
       </div>
 
       {/* Big score */}
       <div
         className="rounded-2xl border border-white/10 p-8 text-center space-y-2"
-        style={{ backgroundColor: "#111827" }}
+        style={{ backgroundColor: "#211C18" }}
       >
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Average Score</p>
         <div className="text-6xl font-black mt-1" style={{ color: scoreColor(avgOverall) }}>
@@ -436,7 +436,7 @@ function SessionSummary({
       {/* Per-question scores */}
       <div
         className="rounded-xl border border-white/10 overflow-hidden"
-        style={{ backgroundColor: "#111827" }}
+        style={{ backgroundColor: "#211C18" }}
       >
         <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-5 py-3 border-b border-white/5">
           Question breakdown
@@ -468,7 +468,7 @@ function SessionSummary({
         <button
           onClick={onRestart}
           className="flex-1 py-3.5 rounded-xl font-bold text-sm transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "#F5A623", color: "#0A0E1A" }}
+          style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
         >
           Start New Session
         </button>
@@ -660,7 +660,7 @@ export default function Evaluator() {
         <h1 className="text-xl sm:text-2xl font-bold text-white">AI Mock Interview</h1>
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "#F5A623" }}>{topic}</span>
-          <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "#1F2937", color: "#9CA3AF" }}>{difficulty}</span>
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "#2C2420", color: "#9CA3AF" }}>{difficulty}</span>
           <button onClick={restart} className="text-xs text-gray-600 hover:text-gray-400 transition-colors underline">Change</button>
         </div>
       </div>
@@ -676,7 +676,7 @@ export default function Evaluator() {
         <QuestionNav total={questions.length} completedCount={history.length} viewIndex={viewIndex} onView={setViewIndex} />
 
         {/* Reviewed question */}
-        <div className="rounded-2xl border border-white/10 p-6 space-y-2" style={{ backgroundColor: "#111827", borderLeft: "3px solid #10B981" }}>
+        <div className="rounded-2xl border border-white/10 p-6 space-y-2" style={{ backgroundColor: "#211C18", borderLeft: "3px solid #10B981" }}>
           <p className="text-xs font-bold tracking-widest" style={{ color: "#10B981" }}>
             QUESTION {viewIndex + 1} OF {questions.length} · REVIEW
           </p>
@@ -688,14 +688,14 @@ export default function Evaluator() {
           <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Your Answer</label>
           <div
             className="w-full rounded-xl px-4 py-3 text-sm text-gray-300 border border-white/10 leading-relaxed whitespace-pre-wrap min-h-[80px]"
-            style={{ backgroundColor: "#111827" }}
+            style={{ backgroundColor: "#211C18" }}
           >
             {entry.answer}
           </div>
         </div>
 
         {/* Score */}
-        <div className="rounded-2xl border border-white/10 p-6" style={{ backgroundColor: "#111827" }}>
+        <div className="rounded-2xl border border-white/10 p-6" style={{ backgroundColor: "#211C18" }}>
           <div className="flex items-center gap-6 flex-wrap">
             <div className="text-center shrink-0">
               <div className="text-5xl font-black leading-none" style={{ color: scoreColor(r.overall_score) }}>
@@ -737,7 +737,7 @@ export default function Evaluator() {
       {/* Question card */}
       <div
         className="rounded-2xl border border-white/10 p-6 space-y-2"
-        style={{ backgroundColor: "#111827", borderLeft: "3px solid #F5A623" }}
+        style={{ backgroundColor: "#211C18", borderLeft: "3px solid #F5A623" }}
       >
         <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623" }}>
           QUESTION {qIndex + 1} OF {questions.length}
@@ -817,7 +817,7 @@ export default function Evaluator() {
             style={{
               backgroundColor:
                 phase === "submitting"
-                  ? "#1F2937"
+                  ? "#2C2420"
                   : answer.trim()
                   ? "#F5A623"
                   : "#2D2A1F",
@@ -825,7 +825,7 @@ export default function Evaluator() {
                 phase === "submitting"
                   ? "#9CA3AF"
                   : answer.trim()
-                  ? "#0A0E1A"
+                  ? "#1C1917"
                   : "#6B5E2A",
               border:
                 phase === "submitting"
@@ -857,7 +857,7 @@ export default function Evaluator() {
           {/* Score banner */}
           <div
             className="rounded-2xl border border-white/10 p-6"
-            style={{ backgroundColor: "#111827" }}
+            style={{ backgroundColor: "#211C18" }}
           >
             <div className="flex items-center gap-6 flex-wrap">
               <div className="text-center shrink-0">
@@ -894,7 +894,7 @@ export default function Evaluator() {
           <button
             onClick={next}
             className="w-full py-3.5 rounded-xl font-bold text-sm transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "#F5A623", color: "#0A0E1A" }}
+            style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
           >
             {isLast ? "See Session Results →" : "Next Question →"}
           </button>

@@ -72,7 +72,7 @@ function CodeBlock({ code }: { code: string }) {
   return (
     <pre
       className="text-xs font-mono p-4 rounded-xl overflow-x-auto leading-6 border border-white/5"
-      style={{ backgroundColor: "#0D1117" }}
+      style={{ backgroundColor: "#130F0C" }}
     >
       {lines.map((line, i) => (
         <span key={i}>
@@ -283,7 +283,7 @@ export default async function LessonDetailPage({
       {/* Header card */}
       <div
         className="lesson-header-card rounded-2xl border border-white/10 p-5 sm:p-8 space-y-4 mb-6"
-        style={{ backgroundColor: "#111827" }}
+        style={{ backgroundColor: "#211C18" }}
       >
         <div className="flex items-center gap-2 flex-wrap">
           <span
@@ -326,7 +326,7 @@ export default async function LessonDetailPage({
               <div
                 key={i}
                 className="rounded-2xl border border-white/10 p-6 space-y-4"
-                style={{ backgroundColor: "#111827", borderLeft: `3px solid ${cfg.color}` }}
+                style={{ backgroundColor: "#211C18", borderLeft: `3px solid ${cfg.color}` }}
               >
                 <div>
                   <p className="text-xs font-bold tracking-widest" style={{ color: cfg.color }}>
@@ -342,7 +342,7 @@ export default async function LessonDetailPage({
       ) : (
         <div
           className="rounded-2xl border border-white/10 flex flex-col items-center justify-center py-20 text-center"
-          style={{ backgroundColor: "#111827" }}
+          style={{ backgroundColor: "#211C18" }}
         >
           <svg
             className="w-10 h-10 text-gray-600 mb-3"

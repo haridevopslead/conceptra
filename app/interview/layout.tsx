@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import Sidebar from "@/components/dashboard/sidebar";
+import BottomNav from "@/components/dashboard/bottom-nav";
 
 export default async function InterviewLayout({
   children,
@@ -12,9 +13,10 @@ export default async function InterviewLayout({
   if (!session) redirect("/login");
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#0A0E1A" }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: "#1C1917" }}>
       <Sidebar user={session.user} />
-      <main className="flex-1 overflow-auto">{children}</main>
+      <main className="flex-1 overflow-auto pb-20 md:pb-0">{children}</main>
+      <BottomNav />
     </div>
   );
 }

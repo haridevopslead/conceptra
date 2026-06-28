@@ -309,7 +309,7 @@ export default async function LessonDetailPage({
             <span
               key={t}
               className="text-xs px-2 py-1 rounded border border-white/10 text-gray-400"
-              style={{ backgroundColor: "#1F2937" }}
+              style={{ backgroundColor: "#2C2420" }}
             >
               {t}
             </span>

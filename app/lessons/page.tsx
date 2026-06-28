@@ -13,11 +13,16 @@ export default async function LessonsPage() {
   if (!session) redirect("/login");
   const plan = session.user.plan ?? "FREE";
 
-  const progress = await db.userLessonProgress.findMany({
-    where: { userId: session.user.id },
-    select: { lessonSlug: true },
-  });
-  const visitedSlugs = progress.map((p) => p.lessonSlug);
+  let visitedSlugs: string[] = [];
+  try {
+    const progress = await db.userLessonProgress.findMany({
+      where: { userId: session.user.id },
+      select: { lessonSlug: true },
+    });
+    visitedSlugs = progress.map((p) => p.lessonSlug);
+  } catch {
+    // DB unavailable — show lessons without progress markers
+  }
 
   return <LessonsClient plan={plan} visitedSlugs={visitedSlugs} />;
 }

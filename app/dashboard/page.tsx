@@ -65,12 +65,18 @@ export default async function DashboardPage() {
   const user = session.user;
   const isFreePlan = !user.plan || user.plan === "FREE";
 
-  const interviews = await db.interviewSession.findMany({
-    where: { userId: user.id },
-    select: { score: true, createdAt: true },
-    orderBy: { createdAt: "desc" },
-  });
-  const lessonCount = await db.userLessonProgress.count({ where: { userId: user.id } });
+  let interviews: { score: number; createdAt: Date }[] = [];
+  let lessonCount = 0;
+  try {
+    interviews = await db.interviewSession.findMany({
+      where: { userId: user.id },
+      select: { score: true, createdAt: true },
+      orderBy: { createdAt: "desc" },
+    });
+    lessonCount = await db.userLessonProgress.count({ where: { userId: user.id } });
+  } catch {
+    // DB unavailable — show empty state
+  }
 
   const interviewCount = interviews.length;
   const avgScore = interviewCount > 0
@@ -123,7 +129,7 @@ export default async function DashboardPage() {
             <span style={{ fontFamily: "'Newsreader', serif", fontSize: 64, fontWeight: 600, color: "#F5A623", lineHeight: 1 }}>{streak}</span>
             <span style={{ fontSize: 16, color: "#B3A799", fontWeight: 500, lineHeight: 1.2 }}>day<br />streak</span>
           </div>
-          <div style={{ width: 1, height: 54, background: "rgba(253,246,227,0.1)" }} />
+          <div className="dash-streak-divider" style={{ width: 1, height: 54, background: "rgba(253,246,227,0.1)" }} />
           <div style={{ maxWidth: 220 }}>
             <p style={{ fontFamily: "'Newsreader', serif", fontSize: 19, color: "#FDF6E3", lineHeight: 1.3 }}>
               {streak > 0 ? "You're showing up." : "Start your first session."}

@@ -28,6 +28,7 @@ body {
   .dash-page { padding: 32px 20px 80px !important; }
   .dash-header { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
   .dash-streak-inner { flex-direction: column !important; gap: 20px !important; }
+  .dash-streak-divider { display: none !important; }
   .dash-streak-meta { max-width: 100% !important; }
   .dash-quick-grid { grid-template-columns: 1fr !important; }
   .dash-journey-stats { gap: 24px !important; }

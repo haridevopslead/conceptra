@@ -81,13 +81,6 @@ export default function LoginPage() {
               <label className="block text-sm font-medium text-gray-300">
                 Password
               </label>
-              <Link
-                href="/forgot-password"
-                className="text-xs hover:underline"
-                style={{ color: "#F5A623" }}
-              >
-                Forgot password?
-              </Link>
             </div>
             <input
               type="password"

@@ -254,7 +254,12 @@ export default async function LessonDetailPage({
   const lesson = LESSONS.find((l) => l.slug === params.slug);
   if (!lesson) notFound();
 
-  const dbLesson = await db.lesson.findUnique({ where: { slug: params.slug } });
+  let dbLesson = null;
+  try {
+    dbLesson = await db.lesson.findUnique({ where: { slug: params.slug } });
+  } catch {
+    // DB unavailable — fall through to "coming soon" placeholder
+  }
   const layers: Layer[] =
     (dbLesson?.content as { layers?: Layer[] } | null)?.layers ?? [];
 

@@ -71,16 +71,16 @@ export default function RegisterPage() {
   return (
     <main
       className="min-h-screen flex items-center justify-center px-4 py-12"
-      style={{ backgroundColor: "#0A0E1A" }}
+      style={{ backgroundColor: "#1C1917" }}
     >
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="text-2xl font-bold" style={{ color: "#F5A623" }}>
+          <Link href="/" style={{ fontFamily: "'Newsreader', serif", fontSize: 26, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>
             Conceptra
           </Link>
-          <h1 className="text-3xl font-bold text-white mt-4">Create your account</h1>
-          <p className="text-gray-400 mt-2">
+          <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 30, fontWeight: 500, color: "#FDF6E3", marginTop: 16 }}>Create your account</h1>
+          <p style={{ color: "#8A8073", marginTop: 8, fontSize: 15 }}>
             Start mastering DevOps interviews today
           </p>
         </div>
@@ -89,7 +89,7 @@ export default function RegisterPage() {
         <form
           onSubmit={handleSubmit}
           className="rounded-2xl border border-white/10 p-8 space-y-5"
-          style={{ backgroundColor: "#111827" }}
+          style={{ backgroundColor: "#2C2420" }}
         >
           {error && (
             <div className="rounded-lg px-4 py-3 text-sm text-red-400 bg-red-400/10 border border-red-400/20">
@@ -109,7 +109,7 @@ export default function RegisterPage() {
               onChange={field("name")}
               placeholder="John Smith"
               className="w-full rounded-lg px-4 py-3 text-white placeholder-gray-500 text-sm border border-white/10 focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent"
-              style={{ backgroundColor: "#1F2937" }}
+              style={{ backgroundColor: "#211C18" }}
             />
           </div>
 
@@ -125,7 +125,7 @@ export default function RegisterPage() {
               onChange={field("email")}
               placeholder="you@example.com"
               className="w-full rounded-lg px-4 py-3 text-white placeholder-gray-500 text-sm border border-white/10 focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent"
-              style={{ backgroundColor: "#1F2937" }}
+              style={{ backgroundColor: "#211C18" }}
             />
           </div>
 
@@ -142,7 +142,7 @@ export default function RegisterPage() {
               onChange={field("password")}
               placeholder="Min. 8 characters"
               className="w-full rounded-lg px-4 py-3 text-white placeholder-gray-500 text-sm border border-white/10 focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent"
-              style={{ backgroundColor: "#1F2937" }}
+              style={{ backgroundColor: "#211C18" }}
             />
           </div>
 
@@ -158,7 +158,7 @@ export default function RegisterPage() {
               onChange={field("confirmPassword")}
               placeholder="••••••••"
               className="w-full rounded-lg px-4 py-3 text-white placeholder-gray-500 text-sm border border-white/10 focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent"
-              style={{ backgroundColor: "#1F2937" }}
+              style={{ backgroundColor: "#211C18" }}
             />
           </div>
 
@@ -166,21 +166,13 @@ export default function RegisterPage() {
             type="submit"
             disabled={loading}
             className="w-full py-3 rounded-lg font-bold text-sm transition-opacity disabled:opacity-60 hover:opacity-90"
-            style={{ backgroundColor: "#F5A623", color: "#0A0E1A" }}
+            style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
           >
             {loading ? "Creating account…" : "Create Account"}
           </button>
 
-          <p className="text-xs text-center text-gray-500">
-            By signing up you agree to our{" "}
-            <Link href="/terms" className="underline hover:text-gray-300">
-              Terms
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="underline hover:text-gray-300">
-              Privacy Policy
-            </Link>
-            .
+          <p className="text-xs text-center" style={{ color: "#6E665C" }}>
+            By signing up you agree to our Terms and Privacy Policy.
           </p>
         </form>
 

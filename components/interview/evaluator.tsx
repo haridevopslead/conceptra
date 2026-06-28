@@ -379,16 +379,14 @@ function SessionSummary({
   return (
     <div className="p-8 w-full max-w-[860px] space-y-6">
       {/* Heading */}
-      <div className="text-center space-y-1">
-        <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623" }}>
-          SESSION COMPLETE
-        </p>
-        <h1 className="text-3xl font-black text-white">{scores.length} Questions Done</h1>
-        <div className="flex items-center justify-center gap-2 mt-1">
+      <div className="text-center space-y-2">
+        <div className="text-5xl">🎉</div>
+        <h1 className="text-3xl font-black text-white">Session Complete!</h1>
+        <div className="flex items-center justify-center gap-2">
           <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "#F5A623" }}>{topic}</span>
           <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full" style={{ backgroundColor: "#1F2937" }}>{difficulty}</span>
+          <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full" style={{ backgroundColor: "#1F2937" }}>{scores.length} questions</span>
         </div>
-        <p className="text-sm text-gray-400 mt-1">Here's how you performed across the session.</p>
       </div>
 
       {/* Big score */}

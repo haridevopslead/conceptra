@@ -22,6 +22,15 @@ function extractScore(text: string): number | null {
   return m ? Math.min(10, Math.max(0, parseInt(m[1], 10))) : null;
 }
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/^#{1,6}\s+/gm, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\*(.+?)\*/g, "$1")
+    .replace(/`(.+?)`/g, "$1")
+    .trim();
+}
+
 function scoreColor(score: number): string {
   if (score >= 8) return "#F5A623";
   if (score >= 6) return "#10B981";
@@ -190,7 +199,7 @@ function Results({
             <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-white/10">
               <div>
                 <p className="text-xs text-gray-500 mb-1">Question {i + 1}</p>
-                <p className="text-sm text-white font-medium">{e.question}</p>
+                <p className="text-sm text-white font-medium">{stripMarkdown(e.question)}</p>
               </div>
               {e.score !== null && (
                 <span
@@ -425,7 +434,7 @@ export default function InterviewSession() {
           {phase === "asking" ? "Generating question…" : "Question"}
         </p>
         <StreamingText
-          text={phase === "asking" ? streamedText : currentQuestion}
+          text={stripMarkdown(phase === "asking" ? streamedText : currentQuestion)}
           streaming={phase === "asking"}
         />
       </div>

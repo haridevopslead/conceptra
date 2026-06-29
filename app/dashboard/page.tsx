@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import Link from "next/link";
 
 const TOTAL_LESSONS = 12;
-const WEEK_LABELS = ["M", "T", "W", "T", "F", "S", "S"];
+const DAY_INITIAL = ["S", "M", "T", "W", "T", "F", "S"]; // indexed by getUTCDay() (0=Sun)
 
 function greeting() {
   const h = new Date().getHours();
@@ -30,24 +30,24 @@ function calcStreak(dates: Date[]): number {
 }
 
 function getWeekDays(activityDates: Date[]) {
-  const now = new Date();
-  const todayStr = now.toISOString().slice(0, 10); // "YYYY-MM-DD" in UTC
+  const nowMs = Date.now();
+  const todayStr = new Date(nowMs).toISOString().slice(0, 10);
 
-  // Find Monday of the current ISO week (week starts Monday)
-  const dow = now.getUTCDay(); // 0=Sun … 6=Sat
-  const daysFromMonday = dow === 0 ? 6 : dow - 1;
-  const mondayMs =
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) -
-    daysFromMonday * 86_400_000;
-
-  // Build set of practiced day strings using the same toISOString approach as calcStreak
-  const activeSet = new Set(
+  // Practiced dates as a Set of "YYYY-MM-DD" UTC strings — simple string comparison
+  const practicedSet = new Set(
     activityDates.map((d) => new Date(d).toISOString().slice(0, 10))
   );
 
-  return WEEK_LABELS.map((label, i) => {
-    const dayStr = new Date(mondayMs + i * 86_400_000).toISOString().slice(0, 10);
-    return { label, active: activeSet.has(dayStr), isToday: dayStr === todayStr };
+  // Rolling 7-day window: [6 days ago … today]
+  // This ensures recent sessions are always visible regardless of which ISO weekday today is.
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(nowMs - (6 - i) * 86_400_000);
+    const dayStr = d.toISOString().slice(0, 10);
+    return {
+      label: DAY_INITIAL[d.getUTCDay()],
+      active: practicedSet.has(dayStr),
+      isToday: dayStr === todayStr,
+    };
   });
 }
 
@@ -110,11 +110,10 @@ export default async function DashboardPage() {
   ];
 
   // Debug: visible in Railway deployment logs
-  console.log("[streak-debug] server UTC now:", new Date().toISOString());
-  console.log("[streak-debug] userId:", user.id);
-  console.log("[streak-debug] interview dates:", interviews.map((i) => i.createdAt.toISOString()));
-  console.log("[streak-debug] lesson dates:", lessonProgress.map((l) => l.visitedAt.toISOString()));
-  console.log("[streak-debug] weekDays:", getWeekDays(allActivityDates).map((d) => `${d.label}:${d.active}(today=${d.isToday})`));
+  console.log("sessions:", JSON.stringify(interviews));
+  const practicedDates = allActivityDates.map((d) => new Date(d).toISOString().slice(0, 10));
+  console.log("practicedDates:", JSON.stringify(practicedDates));
+  console.log("weekDays:", JSON.stringify(getWeekDays(allActivityDates).map((d) => `${d.label}:active=${d.active}:today=${d.isToday}`)));
 
   const streak = calcStreak(allActivityDates);
   const weekDays = getWeekDays(allActivityDates);

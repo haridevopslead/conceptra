@@ -50,6 +50,28 @@ body {
   .lesson-header-card { padding: 20px !important; }
 }
 
+/* ── Shiki code block override ── */
+.shiki-block pre {
+  margin: 0;
+  padding: 16px;
+  background-color: #130F0C !important;
+  font-size: 12px;
+  line-height: 1.75;
+  overflow-x: auto;
+}
+.shiki-block pre code {
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', Menlo, monospace;
+}
+
+/* ── Streak dot: today + practiced ── */
+@keyframes streak-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,166,35,0.5); }
+  50%       { box-shadow: 0 0 0 5px rgba(245,166,35,0); }
+}
+.streak-dot-today {
+  animation: streak-pulse 2s ease-in-out infinite;
+}
+
 /* ── Autofill override (prevents browser blue-grey background) ── */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,

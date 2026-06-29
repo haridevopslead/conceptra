@@ -21,7 +21,8 @@
     "razorpay": "^2.9.6",
     "react": "^18",
     "react-dom": "^18",
-    "resend": "^6.14.0"
+    "resend": "^6.14.0",
+    "shiki": "^4.3.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

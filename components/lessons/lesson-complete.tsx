@@ -3,13 +3,20 @@
 import { useState } from "react";
 import Link from "next/link";
 
+type NextLesson = {
+  slug: string;
+  title: string;
+  topics: string[];
+  durationMinutes: number;
+} | null;
+
 type Props = {
   slug: string;
-  nextSlug: string | null;
+  nextLesson: NextLesson;
   initialCompleted: boolean;
 };
 
-export default function LessonComplete({ slug, nextSlug, initialCompleted }: Props) {
+export default function LessonComplete({ slug, nextLesson, initialCompleted }: Props) {
   const [completed, setCompleted] = useState(initialCompleted);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,10 +40,11 @@ export default function LessonComplete({ slug, nextSlug, initialCompleted }: Pro
 
   return (
     <div
-      className="rounded-2xl border border-white/10 p-6 mt-5 flex flex-col items-center gap-4 text-center"
+      className="rounded-2xl border border-white/10 p-6 mt-5 flex flex-col items-center gap-5 text-center"
       style={{ backgroundColor: "#211C18" }}
     >
       {completed ? (
+        /* ── Completed state ── */
         <>
           <div style={{ fontSize: 36 }}>✓</div>
           <p style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 500, color: "#9CAE86" }}>
@@ -45,9 +53,10 @@ export default function LessonComplete({ slug, nextSlug, initialCompleted }: Pro
           <p style={{ fontSize: 14, color: "#8A8073" }}>
             Great work. Keep the momentum going.
           </p>
-          {nextSlug ? (
+
+          {nextLesson ? (
             <Link
-              href={`/lessons/${nextSlug}`}
+              href={`/lessons/${nextLesson.slug}`}
               style={{
                 width: "100%",
                 display: "block",
@@ -61,12 +70,12 @@ export default function LessonComplete({ slug, nextSlug, initialCompleted }: Pro
                 textAlign: "center",
               }}
             >
-              Next Lesson →
+              Next: {nextLesson.title} →
             </Link>
           ) : (
             <>
               <p style={{ fontSize: 14, color: "#B3A799", lineHeight: 1.6 }}>
-                You&rsquo;ve completed all available lessons! Check back soon.
+                You&rsquo;ve completed all available lessons! More coming soon.
               </p>
               <Link
                 href="/lessons"
@@ -86,10 +95,12 @@ export default function LessonComplete({ slug, nextSlug, initialCompleted }: Pro
           )}
         </>
       ) : (
+        /* ── Not yet completed state ── */
         <>
           {error && (
             <p style={{ fontSize: 13, color: "#C57B6B" }}>✗ {error}</p>
           )}
+
           <button
             onClick={markComplete}
             disabled={loading}
@@ -109,6 +120,46 @@ export default function LessonComplete({ slug, nextSlug, initialCompleted }: Pro
           >
             {loading ? "Saving…" : "Mark as Complete"}
           </button>
+
+          {/* Next lesson preview — always visible below the complete button */}
+          {nextLesson ? (
+            <div style={{ width: "100%", borderTop: "1px solid rgba(253,246,227,0.07)", paddingTop: 16 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6E665C", marginBottom: 10, textAlign: "left" }}>
+                Up Next
+              </p>
+              <Link
+                href={`/lessons/${nextLesson.slug}`}
+                style={{
+                  display: "block",
+                  padding: "12px 16px",
+                  borderRadius: 10,
+                  border: "1px solid rgba(253,246,227,0.08)",
+                  background: "rgba(245,166,35,0.04)",
+                  textDecoration: "none",
+                  textAlign: "left",
+                  transition: "background .15s",
+                }}
+              >
+                <p style={{ fontSize: 14, fontWeight: 600, color: "#FDF6E3", marginBottom: 7 }}>
+                  {nextLesson.title} →
+                </p>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {nextLesson.topics[0] && (
+                    <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "rgba(245,166,35,0.12)", color: "#F5A623", fontWeight: 600 }}>
+                      {nextLesson.topics[0]}
+                    </span>
+                  )}
+                  <span style={{ fontSize: 11, color: "#6E665C" }}>
+                    {nextLesson.durationMinutes} min
+                  </span>
+                </div>
+              </Link>
+            </div>
+          ) : (
+            <p style={{ fontSize: 13, color: "#6E665C" }}>
+              You&rsquo;ve reached the last lesson. More coming soon.
+            </p>
+          )}
         </>
       )}
     </div>

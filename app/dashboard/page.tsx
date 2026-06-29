@@ -29,17 +29,23 @@ function calcStreak(dates: Date[]): number {
   return streak;
 }
 
-function getWeekDays(interviewDates: Date[]) {
-  const today = new Date();
-  const dow = today.getDay();
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
-  monday.setHours(0, 0, 0, 0);
-  const activeDates = new Set(interviewDates.map((d) => d.toISOString().slice(0, 10)));
+function getWeekDays(activityDates: Date[]) {
+  const now = new Date();
+  const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  const dow = now.getUTCDay(); // 0=Sun, 1=Mon, …, 6=Sat
+  const mondayUTC = todayUTC - (dow === 0 ? 6 : dow - 1) * 86_400_000;
+
+  const activeSet = new Set(
+    activityDates.map((d) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
+  );
+
   return WEEK_LABELS.map((label, i) => {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    return { label, active: activeDates.has(d.toISOString().slice(0, 10)) };
+    const dayUTC = mondayUTC + i * 86_400_000;
+    return {
+      label,
+      active: activeSet.has(dayUTC),
+      isToday: dayUTC === todayUTC,
+    };
   });
 }
 
@@ -66,32 +72,41 @@ export default async function DashboardPage() {
 
   let freshPlan = user.plan;
   let interviews: { score: number; topic: string | null; createdAt: Date }[] = [];
-  let lessonCount = 0;
+  let lessonProgress: { visitedAt: Date }[] = [];
   try {
-    const [dbUser, dbInterviews, dbLessonCount] = await Promise.all([
+    const [dbUser, dbInterviews, dbProgress] = await Promise.all([
       db.user.findUnique({ where: { id: user.id }, select: { plan: true } }),
       db.interviewSession.findMany({
         where: { userId: user.id },
         select: { score: true, topic: true, createdAt: true },
         orderBy: { createdAt: "desc" },
       }),
-      db.userLessonProgress.count({ where: { userId: user.id } }),
+      db.userLessonProgress.findMany({
+        where: { userId: user.id },
+        select: { visitedAt: true },
+      }),
     ]);
     if (dbUser) freshPlan = dbUser.plan;
     interviews = dbInterviews;
-    lessonCount = dbLessonCount;
+    lessonProgress = dbProgress;
   } catch {
     // DB unavailable — show empty state
   }
 
   const isFreePlan = !freshPlan || freshPlan === "FREE";
+  const lessonCount = lessonProgress.length;
 
   const interviewCount = interviews.length;
   const avgScore = interviewCount > 0
     ? Math.round(interviews.reduce((s, i) => s + i.score, 0) / interviewCount)
     : null;
-  const streak = calcStreak(interviews.map((i) => i.createdAt));
-  const weekDays = getWeekDays(interviews.map((i) => i.createdAt));
+  // Combine interview + lesson dates so dots fill for any practice day
+  const allActivityDates = [
+    ...interviews.map((i) => i.createdAt),
+    ...lessonProgress.map((l) => l.visitedAt),
+  ];
+  const streak = calcStreak(allActivityDates);
+  const weekDays = getWeekDays(allActivityDates);
   const recent = interviews.slice(0, 3);
   const trackPct = Math.min(100, Math.round((lessonCount / TOTAL_LESSONS) * 100));
   const dayLabel = new Date().toLocaleDateString("en-US", { weekday: "long" });
@@ -150,8 +165,23 @@ export default async function DashboardPage() {
         <div style={{ display: "flex", gap: 12 }}>
           {weekDays.map((d, i) => (
             <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 9 }}>
-              <div style={{ width: 14, height: 14, borderRadius: "50%", background: d.active ? "#F5A623" : "transparent", border: d.active ? "none" : "1.5px solid rgba(253,246,227,0.15)" }} />
-              <span style={{ fontSize: 12, color: "#8A8073", fontWeight: 600 }}>{d.label}</span>
+              <div
+                className={d.active && d.isToday ? "streak-dot-today" : ""}
+                style={{
+                  width: 14,
+                  height: 14,
+                  borderRadius: "50%",
+                  background: d.active ? "#F5A623" : "transparent",
+                  border: d.active
+                    ? "none"
+                    : d.isToday
+                    ? "1.5px solid rgba(245,166,35,0.5)"
+                    : "1.5px solid rgba(253,246,227,0.15)",
+                }}
+              />
+              <span style={{ fontSize: 12, color: d.isToday ? "#F5A623" : "#8A8073", fontWeight: d.isToday ? 700 : 600 }}>
+                {d.label}
+              </span>
             </div>
           ))}
         </div>

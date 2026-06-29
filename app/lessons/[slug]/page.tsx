@@ -6,6 +6,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import LessonTracker from "@/components/lessons/lesson-tracker";
 import LessonComplete from "@/components/lessons/lesson-complete";
+import CopyButton from "@/components/lessons/copy-button";
+import { codeToHtml } from "shiki";
 
 export async function generateStaticParams() {
   return LESSONS.map((l) => ({ slug: l.slug }));
@@ -70,22 +72,36 @@ function buildConceptChunks(content: string): ConceptChunk[] {
   return out;
 }
 
-function CodeBlock({ code }: { code: string }) {
-  const lines = code.split("\n");
+async function CodeBlock({ code }: { code: string }) {
+  let html = "";
+  try {
+    html = await codeToHtml(code, { lang: "dockerfile", theme: "github-dark" });
+  } catch {
+    // fallback: plain text
+    html = `<pre style="margin:0;padding:16px;font-size:12px;line-height:1.7;overflow-x:auto"><code>${code.replace(/</g, "&lt;")}</code></pre>`;
+  }
+
   return (
-    <pre
-      className="text-xs font-mono p-4 rounded-xl overflow-x-auto leading-6 border border-white/5"
-      style={{ backgroundColor: "#130F0C" }}
-    >
-      {lines.map((line, i) => (
-        <span key={i}>
-          <span style={{ color: line.startsWith("#") ? "#6B7280" : "#86EFAC" }}>
-            {line}
-          </span>
-          {i < lines.length - 1 && "\n"}
+    <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" }}>
+      {/* Header bar */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "7px 14px",
+          backgroundColor: "#1a1410",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
+        }}
+      >
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "#6E665C", textTransform: "uppercase" }}>
+          Dockerfile
         </span>
-      ))}
-    </pre>
+        <CopyButton code={code} />
+      </div>
+      {/* Highlighted code */}
+      <div className="shiki-block" dangerouslySetInnerHTML={{ __html: html }} />
+    </div>
   );
 }
 
@@ -355,7 +371,12 @@ export default async function LessonDetailPage({
           })}
           <LessonComplete
             slug={params.slug}
-            nextSlug={nextLesson?.slug ?? null}
+            nextLesson={nextLesson ? {
+              slug: nextLesson.slug,
+              title: nextLesson.title,
+              topics: nextLesson.topics,
+              durationMinutes: nextLesson.durationMinutes,
+            } : null}
             initialCompleted={isCompleted}
           />
         </div>

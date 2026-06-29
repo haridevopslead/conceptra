@@ -3,8 +3,21 @@ import Providers from "@/components/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Conceptra — Master DevOps Interviews",
-  description: "AI-powered DevOps interview coaching built by a Lead DevOps Engineer.",
+  title: "Conceptra — Ace Your DevOps Interview",
+  description: "AI-powered coaching built by a Lead DevOps Engineer. Practice real interview scenarios, get instant feedback, and land your dream role.",
+  metadataBase: new URL("https://conceptra.in"),
+  openGraph: {
+    title: "Conceptra — Ace Your DevOps Interview",
+    description: "AI-powered coaching built by a Lead DevOps Engineer. Practice real interview scenarios, get instant feedback, and land your dream role.",
+    url: "https://conceptra.in",
+    siteName: "Conceptra",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Conceptra — Ace Your DevOps Interview",
+    description: "AI-powered coaching built by a Lead DevOps Engineer. Practice real interview scenarios, get instant feedback, and land your dream role.",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

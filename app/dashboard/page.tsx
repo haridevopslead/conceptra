@@ -31,21 +31,23 @@ function calcStreak(dates: Date[]): number {
 
 function getWeekDays(activityDates: Date[]) {
   const now = new Date();
-  const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-  const dow = now.getUTCDay(); // 0=Sun, 1=Mon, …, 6=Sat
-  const mondayUTC = todayUTC - (dow === 0 ? 6 : dow - 1) * 86_400_000;
+  const todayStr = now.toISOString().slice(0, 10); // "YYYY-MM-DD" in UTC
 
+  // Find Monday of the current ISO week (week starts Monday)
+  const dow = now.getUTCDay(); // 0=Sun … 6=Sat
+  const daysFromMonday = dow === 0 ? 6 : dow - 1;
+  const mondayMs =
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()) -
+    daysFromMonday * 86_400_000;
+
+  // Build set of practiced day strings using the same toISOString approach as calcStreak
   const activeSet = new Set(
-    activityDates.map((d) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
+    activityDates.map((d) => new Date(d).toISOString().slice(0, 10))
   );
 
   return WEEK_LABELS.map((label, i) => {
-    const dayUTC = mondayUTC + i * 86_400_000;
-    return {
-      label,
-      active: activeSet.has(dayUTC),
-      isToday: dayUTC === todayUTC,
-    };
+    const dayStr = new Date(mondayMs + i * 86_400_000).toISOString().slice(0, 10);
+    return { label, active: activeSet.has(dayStr), isToday: dayStr === todayStr };
   });
 }
 
@@ -100,11 +102,20 @@ export default async function DashboardPage() {
   const avgScore = interviewCount > 0
     ? Math.round(interviews.reduce((s, i) => s + i.score, 0) / interviewCount)
     : null;
-  // Combine interview + lesson dates so dots fill for any practice day
+  // Wrap with new Date() defensively — Prisma always returns Date objects from
+  // Railway PostgreSQL, but the explicit wrap guards against any serialization edge case.
   const allActivityDates = [
-    ...interviews.map((i) => i.createdAt),
-    ...lessonProgress.map((l) => l.visitedAt),
+    ...interviews.map((i) => new Date(i.createdAt)),
+    ...lessonProgress.map((l) => new Date(l.visitedAt)),
   ];
+
+  // Debug: visible in Railway deployment logs
+  console.log("[streak-debug] server UTC now:", new Date().toISOString());
+  console.log("[streak-debug] userId:", user.id);
+  console.log("[streak-debug] interview dates:", interviews.map((i) => i.createdAt.toISOString()));
+  console.log("[streak-debug] lesson dates:", lessonProgress.map((l) => l.visitedAt.toISOString()));
+  console.log("[streak-debug] weekDays:", getWeekDays(allActivityDates).map((d) => `${d.label}:${d.active}(today=${d.isToday})`));
+
   const streak = calcStreak(allActivityDates);
   const weekDays = getWeekDays(allActivityDates);
   const recent = interviews.slice(0, 3);

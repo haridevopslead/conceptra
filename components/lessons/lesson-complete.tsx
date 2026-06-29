@@ -131,29 +131,30 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
                 href={`/lessons/${nextLesson.slug}`}
                 style={{
                   display: "block",
-                  padding: "12px 16px",
+                  width: "100%",
+                  padding: "13px 24px",
                   borderRadius: 10,
-                  border: "1px solid rgba(253,246,227,0.08)",
-                  background: "rgba(245,166,35,0.04)",
+                  background: "#F5A623",
+                  color: "#1C1917",
+                  fontWeight: 600,
+                  fontSize: 15,
                   textDecoration: "none",
-                  textAlign: "left",
-                  transition: "background .15s",
+                  textAlign: "center",
+                  boxSizing: "border-box",
                 }}
               >
-                <p style={{ fontSize: 14, fontWeight: 600, color: "#FDF6E3", marginBottom: 7 }}>
-                  {nextLesson.title} →
-                </p>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  {nextLesson.topics[0] && (
-                    <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "rgba(245,166,35,0.12)", color: "#F5A623", fontWeight: 600 }}>
-                      {nextLesson.topics[0]}
-                    </span>
-                  )}
-                  <span style={{ fontSize: 11, color: "#6E665C" }}>
-                    {nextLesson.durationMinutes} min
-                  </span>
-                </div>
+                Next Lesson: {nextLesson.title} →
               </Link>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 8 }}>
+                {nextLesson.topics[0] && (
+                  <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "rgba(245,166,35,0.12)", color: "#F5A623", fontWeight: 600 }}>
+                    {nextLesson.topics[0]}
+                  </span>
+                )}
+                <span style={{ fontSize: 11, color: "#6E665C" }}>
+                  {nextLesson.durationMinutes} min
+                </span>
+              </div>
             </div>
           ) : (
             <p style={{ fontSize: 13, color: "#6E665C" }}>

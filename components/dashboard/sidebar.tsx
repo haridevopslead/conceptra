@@ -114,6 +114,19 @@ export default function Sidebar({ user }: Props) {
           </div>
         </div>
 
+        {/* Upgrade to Pro — only for FREE users */}
+        {isFreePlan && (
+          <Link
+            href="/pricing"
+            style={{ display: "flex", alignItems: "center", gap: 9, padding: "10px 12px", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none", color: "#F5A623", background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.22)" }}
+          >
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+            </svg>
+            Upgrade to Pro
+          </Link>
+        )}
+
         {/* Sign out */}
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}

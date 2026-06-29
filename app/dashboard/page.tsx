@@ -63,20 +63,28 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
   const user = session.user;
-  const isFreePlan = !user.plan || user.plan === "FREE";
 
+  let freshPlan = user.plan;
   let interviews: { score: number; topic: string | null; createdAt: Date }[] = [];
   let lessonCount = 0;
   try {
-    interviews = await db.interviewSession.findMany({
-      where: { userId: user.id },
-      select: { score: true, topic: true, createdAt: true },
-      orderBy: { createdAt: "desc" },
-    });
-    lessonCount = await db.userLessonProgress.count({ where: { userId: user.id } });
+    const [dbUser, dbInterviews, dbLessonCount] = await Promise.all([
+      db.user.findUnique({ where: { id: user.id }, select: { plan: true } }),
+      db.interviewSession.findMany({
+        where: { userId: user.id },
+        select: { score: true, topic: true, createdAt: true },
+        orderBy: { createdAt: "desc" },
+      }),
+      db.userLessonProgress.count({ where: { userId: user.id } }),
+    ]);
+    if (dbUser) freshPlan = dbUser.plan;
+    interviews = dbInterviews;
+    lessonCount = dbLessonCount;
   } catch {
     // DB unavailable — show empty state
   }
+
+  const isFreePlan = !freshPlan || freshPlan === "FREE";
 
   const interviewCount = interviews.length;
   const avgScore = interviewCount > 0
@@ -105,7 +113,7 @@ export default async function DashboardPage() {
           </p>
         </div>
         <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", padding: "5px 11px", borderRadius: 999, background: isFreePlan ? "#2C2420" : "#F5A623", color: isFreePlan ? "#B3A799" : "#1C1917", border: isFreePlan ? "1px solid rgba(253,246,227,0.08)" : "none", marginTop: 6, flexShrink: 0 }}>
-          {user.plan ?? "FREE"} PLAN
+          {freshPlan ?? "FREE"} PLAN
         </span>
       </div>
 

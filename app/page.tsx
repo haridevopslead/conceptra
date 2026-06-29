@@ -36,6 +36,7 @@ export default async function HomePage() {
       >
         <Link href="/" style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>Conceptra</Link>
         <div className="flex items-center gap-4 sm:gap-8">
+          <Link href="/pricing" style={{ color: "#B3A799", fontSize: 14, textDecoration: "none" }}>Pricing</Link>
           <Link href="/login" style={{ color: "#B3A799", fontSize: 14, textDecoration: "none" }}>Sign In</Link>
           <Link href="/register" style={{ background: "#F5A623", color: "#1C1917", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 9, textDecoration: "none" }}>Get Started</Link>
         </div>

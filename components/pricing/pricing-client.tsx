@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Script from "next/script";
-import { useRouter } from "next/navigation";
 
 declare global {
   interface Window {
@@ -34,14 +33,13 @@ type Props = {
 };
 
 export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }: Props) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleUpgrade() {
     if (!isLoggedIn) {
-      router.push("/register");
+      window.location.href = "/register";
       return;
     }
 
@@ -79,7 +77,7 @@ export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
               setSuccess(true);
-              setTimeout(() => router.push("/dashboard"), 2000);
+              setTimeout(() => { window.location.href = "/dashboard"; }, 2000);
             } else {
               setError(verifyData.error ?? "Verification failed. Contact support@conceptra.in");
             }

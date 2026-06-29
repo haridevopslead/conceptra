@@ -1,58 +1,32 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import PricingClient from "@/components/pricing/pricing-client";
 
-export default function PricingPage() {
+export const metadata = { title: "Pricing — Conceptra" };
+
+export default async function PricingPage() {
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
+
   return (
-    <main
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ backgroundColor: "#1C1917" }}
-    >
-      <div className="w-full max-w-lg text-center space-y-6">
-        <div
-          className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold"
-          style={{ backgroundColor: "rgba(245,166,35,0.15)", color: "#F5A623", border: "1px solid rgba(245,166,35,0.3)" }}
-        >
-          Coming Soon
-        </div>
-
-        <h1
-          style={{ fontFamily: "'Newsreader', serif", fontSize: 42, fontWeight: 500, color: "#FDF6E3", lineHeight: 1.2 }}
-        >
-          Conceptra Pro
-        </h1>
-
-        <p style={{ color: "#8A8073", fontSize: 16, lineHeight: 1.7 }}>
-          Unlock every lesson and unlimited AI mock interviews with honest, senior-engineer-level feedback.
-        </p>
-
-        <div
-          className="rounded-2xl border p-8 space-y-4 text-left"
-          style={{ backgroundColor: "#2C2420", borderColor: "rgba(245,166,35,0.2)" }}
-        >
-          {[
-            "All 13 lessons across 6 DevOps domains",
-            "Unlimited mock interview sessions",
-            "AI coaching with production-level feedback",
-            "Priority support",
-          ].map((item) => (
-            <div key={item} className="flex items-center gap-3">
-              <span style={{ color: "#F5A623" }}>✓</span>
-              <span style={{ color: "#B3A799", fontSize: 14 }}>{item}</span>
-            </div>
-          ))}
-        </div>
-
-        <p style={{ color: "#6E665C", fontSize: 13 }}>
-          Pro plan pricing will be announced soon. Stay tuned.
-        </p>
-
-        <Link
-          href="/dashboard"
-          className="inline-block px-6 py-3 rounded-lg font-semibold text-sm transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
-        >
-          Back to Dashboard
+    <main style={{ backgroundColor: "#1C1917", minHeight: "100vh", fontFamily: "'Hanken Grotesk', system-ui, sans-serif" }}>
+      {/* Nav */}
+      <nav style={{ padding: "18px 24px", borderBottom: "1px solid rgba(253,246,227,0.06)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Link href={user ? "/dashboard" : "/"} style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>
+          Conceptra
         </Link>
-      </div>
+        <Link href={user ? "/dashboard" : "/"} style={{ fontSize: 14, color: "#8A8073", textDecoration: "none" }}>
+          {user ? "← Dashboard" : "← Home"}
+        </Link>
+      </nav>
+
+      <PricingClient
+        userName={user?.name ?? ""}
+        userEmail={user?.email ?? ""}
+        isLoggedIn={!!user}
+        isPro={user?.plan === "PRO"}
+      />
     </main>
   );
 }

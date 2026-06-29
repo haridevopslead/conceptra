@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
+import { useState, useEffect } from "react";
 
 const NAV = [
   {
@@ -58,10 +59,20 @@ type Props = {
 export default function Sidebar({ user }: Props) {
   const pathname = usePathname();
   const isFreePlan = !user.plan || user.plan === "FREE";
+  const [hoveredHref, setHoveredHref] = useState<string | null>(null);
+  const [ariaHidden, setAriaHidden] = useState(false);
+
+  useEffect(() => {
+    const update = () => setAriaHidden(window.innerWidth < 768);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   return (
     <aside
       className="hidden md:flex flex-col shrink-0"
+      aria-hidden={ariaHidden}
       style={{ width: 248, background: "#17130F", borderRight: "1px solid rgba(253,246,227,0.06)", position: "sticky", top: 0, height: "100vh" }}
     >
       {/* Logo */}
@@ -75,14 +86,21 @@ export default function Sidebar({ user }: Props) {
       <nav style={{ flex: 1, padding: "22px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
         {NAV.map(({ href, label, icon }) => {
           const active = pathname === href;
+          const hovered = hoveredHref === href;
           return (
             <Link
               key={href}
               href={href}
+              onMouseEnter={() => setHoveredHref(href)}
+              onMouseLeave={() => setHoveredHref(null)}
               style={{
                 display: "flex", alignItems: "center", gap: 12, padding: "11px 14px", borderRadius: 11,
                 fontSize: 15, fontWeight: 500, textDecoration: "none", transition: "all .15s",
-                background: active ? "rgba(245,166,35,0.12)" : "transparent",
+                background: active
+                  ? "rgba(245,166,35,0.12)"
+                  : hovered
+                  ? "rgba(255,255,255,0.05)"
+                  : "transparent",
                 color: active ? "#F5A623" : "#9C9286",
               }}
             >

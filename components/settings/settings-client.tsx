@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 const INPUT_STYLE: React.CSSProperties = {
   width: "100%",
@@ -48,9 +49,10 @@ const SAVE_BTN: React.CSSProperties = {
 type Props = {
   initialName: string;
   email: string;
+  plan: string;
 };
 
-export default function SettingsClient({ initialName, email }: Props) {
+export default function SettingsClient({ initialName, email, plan }: Props) {
   const [name, setName] = useState(initialName);
   const [profileMsg, setProfileMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -159,6 +161,36 @@ export default function SettingsClient({ initialName, email }: Props) {
         </form>
       </section>
 
+      {/* Plan & Billing section */}
+      <section style={CARD}>
+        <p style={{ fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase", color: "#F5A623", fontWeight: 600, marginBottom: 18 }}>
+          Plan &amp; Billing
+        </p>
+        {plan === "PRO" ? (
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
+              <span style={{ fontFamily: "'Newsreader', serif", fontSize: 18, fontWeight: 500, color: "#FDF6E3" }}>Pro Plan</span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", padding: "3px 9px", borderRadius: 999, background: "#F5A623", color: "#1C1917" }}>
+                ACTIVE
+              </span>
+            </div>
+            <p style={{ fontSize: 14, color: "#8A8073" }}>Billed annually at ₹2,999</p>
+          </div>
+        ) : (
+          <div>
+            <p style={{ fontSize: 14, color: "#B3A799", lineHeight: 1.6, marginBottom: 18 }}>
+              You&rsquo;re on the <strong style={{ color: "#FDF6E3" }}>Free plan</strong>. Upgrade to unlock all lessons and unlimited AI mock interviews.
+            </p>
+            <Link
+              href="/pricing"
+              style={{ display: "inline-block", background: "#F5A623", color: "#1C1917", fontWeight: 700, fontSize: 14, padding: "11px 22px", borderRadius: 10, textDecoration: "none" }}
+            >
+              Upgrade to Pro — ₹2,999/year
+            </Link>
+          </div>
+        )}
+      </section>
+
       {/* Security section */}
       <section style={CARD}>
         <p style={{ fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase", color: "#F5A623", fontWeight: 600, marginBottom: 18 }}>
@@ -169,6 +201,7 @@ export default function SettingsClient({ initialName, email }: Props) {
             <label style={LABEL_STYLE}>Current password</label>
             <input
               type="password"
+              autoComplete="current-password"
               value={currentPw}
               onChange={(e) => setCurrentPw(e.target.value)}
               style={INPUT_STYLE}
@@ -180,6 +213,7 @@ export default function SettingsClient({ initialName, email }: Props) {
             <label style={LABEL_STYLE}>New password</label>
             <input
               type="password"
+              autoComplete="new-password"
               value={newPw}
               onChange={(e) => setNewPw(e.target.value)}
               style={INPUT_STYLE}
@@ -191,10 +225,11 @@ export default function SettingsClient({ initialName, email }: Props) {
             <label style={LABEL_STYLE}>Confirm new password</label>
             <input
               type="password"
+              autoComplete="new-password"
               value={confirmPw}
               onChange={(e) => setConfirmPw(e.target.value)}
               style={INPUT_STYLE}
-              placeholder="••••••••"
+              placeholder="Repeat your password"
               required
             />
           </div>

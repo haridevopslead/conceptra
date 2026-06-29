@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { db } from "@/lib/db";
 import SettingsClient from "@/components/settings/settings-client";
 
 export const metadata = { title: "Settings — Conceptra" };
@@ -7,6 +8,14 @@ export const metadata = { title: "Settings — Conceptra" };
 export default async function SettingsPage() {
   const session = await getServerSession(authOptions);
   const user = session!.user;
+
+  let freshPlan = user.plan ?? "FREE";
+  try {
+    const dbUser = await db.user.findUnique({ where: { id: user.id }, select: { plan: true } });
+    if (dbUser) freshPlan = dbUser.plan ?? "FREE";
+  } catch {
+    // fall back to JWT plan
+  }
 
   return (
     <div style={{ maxWidth: 720, margin: "0 auto", padding: "48px 32px 80px" }}>
@@ -22,6 +31,7 @@ export default async function SettingsPage() {
       <SettingsClient
         initialName={user.name ?? ""}
         email={user.email ?? ""}
+        plan={freshPlan}
       />
     </div>
   );

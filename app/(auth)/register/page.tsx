@@ -156,7 +156,7 @@ export default function RegisterPage() {
               autoComplete="new-password"
               value={form.confirmPassword}
               onChange={field("confirmPassword")}
-              placeholder="••••••••"
+              placeholder="Repeat your password"
               className="w-full rounded-lg px-4 py-3 text-white placeholder-gray-500 text-sm border border-white/10 focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent"
               style={{ backgroundColor: "#211C18" }}
             />

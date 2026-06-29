@@ -133,9 +133,9 @@ export default async function DashboardPage() {
       {/* Streak tracker */}
       <div style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 20, padding: "30px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 36, flexWrap: "wrap" }}>
         <div className="dash-streak-inner" style={{ display: "flex", alignItems: "center", gap: 22 }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
             <span style={{ fontFamily: "'Newsreader', serif", fontSize: 64, fontWeight: 600, color: "#F5A623", lineHeight: 1 }}>{streak}</span>
-            <span style={{ fontSize: 16, color: "#B3A799", fontWeight: 500, lineHeight: 1.2 }}>day<br />streak</span>
+            <span style={{ fontSize: 14, color: "#B3A799", fontWeight: 500, marginTop: 4 }}>day streak</span>
           </div>
           <div className="dash-streak-divider" style={{ width: 1, height: 54, background: "rgba(253,246,227,0.1)" }} />
           <div style={{ maxWidth: 220 }}>
@@ -221,8 +221,8 @@ export default async function DashboardPage() {
           </div>
           {avgScore !== null && (
             <div>
-              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 38, fontWeight: 500, color: scoreColor(avgScore), lineHeight: 1 }}>
-                {avgScore}<span style={{ fontSize: 18, color: "#8A8073" }}>/10</span>
+              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 38, fontWeight: 500, color: "#F5A623", lineHeight: 1 }}>
+                {avgScore}<span style={{ fontSize: 18, color: "#F5A623" }}>/10</span>
               </p>
               <p style={{ fontSize: 13.5, color: "#8A8073", marginTop: 6 }}>Average mock score</p>
             </div>

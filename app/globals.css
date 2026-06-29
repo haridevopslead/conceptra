@@ -50,6 +50,15 @@ body {
   .lesson-header-card { padding: 20px !important; }
 }
 
+/* ── Autofill override (prevents browser blue-grey background) ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #211C18 inset !important;
+  -webkit-text-fill-color: #FDF6E3 !important;
+  caret-color: #FDF6E3;
+}
+
 @layer utilities {
   .text-balance { text-wrap: balance; }
   .font-newsreader { font-family: 'Newsreader', Georgia, serif; }

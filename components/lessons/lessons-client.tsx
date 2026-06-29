@@ -57,7 +57,7 @@ function LessonCard({ lesson, plan, visited }: { lesson: Lesson; plan: string; v
       {/* Badges — top-right corner */}
       {locked && (
         <div
-          className="absolute top-4 right-4 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
+          className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold"
           style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
         >
           <LockIcon />
@@ -66,7 +66,7 @@ function LessonCard({ lesson, plan, visited }: { lesson: Lesson; plan: string; v
       )}
       {visited && !locked && (
         <div
-          className="absolute top-4 right-4 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold"
+          className="absolute top-4 right-4 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold"
           style={{ backgroundColor: "rgba(156,174,134,0.18)", color: "#A7C48F", border: "1px solid rgba(156,174,134,0.45)" }}
         >
           ✓ Done
@@ -133,8 +133,8 @@ function LessonCard({ lesson, plan, visited }: { lesson: Lesson; plan: string; v
         ) : (
           <Link
             href={`/lessons/${lesson.slug}`}
-            className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-            style={{ border: "1px solid rgba(253,246,227,0.18)", color: "#FDF6E3" }}
+            className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:bg-white/5"
+            style={{ border: "1px solid rgba(253,246,227,0.18)", color: "#C9BFB2" }}
           >
             {visited ? "Review →" : "Start lesson →"}
           </Link>

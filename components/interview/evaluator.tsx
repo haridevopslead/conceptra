@@ -282,7 +282,7 @@ function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: strin
                 }}
               >
                 <span style={{ fontFamily: "ui-monospace, monospace", fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(245,166,35,0.14)", color: "#F5A623" }}>{meta.code}</span>
-                <div>
+                <div style={{ minHeight: 40 }}>
                   <p style={{ fontSize: 14, fontFamily: "'Newsreader', serif", fontWeight: 500, color: isSelected ? "#F5A623" : "#FDF6E3" }}>{id}</p>
                   <p className="text-xs mt-0.5" style={{ color: "#8A8073" }}>{meta.desc}</p>
                 </div>
@@ -810,43 +810,50 @@ export default function Evaluator() {
         )}
 
         {(phase === "idle" || phase === "submitting") && (
-          <button
-            onClick={submit}
-            disabled={phase === "submitting" || !answer.trim()}
-            className="w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
-            style={{
-              backgroundColor:
-                phase === "submitting"
-                  ? "#2C2420"
-                  : answer.trim()
-                  ? "#F5A623"
-                  : "#2D2A1F",
-              color:
-                phase === "submitting"
-                  ? "#9CA3AF"
-                  : answer.trim()
-                  ? "#1C1917"
-                  : "#6B5E2A",
-              border:
-                phase === "submitting"
-                  ? "1px solid rgba(255,255,255,0.1)"
-                  : answer.trim()
-                  ? "none"
-                  : "1px solid rgba(245,166,35,0.15)",
-            }}
-          >
-            {phase === "submitting" ? (
-              <>
-                <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-                </svg>
-                Evaluating your answer…
-              </>
-            ) : (
-              "Submit Answer"
+          <>
+            <button
+              onClick={submit}
+              disabled={phase === "submitting" || !answer.trim()}
+              className="w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+              style={{
+                backgroundColor:
+                  phase === "submitting"
+                    ? "#2C2420"
+                    : answer.trim()
+                    ? "#F5A623"
+                    : "transparent",
+                color:
+                  phase === "submitting"
+                    ? "#9CA3AF"
+                    : answer.trim()
+                    ? "#1C1917"
+                    : "rgba(245,166,35,0.55)",
+                border:
+                  phase === "submitting"
+                    ? "1px solid rgba(255,255,255,0.1)"
+                    : answer.trim()
+                    ? "none"
+                    : "1px solid rgba(245,166,35,0.45)",
+              }}
+            >
+              {phase === "submitting" ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                  </svg>
+                  Evaluating your answer…
+                </>
+              ) : (
+                "Submit Answer"
+              )}
+            </button>
+            {phase === "idle" && !answer.trim() && (
+              <p className="text-xs text-center" style={{ color: "#6E665C" }}>
+                Type or speak your answer above to submit
+              </p>
             )}
-          </button>
+          </>
         )}
       </div>
 

@@ -219,7 +219,7 @@ function PressureTestContent({ content }: { content: string }) {
               <ul className="space-y-2">
                 {bullets.map((b, j) => (
                   <li key={j} className="flex items-start gap-2 text-sm text-gray-400">
-                    <span className="shrink-0 mt-0.5" style={{ color: "#EF4444" }}>›</span>
+                    <span className="shrink-0 mt-0.5" style={{ color: "#8A8073" }}>·</span>
                     <span>{b.replace(/^-\s*/, "")}</span>
                   </li>
                 ))}

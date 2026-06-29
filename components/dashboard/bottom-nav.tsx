@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const NAV = [
   {
@@ -52,10 +53,19 @@ const NAV = [
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const [ariaHidden, setAriaHidden] = useState(false);
+
+  useEffect(() => {
+    const update = () => setAriaHidden(window.innerWidth >= 768);
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, []);
 
   return (
     <nav
       className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex items-stretch"
+      aria-hidden={ariaHidden}
       style={{
         background: "#17130F",
         borderTop: "1px solid rgba(253,246,227,0.08)",

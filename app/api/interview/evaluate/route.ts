@@ -74,7 +74,7 @@ Be honest and specific. Vague praise or criticism is useless to the candidate.`;
   // Save the interview result — fire-and-forget so a DB error never blocks the response
   const score = typeof result.overall_score === "number" ? result.overall_score : 0;
   db.interviewSession.create({
-    data: { userId: session.user.id, score },
+    data: { userId: session.user.id, score, topic: topicCtx },
   }).catch(() => { /* silent — don't break the UX for a logging failure */ });
 
   return NextResponse.json(result);

@@ -65,12 +65,12 @@ export default async function DashboardPage() {
   const user = session.user;
   const isFreePlan = !user.plan || user.plan === "FREE";
 
-  let interviews: { score: number; createdAt: Date }[] = [];
+  let interviews: { score: number; topic: string | null; createdAt: Date }[] = [];
   let lessonCount = 0;
   try {
     interviews = await db.interviewSession.findMany({
       where: { userId: user.id },
-      select: { score: true, createdAt: true },
+      select: { score: true, topic: true, createdAt: true },
       orderBy: { createdAt: "desc" },
     });
     lessonCount = await db.userLessonProgress.count({ where: { userId: user.id } });
@@ -246,7 +246,7 @@ export default async function DashboardPage() {
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 24px", borderBottom: i < recent.length - 1 ? "1px solid rgba(253,246,227,0.05)" : "none" }}>
                   <div style={{ width: 9, height: 9, borderRadius: "50%", background: color, flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 15, color: "#FDF6E3", fontWeight: 500 }}>Mock Interview</p>
+                    <p style={{ fontSize: 15, color: "#FDF6E3", fontWeight: 500 }}>Mock Interview{s.topic ? ` · ${s.topic}` : ""}</p>
                     <p style={{ fontSize: 13, color: "#8A8073", marginTop: 2 }}>{scoreLabel(s.score)} · {formatDate(s.createdAt)}</p>
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: `${color}20`, color, flexShrink: 0 }}>

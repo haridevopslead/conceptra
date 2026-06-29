@@ -65,8 +65,11 @@ export default async function HomePage() {
           </p>
 
           <div className="flex items-center gap-3 mb-10 text-left">
-            <div className="shrink-0" style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 14, fontWeight: 600, color: "#F5A623" }}>HK</div>
-            <p style={{ fontFamily: "'Newsreader', serif", fontStyle: "italic", fontSize: "clamp(14px, 2.5vw, 17px)", color: "#8A8073", maxWidth: 420, lineHeight: 1.5 }}>&ldquo;Built by the engineer who&rsquo;s been on both sides of the interview table.&rdquo;</p>
+            <div className="shrink-0" style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 14, fontWeight: 600, color: "#F5A623" }}>HN</div>
+            <div>
+              <p style={{ fontFamily: "'Newsreader', serif", fontStyle: "italic", fontSize: "clamp(14px, 2.5vw, 17px)", color: "#8A8073", maxWidth: 420, lineHeight: 1.5 }}>&ldquo;Built by the engineer who&rsquo;s been on both sides of the interview table.&rdquo;</p>
+              <p style={{ fontSize: 12, color: "#6E665C", marginTop: 6 }}>Hari N. · Lead DevOps Engineer · 10+ years in production</p>
+            </div>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:justify-center">
@@ -127,8 +130,15 @@ export default async function HomePage() {
       </div>
 
       {/* Footer */}
-      <footer className="mx-auto px-5 sm:px-10 text-center" style={{ maxWidth: 1080, marginTop: 32, paddingTop: 40, paddingBottom: 40, borderTop: "1px solid rgba(253,246,227,0.06)" }}>
+      <footer className="mx-auto px-5 sm:px-10 text-center" style={{ maxWidth: 1080, marginTop: 32, paddingTop: 40, paddingBottom: 40, borderTop: "1px solid rgba(253,246,227,0.06)", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
         <span style={{ fontSize: 12.5, color: "#6E665C" }}>© 2026 Conceptra · Crafted for engineers who refuse to wing it.</span>
+        <div className="flex items-center gap-4 flex-wrap justify-center">
+          <Link href="/terms" style={{ fontSize: 12, color: "#6E665C", textDecoration: "none" }}>Terms of Service</Link>
+          <span style={{ fontSize: 12, color: "#3A322C" }}>·</span>
+          <Link href="/privacy" style={{ fontSize: 12, color: "#6E665C", textDecoration: "none" }}>Privacy Policy</Link>
+          <span style={{ fontSize: 12, color: "#3A322C" }}>·</span>
+          <a href="mailto:support@conceptra.in" style={{ fontSize: 12, color: "#6E665C", textDecoration: "none" }}>support@conceptra.in</a>
+        </div>
       </footer>
     </main>
   );

@@ -49,11 +49,36 @@ interface SpeechRecognitionInstance extends EventTarget {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/#{1,6}\s+/g, "")       // # headings
+    .replace(/\*\*(.+?)\*\*/g, "$1") // **bold**
+    .replace(/\*(.+?)\*/g, "$1");    // *italic*
+}
+
+const VOICE_CORRECTIONS: [RegExp, string][] = [
+  [/\bdoctor's\b/gi, "Docker's"],
+  [/\bdoctor\b/gi, "Docker"],
+  [/\bcube\s+8\s+s\b/gi, "Kubernetes"],
+  [/\bcube\b/gi, "Kubernetes"],
+  [/\bterra\s+form\b/gi, "Terraform"],
+  [/\bget\s+hub\b/gi, "GitHub"],
+  [/\bget\b/g, "Git"],
+  [/\bjenkins\b/gi, "Jenkins"],
+  [/\bansible\b/gi, "Ansible"],
+  [/\bpromete[uo]s\b/gi, "Prometheus"],
+  [/\bgrafana\b/gi, "Grafana"],
+];
+
+function correctVoice(text: string): string {
+  return VOICE_CORRECTIONS.reduce((t, [re, sub]) => t.replace(re, sub), text);
+}
+
 function parseFeedback(text: string): FeedbackData {
   const score = text.match(/SCORE:\s*(.+)/)?.[1]?.trim() ?? "";
-  const strong = text.match(/STRONG:\s*(.+)/)?.[1]?.trim() ?? "";
-  const improve = text.match(/IMPROVE:\s*(.+)/)?.[1]?.trim() ?? "";
-  const seniorAnswer = text.match(/SENIOR_ANSWER:\s*([\s\S]+)/)?.[1]?.trim() ?? "";
+  const strong = stripMarkdown(text.match(/STRONG:\s*(.+)/)?.[1]?.trim() ?? "");
+  const improve = stripMarkdown(text.match(/IMPROVE:\s*(.+)/)?.[1]?.trim() ?? "");
+  const seniorAnswer = stripMarkdown(text.match(/SENIOR_ANSWER:\s*([\s\S]+)/)?.[1]?.trim() ?? "");
   return { score, strong, improve, seniorAnswer };
 }
 
@@ -231,9 +256,11 @@ export default function DevInterviewPage() {
         else interim += t;
       }
       setInput(
-        baseTextRef.current +
-          finalTranscriptRef.current +
-          (interim ? " " + interim : ""),
+        correctVoice(
+          baseTextRef.current +
+            finalTranscriptRef.current +
+            (interim ? " " + interim : ""),
+        ),
       );
     };
 
@@ -472,6 +499,8 @@ export default function DevInterviewPage() {
               <div className={`chat-bubble ${msg.role === "user" ? "user-bubble" : "dev-bubble"}`}>
                 {isPlaceholder ? (
                   <span className="chat-typing">●●●</span>
+                ) : msg.role === "assistant" ? (
+                  stripMarkdown(msg.content)
                 ) : (
                   msg.content
                 )}

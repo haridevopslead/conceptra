@@ -11,18 +11,28 @@ export const metadata = {
 export default async function LessonsPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
-  const plan = session.user.plan ?? "FREE";
+  let plan = session.user.plan ?? "FREE";
 
   let visitedSlugs: string[] = [];
+  let lessons: Awaited<ReturnType<typeof db.lesson.findMany>> = [];
   try {
-    const progress = await db.userLessonProgress.findMany({
-      where: { userId: session.user.id },
-      select: { lessonSlug: true },
-    });
+    const [dbUser, progress, lessonRows] = await Promise.all([
+      db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } }),
+      db.userLessonProgress.findMany({
+        where: { userId: session.user.id },
+        select: { lessonSlug: true },
+      }),
+      db.lesson.findMany({
+        where: { published: true },
+        orderBy: { order: "asc" },
+      }),
+    ]);
+    if (dbUser) plan = dbUser.plan;
     visitedSlugs = progress.map((p) => p.lessonSlug);
+    lessons = lessonRows;
   } catch {
     // DB unavailable — show lessons without progress markers
   }
 
-  return <LessonsClient plan={plan} visitedSlugs={visitedSlugs} />;
+  return <LessonsClient plan={plan} visitedSlugs={visitedSlugs} lessons={lessons} />;
 }

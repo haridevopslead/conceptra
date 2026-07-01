@@ -2,25 +2,21 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import {
-  LESSONS,
-  CATEGORY_COLOR,
-  DIFFICULTY_COLOR,
-  type Category,
-  type Lesson,
-} from "@/lib/data/lessons";
+import { CATEGORY_COLOR, DIFFICULTY_COLOR, FALLBACK_COLOR } from "@/lib/lesson-style";
 
-const ALL_CATEGORIES = [
-  "All",
-  "Kubernetes",
-  "CI/CD",
-  "Cloud",
-  "Infrastructure as Code",
-  "Monitoring",
-  "SRE",
-] as const;
+type LessonRow = {
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  category: string;
+  difficulty: string;
+  durationMinutes: number;
+  topics: string[];
+  tier: string;
+};
 
-type Props = { plan: string; visitedSlugs: string[] };
+type Props = { plan: string; visitedSlugs: string[]; lessons: LessonRow[] };
 
 function LockIcon() {
   return (
@@ -40,10 +36,10 @@ function ClockIcon() {
   );
 }
 
-function LessonCard({ lesson, plan, visited }: { lesson: Lesson; plan: string; visited: boolean }) {
-  const locked = !lesson.isFree && plan === "FREE";
-  const categoryColor = CATEGORY_COLOR[lesson.category];
-  const difficultyColor = DIFFICULTY_COLOR[lesson.difficulty];
+function LessonCard({ lesson, plan, visited }: { lesson: LessonRow; plan: string; visited: boolean }) {
+  const locked = lesson.tier !== "FREE" && plan === "FREE";
+  const categoryColor = CATEGORY_COLOR[lesson.category] ?? FALLBACK_COLOR;
+  const difficultyColor = DIFFICULTY_COLOR[lesson.difficulty] ?? FALLBACK_COLOR;
 
   return (
     <div
@@ -144,32 +140,37 @@ function LessonCard({ lesson, plan, visited }: { lesson: Lesson; plan: string; v
   );
 }
 
-export default function LessonsClient({ plan, visitedSlugs }: Props) {
+export default function LessonsClient({ plan, visitedSlugs, lessons }: Props) {
   const visitedSet = new Set(visitedSlugs);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("All");
 
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set(lessons.map((l) => l.category)))],
+    [lessons]
+  );
+
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return LESSONS.filter((l) => {
+    return lessons.filter((l) => {
       const matchesCategory =
         activeCategory === "All" || l.category === activeCategory;
       const matchesSearch =
         !q ||
         l.title.toLowerCase().includes(q) ||
-        l.description.toLowerCase().includes(q) ||
+        (l.description ?? "").toLowerCase().includes(q) ||
         l.topics.some((t) => t.toLowerCase().includes(q));
       return matchesCategory && matchesSearch;
     });
-  }, [search, activeCategory]);
+  }, [lessons, search, activeCategory]);
 
   const countFor = (cat: string) =>
     cat === "All"
-      ? LESSONS.length
-      : LESSONS.filter((l) => l.category === cat).length;
+      ? lessons.length
+      : lessons.filter((l) => l.category === cat).length;
 
-  const freeCount = filtered.filter((l) => l.isFree).length;
-  const proCount = filtered.filter((l) => !l.isFree).length;
+  const freeCount = filtered.filter((l) => l.tier === "FREE").length;
+  const proCount = filtered.filter((l) => l.tier !== "FREE").length;
 
   return (
     <div className="p-4 sm:p-8 max-w-5xl mx-auto space-y-6">
@@ -178,7 +179,7 @@ export default function LessonsClient({ plan, visitedSlugs }: Props) {
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "#FDF6E3", fontFamily: "'Newsreader', serif", fontWeight: 500 }}>Lessons</h1>
         <p className="text-sm mt-1" style={{ color: "#B3A799" }}>
-          {LESSONS.length} lessons across 6 DevOps domains
+          {lessons.length} lessons across {categories.length - 1} DevOps domains
         </p>
       </div>
 
@@ -206,10 +207,9 @@ export default function LessonsClient({ plan, visitedSlugs }: Props) {
 
       {/* ── Category tabs ── */}
       <div className="flex gap-2 flex-wrap">
-        {ALL_CATEGORIES.map((cat) => {
+        {categories.map((cat) => {
           const active = activeCategory === cat;
-          const color =
-            cat === "All" ? "#F5A623" : CATEGORY_COLOR[cat as Category];
+          const color = cat === "All" ? "#F5A623" : CATEGORY_COLOR[cat] ?? FALLBACK_COLOR;
           return (
             <button
               key={cat}

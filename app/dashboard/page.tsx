@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import Link from "next/link";
 
-const TOTAL_LESSONS = 12;
 const DAY_INITIAL = ["S", "M", "T", "W", "T", "F", "S"]; // indexed by getUTCDay() (0=Sun)
 
 function greeting() {
@@ -75,8 +74,9 @@ export default async function DashboardPage() {
   let freshPlan = user.plan;
   let interviews: { score: number; topic: string | null; createdAt: Date }[] = [];
   let lessonProgress: { visitedAt: Date }[] = [];
+  let totalLessons = 8;
   try {
-    const [dbUser, dbInterviews, dbProgress] = await Promise.all([
+    const [dbUser, dbInterviews, dbProgress, dbLessonCount] = await Promise.all([
       db.user.findUnique({ where: { id: user.id }, select: { plan: true } }),
       db.interviewSession.findMany({
         where: { userId: user.id },
@@ -87,10 +87,12 @@ export default async function DashboardPage() {
         where: { userId: user.id },
         select: { visitedAt: true },
       }),
+      db.lesson.count({ where: { published: true } }),
     ]);
     if (dbUser) freshPlan = dbUser.plan;
     interviews = dbInterviews;
     lessonProgress = dbProgress;
+    totalLessons = dbLessonCount;
   } catch {
     // DB unavailable — show empty state
   }
@@ -118,7 +120,7 @@ export default async function DashboardPage() {
   const streak = calcStreak(allActivityDates);
   const weekDays = getWeekDays(allActivityDates);
   const recent = interviews.slice(0, 3);
-  const trackPct = Math.min(100, Math.round((lessonCount / TOTAL_LESSONS) * 100));
+  const trackPct = Math.min(100, Math.round((lessonCount / totalLessons) * 100));
   const dayLabel = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
   return (
@@ -241,7 +243,7 @@ export default async function DashboardPage() {
           </div>
           <div>
             <p style={{ fontFamily: "'Newsreader', serif", fontSize: 20, color: "#FDF6E3", fontWeight: 500 }}>Continue learning</p>
-            <p style={{ fontSize: 14, color: "#B3A799", marginTop: 5, lineHeight: 1.5 }}>Pick up where you left off across {TOTAL_LESSONS} DevOps lessons.</p>
+            <p style={{ fontSize: 14, color: "#B3A799", marginTop: 5, lineHeight: 1.5 }}>Pick up where you left off across {totalLessons} DevOps lessons.</p>
           </div>
           <span style={{ fontSize: 14, fontWeight: 600, color: "#F5A623", marginTop: 2 }}>Browse lessons →</span>
         </Link>

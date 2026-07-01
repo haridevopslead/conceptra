@@ -1,4 +1,4 @@
-import { LESSONS, CATEGORY_COLOR, DIFFICULTY_COLOR } from "@/lib/data/lessons";
+import { CATEGORY_COLOR, DIFFICULTY_COLOR, FALLBACK_COLOR } from "@/lib/lesson-style";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -10,7 +10,8 @@ import CopyButton from "@/components/lessons/copy-button";
 import { codeToHtml } from "shiki";
 
 export async function generateStaticParams() {
-  return LESSONS.map((l) => ({ slug: l.slug }));
+  const lessons = await db.lesson.findMany({ where: { published: true }, select: { slug: true } });
+  return lessons.map((l) => ({ slug: l.slug }));
 }
 
 type Layer = {
@@ -270,32 +271,42 @@ export default async function LessonDetailPage({
 }: {
   params: { slug: string };
 }) {
-  const lessonIndex = LESSONS.findIndex((l) => l.slug === params.slug);
-  if (lessonIndex === -1) notFound();
-  const lesson = LESSONS[lessonIndex];
-  const nextLesson = lessonIndex < LESSONS.length - 1 ? LESSONS[lessonIndex + 1] : null;
-
   const session = await getServerSession(authOptions);
+  let plan = session?.user?.plan ?? "FREE";
 
-  let dbLesson = null;
+  const dbLesson = await db.lesson.findUnique({ where: { slug: params.slug } });
+  if (!dbLesson || !dbLesson.published) notFound();
+
   let isCompleted = false;
+  let nextLesson: { slug: string; title: string; topics: string[]; durationMinutes: number } | null = null;
   try {
-    [dbLesson] = await Promise.all([
-      db.lesson.findUnique({ where: { slug: params.slug } }),
+    const [dbUser, , nextLessonRow] = await Promise.all([
+      session?.user?.id
+        ? db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } })
+        : Promise.resolve(null),
       session?.user?.id
         ? db.userLessonProgress
             .findUnique({ where: { userId_lessonSlug: { userId: session.user.id, lessonSlug: params.slug } } })
             .then((p) => { isCompleted = p?.completed ?? false; })
         : Promise.resolve(),
+      db.lesson.findFirst({
+        where: { order: { gt: dbLesson.order }, published: true },
+        orderBy: { order: "asc" },
+      }),
     ]);
+    if (dbUser) plan = dbUser.plan;
+    nextLesson = nextLessonRow;
   } catch {
-    // DB unavailable — show content without completion state
+    // DB unavailable — show content without completion/next-lesson state
   }
-  const layers: Layer[] =
-    (dbLesson?.content as { layers?: Layer[] } | null)?.layers ?? [];
 
-  const categoryColor  = CATEGORY_COLOR[lesson.category];
-  const difficultyColor = DIFFICULTY_COLOR[lesson.difficulty];
+  const locked = dbLesson.tier !== "FREE" && plan === "FREE";
+  const layers: Layer[] = locked
+    ? []
+    : (dbLesson.content as { layers?: Layer[] } | null)?.layers ?? [];
+
+  const categoryColor  = CATEGORY_COLOR[dbLesson.category] ?? FALLBACK_COLOR;
+  const difficultyColor = DIFFICULTY_COLOR[dbLesson.difficulty] ?? FALLBACK_COLOR;
 
   return (
     <div className="lesson-detail-page p-4 sm:p-8 w-full max-w-[860px]">
@@ -321,22 +332,22 @@ export default async function LessonDetailPage({
             className="text-xs font-semibold px-2 py-0.5 rounded-full"
             style={{ backgroundColor: `${categoryColor}20`, color: categoryColor }}
           >
-            {lesson.category}
+            {dbLesson.category}
           </span>
           <span
             className="text-xs font-medium px-2 py-0.5 rounded-full"
             style={{ backgroundColor: `${difficultyColor}20`, color: difficultyColor }}
           >
-            {lesson.difficulty}
+            {dbLesson.difficulty}
           </span>
-          <span className="text-xs text-gray-500 ml-auto">{lesson.durationMinutes} min</span>
+          <span className="text-xs text-gray-500 ml-auto">{dbLesson.durationMinutes} min</span>
         </div>
 
-        <h1 className="text-2xl font-bold text-white">{lesson.title}</h1>
-        <p className="text-gray-400">{lesson.description}</p>
+        <h1 className="text-2xl font-bold text-white">{dbLesson.title}</h1>
+        <p className="text-gray-400">{dbLesson.description}</p>
 
         <div className="flex flex-wrap gap-2 pt-2">
-          {lesson.topics.map((t) => (
+          {dbLesson.topics.map((t) => (
             <span
               key={t}
               className="text-xs px-2 py-1 rounded border border-white/10 text-gray-400"
@@ -349,7 +360,27 @@ export default async function LessonDetailPage({
       </div>
 
       {/* Content layers */}
-      {layers.length > 0 ? (
+      {locked ? (
+        <div
+          className="rounded-2xl border border-white/10 flex flex-col items-center justify-center py-20 text-center gap-4"
+          style={{ backgroundColor: "#211C18" }}
+        >
+          <div
+            className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
+            style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
+          >
+            Pro Lesson
+          </div>
+          <p className="text-sm font-medium text-gray-400">Upgrade to Pro to unlock this lesson</p>
+          <Link
+            href="/pricing"
+            className="text-xs font-semibold px-4 py-2 rounded-lg transition-opacity hover:opacity-80"
+            style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
+          >
+            Upgrade to unlock
+          </Link>
+        </div>
+      ) : layers.length > 0 ? (
         <div className="space-y-5">
           {layers.map((layer, i) => {
             const cfg = LAYER_CONFIG[layer.type] ?? { color: "#6B7280", label: layer.type.toUpperCase() };
@@ -371,12 +402,7 @@ export default async function LessonDetailPage({
           })}
           <LessonComplete
             slug={params.slug}
-            nextLesson={nextLesson ? {
-              slug: nextLesson.slug,
-              title: nextLesson.title,
-              topics: nextLesson.topics,
-              durationMinutes: nextLesson.durationMinutes,
-            } : null}
+            nextLesson={nextLesson}
             initialCompleted={isCompleted}
           />
         </div>

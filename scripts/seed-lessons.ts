@@ -13,6 +13,10 @@ const lessons = [
     title: "Docker Fundamentals",
     description:
       "Master containers from the ground up: images, layers, volumes, networking, and multi-stage builds.",
+    category: "Kubernetes",
+    difficulty: "Beginner",
+    durationMinutes: 20,
+    topics: ["Dockerfile", "multi-stage builds", "volumes", "networking", "images vs containers"],
     tier: "FREE" as const,
     order: 1,
     published: true,
@@ -44,6 +48,10 @@ const lessons = [
     title: "Kubernetes Architecture Deep Dive",
     description:
       "Understand the control plane, worker nodes, etcd, kube-scheduler, and how pods are actually scheduled.",
+    category: "Kubernetes",
+    difficulty: "Intermediate",
+    durationMinutes: 35,
+    topics: ["control plane", "etcd", "kube-scheduler", "kubelet", "pod scheduling"],
     tier: "FREE" as const,
     order: 2,
     published: true,
@@ -77,7 +85,11 @@ const lessons = [
     title: "CI/CD Pipelines — Jenkins & GitHub Actions",
     description:
       "Build production-grade pipelines that test, build, and deploy automatically without breaking things.",
-    tier: "FREE" as const,
+    category: "CI/CD",
+    difficulty: "Intermediate",
+    durationMinutes: 30,
+    topics: ["CI/CD pipeline design", "Jenkins", "GitHub Actions", "blue/green deploys", "rollback"],
+    tier: "PRO" as const,
     order: 3,
     published: true,
     content: {
@@ -110,7 +122,11 @@ const lessons = [
     title: "AWS Fundamentals for DevOps Engineers",
     description:
       "EC2, S3, VPC, IAM, RDS, and the AWS concepts every DevOps engineer is tested on in interviews.",
-    tier: "FREE" as const,
+    category: "Cloud",
+    difficulty: "Beginner",
+    durationMinutes: 35,
+    topics: ["EC2", "S3", "VPC", "IAM", "RDS", "CloudWatch"],
+    tier: "PRO" as const,
     order: 4,
     published: true,
     content: {
@@ -142,7 +158,11 @@ const lessons = [
     title: "Terraform & Infrastructure as Code",
     description:
       "Write infrastructure as code, manage state, and deploy cloud resources safely without manual console clicking.",
-    tier: "FREE" as const,
+    category: "Infrastructure as Code",
+    difficulty: "Intermediate",
+    durationMinutes: 30,
+    topics: ["HCL", "state file", "remote backend & locking", "modules", "plan/apply/import"],
+    tier: "PRO" as const,
     order: 5,
     published: true,
     content: {
@@ -174,7 +194,11 @@ const lessons = [
     title: "Linux & Shell Scripting for DevOps",
     description:
       "Master the Linux commands, file system, processes, and shell scripting that every DevOps engineer uses daily in production.",
-    tier: "FREE" as const,
+    category: "Linux",
+    difficulty: "Beginner",
+    durationMinutes: 25,
+    topics: ["disk management", "process management", "shell scripting", "log analysis", "permissions"],
+    tier: "PRO" as const,
     order: 6,
     published: true,
     content: {
@@ -208,7 +232,11 @@ const lessons = [
     title: "Git & Version Control for DevOps",
     description:
       "Master Git branching, merging, rebasing, and the workflows that keep teams from stepping on each other.",
-    tier: "FREE" as const,
+    category: "Git",
+    difficulty: "Beginner",
+    durationMinutes: 20,
+    topics: ["git internals", "branching strategies", "rebase vs merge", "reflog", "hooks"],
+    tier: "PRO" as const,
     order: 7,
     published: true,
     content: {
@@ -241,7 +269,11 @@ const lessons = [
     title: "Observability — Prometheus, Grafana & Loki",
     description:
       "Build monitoring that actually tells you what is wrong before users do. Metrics, logs, traces, and alerting done right.",
-    tier: "FREE" as const,
+    category: "Monitoring",
+    difficulty: "Advanced",
+    durationMinutes: 35,
+    topics: ["Prometheus & PromQL", "Loki/LogQL", "tracing", "Grafana dashboards", "SLOs & error budgets"],
+    tier: "PRO" as const,
     order: 8,
     published: true,
     content: {
@@ -281,6 +313,10 @@ async function main() {
       update: {
         title: lesson.title,
         description: lesson.description,
+        category: lesson.category,
+        difficulty: lesson.difficulty,
+        durationMinutes: lesson.durationMinutes,
+        topics: lesson.topics,
         tier: lesson.tier,
         order: lesson.order,
         published: lesson.published,

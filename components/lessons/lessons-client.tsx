@@ -132,7 +132,7 @@ function LessonCard({ lesson, plan, visited }: { lesson: LessonRow; plan: string
             className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all hover:bg-white/5"
             style={{ border: "1px solid rgba(253,246,227,0.18)", color: "#C9BFB2" }}
           >
-            {visited ? "Review →" : "Start lesson →"}
+            {visited ? "Review →" : "Read brief →"}
           </Link>
         )}
       </div>
@@ -177,9 +177,9 @@ export default function LessonsClient({ plan, visitedSlugs, lessons }: Props) {
 
       {/* ── Header ── */}
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: "#FDF6E3", fontFamily: "'Newsreader', serif", fontWeight: 500 }}>Lessons</h1>
+        <h1 className="text-2xl font-bold" style={{ color: "#FDF6E3", fontFamily: "'Newsreader', serif", fontWeight: 500 }}>Interview Prep Briefs</h1>
         <p className="text-sm mt-1" style={{ color: "#B3A799" }}>
-          {lessons.length} lessons across {categories.length - 1} DevOps domains
+          Know exactly what to say when they ask about Docker, Kubernetes, AWS, and more. Built for engineers who already work in DevOps — not beginners starting from scratch.
         </p>
       </div>
 
@@ -244,9 +244,9 @@ export default function LessonsClient({ plan, visitedSlugs, lessons }: Props) {
       {/* ── Results meta ── */}
       {filtered.length > 0 && (
         <p className="text-xs text-gray-500">
-          Showing {filtered.length} lesson{filtered.length !== 1 ? "s" : ""}
+          Showing {filtered.length} brief{filtered.length !== 1 ? "s" : ""}
           {plan === "FREE" && proCount > 0 && (
-            <> &mdash; <span className="text-gray-400">{freeCount} free</span>, {proCount} require Pro</>
+            <> &mdash; <span className="text-gray-400">{freeCount} free</span>, {proCount} require Pro to unlock</>
           )}
         </p>
       )}

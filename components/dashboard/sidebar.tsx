@@ -20,7 +20,7 @@ const NAV = [
   },
   {
     href: "/lessons",
-    label: "Lessons",
+    label: "Interview Briefs",
     icon: (
       <svg width="19" height="19" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />

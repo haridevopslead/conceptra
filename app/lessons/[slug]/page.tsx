@@ -319,7 +319,7 @@ export default async function LessonDetailPage({
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <polyline points="15 18 9 12 15 6" />
         </svg>
-        Back to Lessons
+        Back to Interview Briefs
       </Link>
 
       {/* Header card */}

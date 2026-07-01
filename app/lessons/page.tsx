@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import LessonsClient from "@/components/lessons/lessons-client";
 
 export const metadata = {
-  title: "Lessons — Conceptra",
+  title: "Interview Prep Briefs — Conceptra",
 };
 
 export default async function LessonsPage() {

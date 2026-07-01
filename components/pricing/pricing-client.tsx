@@ -12,13 +12,13 @@ declare global {
 
 const FREE_FEATURES = [
   "3 AI mock interviews per month",
-  "2 lessons access",
+  "2 briefs access",
   "Basic scoring",
 ];
 
 const PRO_FEATURES = [
   "Unlimited AI mock interviews",
-  "All 40+ lessons",
+  "All interview briefs",
   "Voice input",
   "Detailed scoring (Depth, Accuracy, Production Awareness)",
   "Session history",

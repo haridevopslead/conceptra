@@ -37,7 +37,7 @@ export default function TermsPage() {
         <div style={SECTION_STYLE}>
           <h2 style={H2_STYLE}>2. Description of Service</h2>
           <p style={P_STYLE}>
-            Conceptra is an AI-powered DevOps interview coaching platform that provides structured lessons, mock interview sessions, and personalised feedback to help engineers prepare for technical interviews at Indian technology companies. The Service uses large language models to evaluate answers and generate coaching feedback.
+            Conceptra is an AI-powered DevOps interview coaching platform that provides structured interview briefs, mock interview sessions, and personalised feedback to help engineers prepare for technical interviews at Indian technology companies. The Service uses large language models to evaluate answers and generate coaching feedback.
           </p>
           <p style={P_STYLE}>
             AI-generated feedback is for educational purposes only. It does not guarantee job placement or interview success and should not be treated as professional career advice.
@@ -70,7 +70,7 @@ export default function TermsPage() {
         <div style={SECTION_STYLE}>
           <h2 style={H2_STYLE}>5. Intellectual Property</h2>
           <p style={P_STYLE}>
-            All content, design, code, lesson material, and AI-generated coaching output on Conceptra is owned by or licensed to us. You may not reproduce, distribute, modify, or create derivative works without our express written permission.
+            All content, design, code, interview brief material, and AI-generated coaching output on Conceptra is owned by or licensed to us. You may not reproduce, distribute, modify, or create derivative works without our express written permission.
           </p>
           <p style={P_STYLE}>
             Your answers, responses, and interactions submitted through the Service remain your property. By submitting content, you grant us a non-exclusive licence to use it solely to provide and improve the Service.
@@ -82,7 +82,7 @@ export default function TermsPage() {
           <p style={P_STYLE}>You agree not to:</p>
           <ul style={{ ...P_STYLE, paddingLeft: 24 }}>
             <li style={{ marginBottom: 6 }}>Use the Service for any unlawful purpose or in violation of any applicable law or regulation</li>
-            <li style={{ marginBottom: 6 }}>Attempt to reverse-engineer, scrape, or extract the Service&rsquo;s content, lesson data, or AI prompts at scale</li>
+            <li style={{ marginBottom: 6 }}>Attempt to reverse-engineer, scrape, or extract the Service&rsquo;s content, interview brief data, or AI prompts at scale</li>
             <li style={{ marginBottom: 6 }}>Share account credentials or allow others to access your account</li>
             <li style={{ marginBottom: 6 }}>Interfere with or disrupt the integrity or performance of the Service</li>
             <li style={{ marginBottom: 6 }}>Use the Service to train competing AI models or products</li>

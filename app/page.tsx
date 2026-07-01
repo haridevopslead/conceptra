@@ -78,7 +78,7 @@ export default async function HomePage() {
               Start Free Trial
             </Link>
             <Link href="/lessons" className="text-center font-medium" style={{ background: "transparent", color: "#FDF6E3", fontSize: 16, border: "1px solid rgba(253,246,227,0.18)", padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
-              Browse Lessons
+              Browse Interview Briefs
             </Link>
           </div>
         </div>

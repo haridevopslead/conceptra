@@ -369,9 +369,9 @@ export default async function LessonDetailPage({
             className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
             style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
           >
-            Pro Lesson
+            Pro Brief
           </div>
-          <p className="text-sm font-medium text-gray-400">Upgrade to Pro to unlock this lesson</p>
+          <p className="text-sm font-medium text-gray-400">Upgrade to Pro to unlock this brief</p>
           <Link
             href="/pricing"
             className="text-xs font-semibold px-4 py-2 rounded-lg transition-opacity hover:opacity-80"
@@ -421,9 +421,9 @@ export default async function LessonDetailPage({
             <path d="M14.752 11.168l-3.197-2.132A1 1 0 0 0 10 9.87v4.263a1 1 0 0 0 1.555.832l3.197-2.132a1 1 0 0 0 0-1.664z" />
             <circle cx="12" cy="12" r="9" />
           </svg>
-          <p className="text-sm font-medium text-gray-400">Lesson content coming soon</p>
+          <p className="text-sm font-medium text-gray-400">Brief content coming soon</p>
           <p className="text-xs text-gray-600 mt-1">
-            Full AI-guided lesson content will appear here.
+            Full AI-guided brief content will appear here.
           </p>
         </div>
       )}

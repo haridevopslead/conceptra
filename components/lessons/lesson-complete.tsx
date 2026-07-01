@@ -48,7 +48,7 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
         <>
           <div style={{ fontSize: 36 }}>✓</div>
           <p style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 500, color: "#9CAE86" }}>
-            Lesson Complete!
+            Brief Complete!
           </p>
           <p style={{ fontSize: 14, color: "#8A8073" }}>
             Great work. Keep the momentum going.
@@ -75,7 +75,7 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
           ) : (
             <>
               <p style={{ fontSize: 14, color: "#B3A799", lineHeight: 1.6 }}>
-                You&rsquo;ve completed all available lessons! More coming soon.
+                You&rsquo;ve completed all available briefs! More coming soon.
               </p>
               <Link
                 href="/lessons"
@@ -89,7 +89,7 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
                   textDecoration: "none",
                 }}
               >
-                Back to Lessons
+                Back to Interview Briefs
               </Link>
             </>
           )}
@@ -143,7 +143,7 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
                   boxSizing: "border-box",
                 }}
               >
-                Next Lesson: {nextLesson.title} →
+                Next Brief: {nextLesson.title} →
               </Link>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 8 }}>
                 {nextLesson.topics[0] && (
@@ -158,7 +158,7 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
             </div>
           ) : (
             <p style={{ fontSize: 13, color: "#6E665C" }}>
-              You&rsquo;ve reached the last lesson. More coming soon.
+              You&rsquo;ve reached the last brief. More coming soon.
             </p>
           )}
         </>

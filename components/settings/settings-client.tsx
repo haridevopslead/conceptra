@@ -179,7 +179,7 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
         ) : (
           <div>
             <p style={{ fontSize: 14, color: "#B3A799", lineHeight: 1.6, marginBottom: 18 }}>
-              You&rsquo;re on the <strong style={{ color: "#FDF6E3" }}>Free plan</strong>. Upgrade to unlock all lessons and unlimited AI mock interviews.
+              You&rsquo;re on the <strong style={{ color: "#FDF6E3" }}>Free plan</strong>. Upgrade to unlock all interview briefs and unlimited AI mock interviews.
             </p>
             <Link
               href="/pricing"

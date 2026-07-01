@@ -148,7 +148,7 @@ export default async function DashboardPage() {
       {isFreePlan && (
         <div className="dash-upgrade-inner" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, background: "rgba(245,166,35,0.07)", border: "1px solid rgba(245,166,35,0.28)", borderRadius: 16, padding: "20px 24px" }}>
           <div>
-            <p style={{ fontSize: 15, fontWeight: 600, color: "#FDF6E3" }}>Unlock every lesson and unlimited mock interviews</p>
+            <p style={{ fontSize: 15, fontWeight: 600, color: "#FDF6E3" }}>Unlock every interview brief and unlimited mock interviews</p>
             <p style={{ fontSize: 13.5, color: "#B3A799", marginTop: 3 }}>Go Pro for full AI coaching and priority feedback.</p>
           </div>
           <Link href="/pricing" style={{ flexShrink: 0, background: "#F5A623", color: "#1C1917", fontWeight: 600, fontSize: 14, border: "none", padding: "11px 20px", borderRadius: 10, cursor: "pointer", textDecoration: "none" }}>
@@ -243,9 +243,9 @@ export default async function DashboardPage() {
           </div>
           <div>
             <p style={{ fontFamily: "'Newsreader', serif", fontSize: 20, color: "#FDF6E3", fontWeight: 500 }}>Continue learning</p>
-            <p style={{ fontSize: 14, color: "#B3A799", marginTop: 5, lineHeight: 1.5 }}>Pick up where you left off across {totalLessons} DevOps lessons.</p>
+            <p style={{ fontSize: 14, color: "#B3A799", marginTop: 5, lineHeight: 1.5 }}>Pick up where you left off across {totalLessons} interview briefs.</p>
           </div>
-          <span style={{ fontSize: 14, fontWeight: 600, color: "#F5A623", marginTop: 2 }}>Browse lessons →</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "#F5A623", marginTop: 2 }}>Browse interview briefs →</span>
         </Link>
       </div>
 
@@ -255,7 +255,7 @@ export default async function DashboardPage() {
         <div className="dash-journey-stats" style={{ display: "flex", gap: 48, flexWrap: "wrap", marginBottom: 26 }}>
           <div>
             <p style={{ fontFamily: "'Newsreader', serif", fontSize: 38, fontWeight: 500, color: "#FDF6E3", lineHeight: 1 }}>{lessonCount}</p>
-            <p style={{ fontSize: 13.5, color: "#8A8073", marginTop: 6 }}>Lessons completed</p>
+            <p style={{ fontSize: 13.5, color: "#8A8073", marginTop: 6 }}>Briefs completed</p>
           </div>
           <div>
             <p style={{ fontFamily: "'Newsreader', serif", fontSize: 38, fontWeight: 500, color: "#FDF6E3", lineHeight: 1 }}>{interviewCount}</p>
@@ -285,8 +285,8 @@ export default async function DashboardPage() {
         {recent.length === 0 ? (
           <div style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: "54px 30px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
             <p style={{ fontFamily: "'Newsreader', serif", fontSize: 21, color: "#FDF6E3" }}>Nothing here — yet.</p>
-            <p style={{ fontSize: 14, color: "#B3A799", maxWidth: 340, lineHeight: 1.55 }}>Complete a lesson or interview to see your history here.</p>
-            <Link href="/lessons" style={{ marginTop: 8, fontSize: 13.5, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>Start your first lesson →</Link>
+            <p style={{ fontSize: 14, color: "#B3A799", maxWidth: 340, lineHeight: 1.55 }}>Complete a brief or interview to see your history here.</p>
+            <Link href="/lessons" style={{ marginTop: 8, fontSize: 13.5, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>Start your first brief →</Link>
           </div>
         ) : (
           <div style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, overflow: "hidden" }}>

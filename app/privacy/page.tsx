@@ -36,7 +36,7 @@ export default function PrivacyPage() {
         <div style={SECTION_STYLE}>
           <h2 style={H2_STYLE}>1. Information We Collect</h2>
           <p style={P_STYLE}><strong style={{ color: "#FDF6E3" }}>Account information:</strong> When you register, we collect your name and email address.</p>
-          <p style={P_STYLE}><strong style={{ color: "#FDF6E3" }}>Usage data:</strong> We collect data on lessons completed, mock interview sessions, scores, and topics selected so we can personalise your experience and track your progress.</p>
+          <p style={P_STYLE}><strong style={{ color: "#FDF6E3" }}>Usage data:</strong> We collect data on interview briefs completed, mock interview sessions, scores, and topics selected so we can personalise your experience and track your progress.</p>
           <p style={P_STYLE}><strong style={{ color: "#FDF6E3" }}>Interview answers:</strong> The text of your interview answers is sent to our AI provider (Anthropic) for evaluation. We do not permanently store your raw answer text in our database — only the evaluation scores and feedback are retained.</p>
           <p style={P_STYLE}><strong style={{ color: "#FDF6E3" }}>Payment information:</strong> We do not store payment card details. Payments are handled entirely by Razorpay, which has its own privacy policy.</p>
           <p style={P_STYLE}><strong style={{ color: "#FDF6E3" }}>Technical data:</strong> We may collect IP addresses, browser type, and device information for security and analytics purposes.</p>
@@ -51,7 +51,7 @@ export default function PrivacyPage() {
             <li style={{ marginBottom: 6 }}>Process payments and manage subscriptions</li>
             <li style={{ marginBottom: 6 }}>Send essential account notifications (password resets, billing alerts)</li>
             <li style={{ marginBottom: 6 }}>Detect and prevent fraud, abuse, and security incidents</li>
-            <li style={{ marginBottom: 6 }}>Improve the quality of our AI coaching and lesson content</li>
+            <li style={{ marginBottom: 6 }}>Improve the quality of our AI coaching and interview brief content</li>
           </ul>
           <p style={P_STYLE}>We do not sell your personal data to third parties.</p>
         </div>
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
         <div style={SECTION_STYLE}>
           <h2 style={H2_STYLE}>6. Data Retention</h2>
           <p style={P_STYLE}>
-            We retain your account data for as long as your account is active. Interview scores and lesson progress are retained indefinitely to power your learning history. If you delete your account, we will delete your personal data within 30 days, except where retention is required by applicable law.
+            We retain your account data for as long as your account is active. Interview scores and interview brief progress are retained indefinitely to power your learning history. If you delete your account, we will delete your personal data within 30 days, except where retention is required by applicable law.
           </p>
         </div>
 

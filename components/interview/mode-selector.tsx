@@ -1,16 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import Evaluator from "./evaluator";
-
-type Mode = "select" | "practice";
+import { Zap, Mic2 } from "lucide-react";
 
 export default function ModeSelector() {
-  const [mode, setMode] = useState<Mode>("select");
-
-  if (mode === "practice") return <Evaluator />;
-
   return (
     <div className="ms-wrap">
       <h1 className="ms-title">Interview Practice</h1>
@@ -18,8 +11,10 @@ export default function ModeSelector() {
 
       <div className="ms-grid">
         {/* Quick Practice card */}
-        <button onClick={() => setMode("practice")} className="ms-card">
-          <div className="ms-card-icon">⚡</div>
+        <Link href="/interview/practice" className="ms-card">
+          <div className="ms-card-icon">
+            <Zap size={28} strokeWidth={2} />
+          </div>
           <h2 className="ms-card-title">Quick Practice</h2>
           <p className="ms-card-desc">
             Answer curated questions topic by topic. Get instant scored
@@ -27,11 +22,13 @@ export default function ModeSelector() {
             senior-engineer response.
           </p>
           <span className="ms-card-cta">Start practicing →</span>
-        </button>
+        </Link>
 
         {/* Interview with Dev card */}
         <Link href="/interview/dev" className="ms-card ms-card-gold">
-          <div className="ms-card-icon">🤖</div>
+          <div className="ms-card-icon ms-card-icon-gold">
+            <Mic2 size={28} strokeWidth={2} />
+          </div>
           <h2 className="ms-card-title">Interview with Dev</h2>
           <p className="ms-card-desc">
             Have a real back-and-forth conversation with Dev, a Senior DevOps
@@ -75,7 +72,8 @@ export default function ModeSelector() {
         }
         .ms-card-gold { border-color: #3D3018; }
         .ms-card-gold:hover { border-color: #F5A623; }
-        .ms-card-icon { font-size: 2rem; }
+        .ms-card-icon { color: #C9B8AE; }
+        .ms-card-icon-gold { color: #F5A623; }
         .ms-card-title {
           font-size: 1.15rem; font-weight: 700; margin: 0; color: #E7DDD5;
         }

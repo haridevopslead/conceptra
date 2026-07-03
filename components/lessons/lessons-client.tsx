@@ -198,6 +198,7 @@ export default function LessonsClient({ plan, visitedSlugs, lessons }: Props) {
         <input
           type="text"
           placeholder="Search briefs, topics…"
+          aria-label="Search interview briefs"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent"
@@ -206,7 +207,7 @@ export default function LessonsClient({ plan, visitedSlugs, lessons }: Props) {
       </div>
 
       {/* ── Category tabs ── */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 overflow-x-auto whitespace-nowrap pb-1">
         {categories.map((cat) => {
           const active = activeCategory === cat;
           const color = cat === "All" ? "#F5A623" : CATEGORY_COLOR[cat] ?? FALLBACK_COLOR;
@@ -214,7 +215,7 @@ export default function LessonsClient({ plan, visitedSlugs, lessons }: Props) {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-colors border shrink-0"
               style={
                 active
                   ? { backgroundColor: `${color}20`, color, borderColor: color }
@@ -225,7 +226,7 @@ export default function LessonsClient({ plan, visitedSlugs, lessons }: Props) {
                     }
               }
             >
-              {cat}
+              <span>{cat}</span>{" "}
               <span
                 className="text-[10px] px-1.5 py-0.5 rounded-full font-bold"
                 style={

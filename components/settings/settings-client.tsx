@@ -54,8 +54,10 @@ type Props = {
 
 export default function SettingsClient({ initialName, email, plan }: Props) {
   const [name, setName] = useState(initialName);
+  const [savedName, setSavedName] = useState(initialName);
   const [profileMsg, setProfileMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [profileLoading, setProfileLoading] = useState(false);
+  const isProfileDirty = name.trim() !== savedName.trim() && name.trim().length > 0;
 
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
@@ -77,6 +79,7 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
       const data = await res.json();
       if (res.ok) {
         setProfileMsg({ ok: true, text: "Name updated successfully." });
+        setSavedName(name.trim());
       } else {
         setProfileMsg({ ok: false, text: data.error ?? "Failed to update name." });
       }
@@ -137,6 +140,7 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
               onChange={(e) => setName(e.target.value)}
               style={INPUT_STYLE}
               placeholder="Your name"
+              aria-label="Full name"
               required
             />
           </div>
@@ -146,7 +150,9 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
               type="email"
               value={email}
               readOnly
-              style={{ ...INPUT_STYLE, color: "#6E665C", cursor: "not-allowed" }}
+              disabled
+              aria-label="Email address"
+              style={{ ...INPUT_STYLE, color: "#6E665C", cursor: "not-allowed", opacity: 0.5 }}
             />
             <p style={{ fontSize: 12, color: "#6E665C", marginTop: 6 }}>Email cannot be changed.</p>
           </div>
@@ -155,7 +161,15 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
               {profileMsg.ok ? "✓ " : "✗ "}{profileMsg.text}
             </p>
           )}
-          <button type="submit" style={SAVE_BTN} disabled={profileLoading}>
+          <button
+            type="submit"
+            style={{
+              ...SAVE_BTN,
+              opacity: !isProfileDirty || profileLoading ? 0.5 : 1,
+              cursor: !isProfileDirty || profileLoading ? "not-allowed" : "pointer",
+            }}
+            disabled={!isProfileDirty || profileLoading}
+          >
             {profileLoading ? "Saving…" : "Save Profile"}
           </button>
         </form>
@@ -206,6 +220,7 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
               onChange={(e) => setCurrentPw(e.target.value)}
               style={INPUT_STYLE}
               placeholder="••••••••"
+              aria-label="Current password"
               required
             />
           </div>
@@ -218,6 +233,7 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
               onChange={(e) => setNewPw(e.target.value)}
               style={INPUT_STYLE}
               placeholder="At least 8 characters"
+              aria-label="New password"
               required
             />
           </div>
@@ -230,6 +246,7 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
               onChange={(e) => setConfirmPw(e.target.value)}
               style={INPUT_STYLE}
               placeholder="Repeat your password"
+              aria-label="Confirm new password"
               required
             />
           </div>

@@ -174,35 +174,43 @@ export default async function DashboardPage() {
             </p>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 12 }}>
-          {weekDays.map((d, i) => (
-            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 9 }}>
-              <div
-                className={d.active && d.isToday ? "streak-dot-today" : ""}
-                style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: "50%",
-                  background: d.active ? "#F5A623" : "transparent",
-                  border: d.active
-                    ? "none"
-                    : d.isToday
-                    ? "1.5px solid rgba(245,166,35,0.5)"
-                    : "1.5px solid rgba(253,246,227,0.15)",
-                }}
-              />
-              <span style={{ fontSize: 12, color: d.isToday ? "#F5A623" : "#8A8073", fontWeight: d.isToday ? 700 : 600 }}>
-                {d.label}
-              </span>
-            </div>
-          ))}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10 }}>
+          <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "#6E665C", fontWeight: 600 }}>
+            Last 7 days
+          </span>
+          <div style={{ display: "flex", gap: 12 }}>
+            {weekDays.map((d, i) => (
+              <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 9 }}>
+                <div
+                  className={d.active && d.isToday ? "streak-dot-today" : ""}
+                  style={{
+                    width: 14,
+                    height: 14,
+                    borderRadius: "50%",
+                    background: d.active ? "#F5A623" : "transparent",
+                    border: d.active
+                      ? "none"
+                      : d.isToday
+                      ? "1.5px solid rgba(245,166,35,0.5)"
+                      : "1.5px solid rgba(253,246,227,0.15)",
+                  }}
+                />
+                <span style={{ fontSize: 12, color: d.isToday ? "#F5A623" : "#8A8073", fontWeight: d.isToday ? 700 : 600 }}>
+                  {d.label}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Today's focus */}
       <div className="dash-focus-inner" style={{ background: "#2C2420", border: "1px solid rgba(245,166,35,0.22)", borderLeft: "3px solid #F5A623", borderRadius: 18, padding: "26px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
         <div style={{ maxWidth: 560 }}>
-          <p style={{ fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "#F5A623", fontWeight: 600, marginBottom: 9 }}>Today&rsquo;s focus</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 9 }}>
+            <p style={{ fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "#F5A623", fontWeight: 600, margin: 0 }}>Today&rsquo;s focus</p>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: "rgba(245,166,35,0.14)", color: "#F5A623" }}>~15 min</span>
+          </div>
           <p style={{ fontFamily: "'Newsreader', serif", fontSize: 20, color: "#FDF6E3", lineHeight: 1.35, marginBottom: 6 }}>
             {interviewCount === 0 ? "Run your first mock interview." : "Sharpen your production awareness."}
           </p>
@@ -219,7 +227,7 @@ export default async function DashboardPage() {
 
       {/* Quick actions */}
       <div className="dash-quick-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-        <Link href="/interview" style={{ textDecoration: "none", textAlign: "left", background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: 28, cursor: "pointer", display: "flex", flexDirection: "column", gap: 14 }}>
+        <Link href="/interview" className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" style={{ textDecoration: "none", textAlign: "left", background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: 28, cursor: "pointer", display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ color: "#F5A623" }}>
             <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
               <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
@@ -234,7 +242,7 @@ export default async function DashboardPage() {
           </div>
           <span style={{ fontSize: 14, fontWeight: 600, color: "#F5A623", marginTop: 2 }}>Begin session →</span>
         </Link>
-        <Link href="/lessons" style={{ textDecoration: "none", textAlign: "left", background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: 28, cursor: "pointer", display: "flex", flexDirection: "column", gap: 14 }}>
+        <Link href="/lessons" className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" style={{ textDecoration: "none", textAlign: "left", background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: 28, cursor: "pointer", display: "flex", flexDirection: "column", gap: 14 }}>
           <div style={{ color: "#F5A623" }}>
             <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
@@ -293,7 +301,12 @@ export default async function DashboardPage() {
             {recent.map((s, i) => {
               const color = scoreColor(s.score);
               return (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 24px", borderBottom: i < recent.length - 1 ? "1px solid rgba(253,246,227,0.05)" : "none" }}>
+                <Link
+                  key={i}
+                  href="/interview"
+                  className="hover:bg-white/5"
+                  style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 24px", borderBottom: i < recent.length - 1 ? "1px solid rgba(253,246,227,0.05)" : "none", textDecoration: "none", cursor: "pointer" }}
+                >
                   <div style={{ width: 9, height: 9, borderRadius: "50%", background: color, flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontSize: 15, color: "#FDF6E3", fontWeight: 500 }}>Mock Interview{s.topic ? ` · ${s.topic}` : ""}</p>
@@ -302,10 +315,15 @@ export default async function DashboardPage() {
                   <span style={{ fontSize: 13, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: `${color}20`, color, flexShrink: 0 }}>
                     {s.score}/10
                   </span>
-                </div>
+                </Link>
               );
             })}
           </div>
+        )}
+        {recent.length > 0 && (
+          <Link href="/interview" style={{ display: "inline-block", marginTop: 12, fontSize: 13.5, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>
+            View all activity →
+          </Link>
         )}
       </div>
     </div>

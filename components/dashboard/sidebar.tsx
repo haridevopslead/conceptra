@@ -83,7 +83,7 @@ export default function Sidebar({ user }: Props) {
       </div>
 
       {/* Nav */}
-      <nav style={{ flex: 1, padding: "22px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
+      <nav aria-label="Primary navigation" style={{ flex: 1, padding: "22px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
         {NAV.map(({ href, label, icon }) => {
           const active = pathname === href;
           const hovered = hoveredHref === href;

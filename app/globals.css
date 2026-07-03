@@ -13,9 +13,19 @@ body {
   background: rgba(245, 166, 35, 0.3);
 }
 
-::-webkit-scrollbar { width: 11px; height: 11px; }
-::-webkit-scrollbar-track { background: #1C1917; }
-::-webkit-scrollbar-thumb { background: #3A322C; border-radius: 6px; border: 3px solid #1C1917; }
+*:focus-visible {
+  outline: 2px solid #F5A623;
+  outline-offset: 2px;
+}
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid #F5A623;
+  outline-offset: 2px;
+}
+
+* { scrollbar-width: thin; scrollbar-color: #3D3530 transparent; }
+*::-webkit-scrollbar { width: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: #3D3530; border-radius: 3px; }
 
 .lesson-card:hover {
   transform: translateY(-4px);

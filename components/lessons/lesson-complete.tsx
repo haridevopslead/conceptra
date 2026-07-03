@@ -55,23 +55,37 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
           </p>
 
           {nextLesson ? (
-            <Link
-              href={`/lessons/${nextLesson.slug}`}
-              style={{
-                width: "100%",
-                display: "block",
-                padding: "14px 24px",
-                borderRadius: 12,
-                background: "#F5A623",
-                color: "#1C1917",
-                fontWeight: 700,
-                fontSize: 15,
-                textDecoration: "none",
-                textAlign: "center",
-              }}
-            >
-              Next: {nextLesson.title} →
-            </Link>
+            <div style={{ width: "100%" }}>
+              <Link
+                href={`/lessons/${nextLesson.slug}`}
+                style={{
+                  width: "100%",
+                  display: "block",
+                  padding: "13px 24px",
+                  borderRadius: 12,
+                  background: "transparent",
+                  border: "1px solid rgba(245,166,35,0.4)",
+                  color: "#F5A623",
+                  fontWeight: 600,
+                  fontSize: 15,
+                  textDecoration: "none",
+                  textAlign: "center",
+                  boxSizing: "border-box",
+                }}
+              >
+                Next Brief: {nextLesson.title} →
+              </Link>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 8 }}>
+                {nextLesson.topics[0] && (
+                  <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "rgba(245,166,35,0.12)", color: "#F5A623", fontWeight: 600 }}>
+                    {nextLesson.topics[0]}
+                  </span>
+                )}
+                <span style={{ fontSize: 11, color: "#6E665C" }}>
+                  {nextLesson.durationMinutes} min
+                </span>
+              </div>
+            </div>
           ) : (
             <>
               <p style={{ fontSize: 14, color: "#B3A799", lineHeight: 1.6 }}>
@@ -120,47 +134,6 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
           >
             {loading ? "Saving…" : "Mark as Complete"}
           </button>
-
-          {/* Next lesson preview — always visible below the complete button */}
-          {nextLesson ? (
-            <div style={{ width: "100%", borderTop: "1px solid rgba(253,246,227,0.07)", paddingTop: 16 }}>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "#6E665C", marginBottom: 10, textAlign: "left" }}>
-                Up Next
-              </p>
-              <Link
-                href={`/lessons/${nextLesson.slug}`}
-                style={{
-                  display: "block",
-                  width: "100%",
-                  padding: "13px 24px",
-                  borderRadius: 10,
-                  background: "#F5A623",
-                  color: "#1C1917",
-                  fontWeight: 600,
-                  fontSize: 15,
-                  textDecoration: "none",
-                  textAlign: "center",
-                  boxSizing: "border-box",
-                }}
-              >
-                Next Brief: {nextLesson.title} →
-              </Link>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 8 }}>
-                {nextLesson.topics[0] && (
-                  <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "rgba(245,166,35,0.12)", color: "#F5A623", fontWeight: 600 }}>
-                    {nextLesson.topics[0]}
-                  </span>
-                )}
-                <span style={{ fontSize: 11, color: "#6E665C" }}>
-                  {nextLesson.durationMinutes} min
-                </span>
-              </div>
-            </div>
-          ) : (
-            <p style={{ fontSize: 13, color: "#6E665C" }}>
-              You&rsquo;ve reached the last brief. More coming soon.
-            </p>
-          )}
         </>
       )}
     </div>

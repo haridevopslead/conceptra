@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import Link from "next/link";
+import WelcomeBanner from "@/components/dashboard/welcome-banner";
 
 const DAY_INITIAL = ["S", "M", "T", "W", "T", "F", "S"]; // indexed by getUTCDay() (0=Sun)
 
@@ -123,8 +124,12 @@ export default async function DashboardPage() {
   const trackPct = Math.min(100, Math.round((lessonCount / totalLessons) * 100));
   const dayLabel = new Date().toLocaleDateString("en-US", { weekday: "long" });
 
+  const isFirstTimeUser = interviewCount === 0 && lessonCount === 0;
+
   return (
     <div className="dash-page" style={{ maxWidth: 920, margin: "0 auto", padding: "56px 64px 80px", display: "flex", flexDirection: "column", gap: 26 }}>
+
+      {isFirstTimeUser && <WelcomeBanner />}
 
       {/* Header */}
       <div className="dash-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20 }}>

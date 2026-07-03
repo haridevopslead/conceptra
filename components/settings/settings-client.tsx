@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 const INPUT_STYLE: React.CSSProperties = {
   width: "100%",
@@ -53,6 +55,7 @@ type Props = {
 };
 
 export default function SettingsClient({ initialName, email, plan }: Props) {
+  const router = useRouter();
   const [name, setName] = useState(initialName);
   const [savedName, setSavedName] = useState(initialName);
   const [profileMsg, setProfileMsg] = useState<{ ok: boolean; text: string } | null>(null);
@@ -64,6 +67,30 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
   const [confirmPw, setConfirmPw] = useState("");
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [pwLoading, setPwLoading] = useState(false);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  async function deleteAccount() {
+    setDeleteLoading(true);
+    setDeleteError(null);
+    try {
+      const res = await fetch("/api/settings/account", { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setDeleteError(data.error ?? "Failed to delete account. Please try again.");
+        setDeleteLoading(false);
+        return;
+      }
+      await signOut({ redirect: false });
+      router.push("/");
+    } catch {
+      setDeleteError("Network error. Please try again.");
+      setDeleteLoading(false);
+    }
+  }
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
@@ -259,6 +286,94 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
             {pwLoading ? "Saving…" : "Update Password"}
           </button>
         </form>
+      </section>
+
+      {/* Danger Zone */}
+      <section style={{ ...CARD, border: "1px solid rgba(197,66,66,0.35)" }}>
+        <p style={{ fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase", color: "#C57B6B", fontWeight: 600, marginBottom: 18 }}>
+          Danger Zone
+        </p>
+        <p style={{ fontSize: 15, fontWeight: 600, color: "#FDF6E3", marginBottom: 6 }}>Delete Account</p>
+        <p style={{ fontSize: 14, color: "#B3A799", lineHeight: 1.6, marginBottom: 18 }}>
+          Permanently delete your account and all your data. This action cannot be undone.
+        </p>
+
+        {!showDeleteConfirm ? (
+          <button
+            type="button"
+            onClick={() => setShowDeleteConfirm(true)}
+            style={{
+              padding: "11px 22px",
+              borderRadius: 10,
+              background: "transparent",
+              border: "1px solid #C54242",
+              color: "#C57B6B",
+              fontWeight: 700,
+              fontSize: 14,
+              cursor: "pointer",
+              fontFamily: "inherit",
+            }}
+          >
+            Delete Account
+          </button>
+        ) : (
+          <div style={{ background: "#1A1210", border: "1px solid rgba(197,66,66,0.3)", borderRadius: 12, padding: 18 }}>
+            <p style={{ fontSize: 13.5, color: "#C9BFB2", marginBottom: 12 }}>
+              Type <strong style={{ color: "#FDF6E3" }}>DELETE</strong> to confirm. This will permanently erase your
+              account, mock interview history, and lesson progress.
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              style={{ ...INPUT_STYLE, marginBottom: 12, borderColor: "rgba(197,66,66,0.3)" }}
+              placeholder="Type DELETE"
+              aria-label="Type DELETE to confirm account deletion"
+            />
+            {deleteError && (
+              <p style={{ fontSize: 13, color: "#C57B6B", marginBottom: 12 }}>✗ {deleteError}</p>
+            )}
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                type="button"
+                onClick={deleteAccount}
+                disabled={deleteConfirmText !== "DELETE" || deleteLoading}
+                style={{
+                  padding: "11px 22px",
+                  borderRadius: 10,
+                  background: "#C54242",
+                  color: "#FDF6E3",
+                  fontWeight: 700,
+                  fontSize: 14,
+                  border: "none",
+                  cursor: deleteConfirmText !== "DELETE" || deleteLoading ? "not-allowed" : "pointer",
+                  opacity: deleteConfirmText !== "DELETE" || deleteLoading ? 0.5 : 1,
+                  fontFamily: "inherit",
+                }}
+              >
+                {deleteLoading ? "Deleting…" : "Permanently Delete Account"}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setShowDeleteConfirm(false); setDeleteConfirmText(""); setDeleteError(null); }}
+                disabled={deleteLoading}
+                style={{
+                  padding: "11px 22px",
+                  borderRadius: 10,
+                  background: "transparent",
+                  border: "1px solid rgba(253,246,227,0.15)",
+                  color: "#C9BFB2",
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     </>
   );

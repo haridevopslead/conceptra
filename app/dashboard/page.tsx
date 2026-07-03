@@ -301,11 +301,9 @@ export default async function DashboardPage() {
             {recent.map((s, i) => {
               const color = scoreColor(s.score);
               return (
-                <Link
+                <div
                   key={i}
-                  href="/interview"
-                  className="hover:bg-white/5"
-                  style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 24px", borderBottom: i < recent.length - 1 ? "1px solid rgba(253,246,227,0.05)" : "none", textDecoration: "none", cursor: "pointer" }}
+                  style={{ display: "flex", alignItems: "center", gap: 16, padding: "18px 24px", borderBottom: i < recent.length - 1 ? "1px solid rgba(253,246,227,0.05)" : "none" }}
                 >
                   <div style={{ width: 9, height: 9, borderRadius: "50%", background: color, flexShrink: 0 }} />
                   <div style={{ flex: 1, minWidth: 0 }}>
@@ -315,15 +313,15 @@ export default async function DashboardPage() {
                   <span style={{ fontSize: 13, fontWeight: 700, padding: "4px 10px", borderRadius: 999, background: `${color}20`, color, flexShrink: 0 }}>
                     {s.score}/10
                   </span>
-                </Link>
+                </div>
               );
             })}
           </div>
         )}
         {recent.length > 0 && (
-          <Link href="/interview" style={{ display: "inline-block", marginTop: 12, fontSize: 13.5, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>
-            View all activity →
-          </Link>
+          <p style={{ display: "inline-block", marginTop: 12, fontSize: 13.5, fontWeight: 600, color: "#6E665C" }}>
+            View all activity <span style={{ fontWeight: 500 }}>(coming soon)</span>
+          </p>
         )}
       </div>
     </div>

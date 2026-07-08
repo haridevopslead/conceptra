@@ -17,6 +17,25 @@ const CARDS = [
 
 const BRANDS = ["Razorpay", "PhonePe", "Swiggy", "Flipkart"];
 
+const FAQS = [
+  {
+    q: "Why not just use ChatGPT for a mock interview instead?",
+    a: "General AI chat doesn't know what a senior interviewer at a company like Razorpay or Flipkart actually listens for. Conceptra's scoring rubric — Depth, Accuracy, Production Awareness — and every question are built from 10+ years of actually running these interviews, so your feedback is calibrated to a real hiring bar, not generic encouragement.",
+  },
+  {
+    q: "Is the feedback actually accurate, or generic AI output?",
+    a: "Every question and scoring rubric is reviewed for production accuracy by a practicing Lead DevOps Engineer — not auto-generated and shipped untouched. The AI applies that human-defined rubric consistently every time you practice.",
+  },
+  {
+    q: "Is my data / my answers safe?",
+    a: "Your practice answers are stored securely and used only to give you feedback and track your own progress. We don't share your data with employers or third parties.",
+  },
+  {
+    q: "Who is this for?",
+    a: "Working DevOps/SRE/platform engineers with real production experience who are actively interviewing and want to pressure-test how their answers would land — not a beginner course.",
+  },
+];
+
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
   if (session) redirect("/dashboard");
@@ -194,10 +213,27 @@ export default async function HomePage() {
 
       {/* Brand logos */}
       <div className="mx-auto px-5 sm:px-10 flex flex-col items-center gap-6" style={{ maxWidth: 1080, paddingTop: 56, paddingBottom: 28 }}>
-        <p style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "#8A8073", fontWeight: 600 }}>Join engineers preparing for</p>
+        <p style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "#8A8073", fontWeight: 600, textAlign: "center", maxWidth: 640 }}>Our content is built around real interview patterns from companies like</p>
         <div className="flex flex-wrap gap-6 sm:gap-12 justify-center items-center">
           {BRANDS.map(b => (
             <span key={b} style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(18px, 4vw, 26px)", color: "#C9BFB2", fontWeight: 500 }}>{b}</span>
+          ))}
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div className="mx-auto px-5 sm:px-10" style={{ maxWidth: 760, paddingTop: 56, paddingBottom: 30 }}>
+        <div className="flex items-center gap-3 justify-center mb-10">
+          <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#F5A623" }}>Questions</span>
+          <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
+        </div>
+        <div className="flex flex-col gap-4">
+          {FAQS.map(({ q, a }) => (
+            <div key={q} style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: "24px 26px" }}>
+              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 18, lineHeight: 1.35, color: "#FDF6E3", fontWeight: 500, marginBottom: 10 }}>{q}</p>
+              <p style={{ fontSize: 14.5, lineHeight: 1.65, color: "#B3A799" }}>{a}</p>
+            </div>
           ))}
         </div>
       </div>

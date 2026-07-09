@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { evaluateAnswer, EvaluationError } from "@/lib/interview/evaluate";
+import { recordPracticeStreak } from "@/lib/streak";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -28,6 +29,8 @@ export async function POST(req: NextRequest) {
   db.interviewSession.create({
     data: { userId: session.user.id, score, topic: topicCtx },
   }).catch(() => { /* silent — don't break the UX for a logging failure */ });
+
+  recordPracticeStreak(session.user.id).catch(() => { /* silent — streak update is non-critical */ });
 
   return NextResponse.json(result);
 }

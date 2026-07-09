@@ -14,21 +14,6 @@ function greeting() {
   return "Good evening";
 }
 
-function calcStreak(dates: Date[]): number {
-  if (!dates.length) return 0;
-  const days = new Set(dates.map((d) => d.toISOString().slice(0, 10)));
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const yesterdayStr = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
-  if (!days.has(todayStr) && !days.has(yesterdayStr)) return 0;
-  let streak = 0;
-  let cursor = days.has(todayStr) ? new Date() : new Date(Date.now() - 86_400_000);
-  while (days.has(cursor.toISOString().slice(0, 10))) {
-    streak++;
-    cursor = new Date(cursor.getTime() - 86_400_000);
-  }
-  return streak;
-}
-
 function getWeekDays(activityDates: Date[]) {
   const nowMs = Date.now();
   const todayStr = new Date(nowMs).toISOString().slice(0, 10);
@@ -73,12 +58,13 @@ export default async function DashboardPage() {
   const user = session.user;
 
   let freshPlan = user.plan;
+  let streak = 0;
   let interviews: { score: number; topic: string | null; createdAt: Date }[] = [];
   let lessonProgress: { visitedAt: Date }[] = [];
   let totalLessons = 8;
   try {
     const [dbUser, dbInterviews, dbProgress, dbLessonCount] = await Promise.all([
-      db.user.findUnique({ where: { id: user.id }, select: { plan: true } }),
+      db.user.findUnique({ where: { id: user.id }, select: { plan: true, currentStreak: true } }),
       db.interviewSession.findMany({
         where: { userId: user.id },
         select: { score: true, topic: true, createdAt: true },
@@ -90,7 +76,10 @@ export default async function DashboardPage() {
       }),
       db.lesson.count({ where: { published: true } }),
     ]);
-    if (dbUser) freshPlan = dbUser.plan;
+    if (dbUser) {
+      freshPlan = dbUser.plan;
+      streak = dbUser.currentStreak;
+    }
     interviews = dbInterviews;
     lessonProgress = dbProgress;
     totalLessons = dbLessonCount;
@@ -118,7 +107,6 @@ export default async function DashboardPage() {
   console.log("practicedDates:", JSON.stringify(practicedDates));
   console.log("weekDays:", JSON.stringify(getWeekDays(allActivityDates).map((d) => `${d.label}:active=${d.active}:today=${d.isToday}`)));
 
-  const streak = calcStreak(allActivityDates);
   const weekDays = getWeekDays(allActivityDates);
   const recent = interviews.slice(0, 3);
   const trackPct = Math.min(100, Math.round((lessonCount / totalLessons) * 100));
@@ -135,7 +123,7 @@ export default async function DashboardPage() {
       <div className="dash-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20 }}>
         <div>
           <p style={{ fontSize: 13, letterSpacing: "0.16em", textTransform: "uppercase", color: "#8A8073", fontWeight: 600, marginBottom: 10 }}>
-            {dayLabel}{streak > 0 ? ` · Day ${streak} of your streak` : ""}
+            {dayLabel}{streak > 0 ? ` · 🔥 ${streak}-day streak` : ""}
           </p>
           <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 40, fontWeight: 500, color: "#FDF6E3", letterSpacing: "-0.01em", lineHeight: 1.1 }}>
             {greeting()}, {user.name ?? user.email?.split("@")[0]}.

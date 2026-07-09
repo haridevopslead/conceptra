@@ -173,6 +173,12 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+
+        <div className="flex justify-center mt-6">
+          <Link href="/try" className="text-center font-semibold" style={{ background: "#F5A623", color: "#1C1917", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
+            Try this question yourself — no signup →
+          </Link>
+        </div>
       </div>
 
       {/* 01 02 03 cards */}

@@ -27,7 +27,15 @@ export async function POST(req: NextRequest) {
   // Save the interview result — fire-and-forget so a DB error never blocks the response
   const score = typeof result.overall_score === "number" ? result.overall_score : 0;
   db.interviewSession.create({
-    data: { userId: session.user.id, score, topic: topicCtx },
+    data: {
+      userId: session.user.id,
+      score,
+      topic: topicCtx,
+      depthScore: typeof result.depth_score === "number" ? result.depth_score : null,
+      accuracyScore: typeof result.accuracy_score === "number" ? result.accuracy_score : null,
+      productionAwarenessScore:
+        typeof result.production_awareness_score === "number" ? result.production_awareness_score : null,
+    },
   }).catch(() => { /* silent — don't break the UX for a logging failure */ });
 
   recordPracticeStreak(session.user.id).catch(() => { /* silent — streak update is non-critical */ });

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import Link from "next/link";
 import WelcomeBanner from "@/components/dashboard/welcome-banner";
+import { computeReadinessScore, READINESS_WINDOW } from "@/lib/readiness";
 
 const DAY_INITIAL = ["S", "M", "T", "W", "T", "F", "S"]; // indexed by getUTCDay() (0=Sun)
 
@@ -48,6 +49,12 @@ function scoreLabel(n: number) {
   if (n >= 4) return "Needs Work";
   return "Keep Practicing";
 }
+function readinessColor(pct: number) {
+  if (pct >= 80) return "#F5A623";
+  if (pct >= 60) return "#9CAE86";
+  if (pct >= 40) return "#D6A24E";
+  return "#C57B6B";
+}
 function formatDate(d: Date) {
   return new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }).format(d);
 }
@@ -59,7 +66,14 @@ export default async function DashboardPage() {
 
   let freshPlan = user.plan;
   let streak = 0;
-  let interviews: { score: number; topic: string | null; createdAt: Date }[] = [];
+  let interviews: {
+    score: number;
+    topic: string | null;
+    createdAt: Date;
+    depthScore: number | null;
+    accuracyScore: number | null;
+    productionAwarenessScore: number | null;
+  }[] = [];
   let lessonProgress: { visitedAt: Date }[] = [];
   let totalLessons = 8;
   try {
@@ -67,7 +81,14 @@ export default async function DashboardPage() {
       db.user.findUnique({ where: { id: user.id }, select: { plan: true, currentStreak: true } }),
       db.interviewSession.findMany({
         where: { userId: user.id },
-        select: { score: true, topic: true, createdAt: true },
+        select: {
+          score: true,
+          topic: true,
+          createdAt: true,
+          depthScore: true,
+          accuracyScore: true,
+          productionAwarenessScore: true,
+        },
         orderBy: { createdAt: "desc" },
       }),
       db.userLessonProgress.findMany({
@@ -94,6 +115,9 @@ export default async function DashboardPage() {
   const avgScore = interviewCount > 0
     ? Math.round(interviews.reduce((s, i) => s + i.score, 0) / interviewCount)
     : null;
+  // `interviews` is already ordered most-recent-first, which is what the
+  // readiness window needs.
+  const readiness = computeReadinessScore(interviews, READINESS_WINDOW);
   // Wrap with new Date() defensively — Prisma always returns Date objects from
   // Railway PostgreSQL, but the explicit wrap guards against any serialization edge case.
   const allActivityDates = [
@@ -149,6 +173,39 @@ export default async function DashboardPage() {
           </Link>
         </div>
       )}
+
+      {/* Readiness Score — the primary number a returning user sees */}
+      <div style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 20, padding: "30px 32px" }}>
+        {readiness ? (
+          <>
+            <p style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(26px, 4vw, 34px)", fontWeight: 500, color: "#FDF6E3", lineHeight: 1.25 }}>
+              You&rsquo;re <span style={{ color: readinessColor(readiness.percent), fontWeight: 700 }}>{readiness.percent}%</span> interview-ready.
+            </p>
+            <p style={{ fontSize: 13.5, color: "#8A8073", marginTop: 8 }}>
+              Based on your last {readiness.sessionCount} scored session{readiness.sessionCount === 1 ? "" : "s"}
+            </p>
+            <div style={{ display: "flex", gap: 14, marginTop: 24, flexWrap: "wrap" }}>
+              {[
+                { label: "Depth", val: readiness.avgDepth },
+                { label: "Accuracy", val: readiness.avgAccuracy },
+                { label: "Production Awareness", val: readiness.avgProduction },
+              ].map((d) => (
+                <div key={d.label} style={{ flex: "1 1 140px", background: "#1C1917", border: "1px solid rgba(253,246,227,0.06)", borderRadius: 12, padding: "14px 16px" }}>
+                  <p style={{ fontSize: 20, fontWeight: 700, color: scoreColor(Math.round(d.val)) }}>
+                    {d.val.toFixed(1)}<span style={{ fontSize: 12, color: "#8A8073", fontWeight: 500 }}>/10</span>
+                  </p>
+                  <p style={{ fontSize: 12, color: "#8A8073", marginTop: 3 }}>{d.label}</p>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div style={{ textAlign: "center", padding: "14px 0" }}>
+            <p style={{ fontFamily: "'Newsreader', serif", fontSize: 22, color: "#FDF6E3" }}>Keep practicing to unlock your Readiness Score.</p>
+            <p style={{ fontSize: 14, color: "#B3A799", marginTop: 6 }}>Complete at least 2 mock interviews and we&rsquo;ll show how interview-ready you are.</p>
+          </div>
+        )}
+      </div>
 
       {/* Streak tracker */}
       <div style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 20, padding: "30px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 36, flexWrap: "wrap" }}>

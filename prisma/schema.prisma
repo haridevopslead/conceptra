@@ -112,12 +112,15 @@ model Lesson {
 }
 
 model InterviewSession {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  score     Int
-  topic     String?
-  createdAt DateTime @default(now())
+  id                        String   @id @default(cuid())
+  userId                    String
+  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  score                     Int
+  depthScore                Int?
+  accuracyScore             Int?
+  productionAwarenessScore  Int?
+  topic                     String?
+  createdAt                 DateTime @default(now())
 
   @@index([userId])
   @@index([userId, createdAt])

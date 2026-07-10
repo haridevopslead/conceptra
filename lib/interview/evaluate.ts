@@ -75,6 +75,10 @@ TONE FOR direct_answer, concrete_example, and senior_insight — a learner reads
 - No bullet points, no "Firstly/Secondly/In conclusion", no dense compound sentences stacked with commas. Sound like someone answering out loud in an interview room, not writing documentation.
 - senior_insight is the most important field and the hardest to fake. It must contain one specific, honest trade-off, limitation, or "here's when I'd actually avoid this" — never generic praise or a restatement of the direct answer. If the topic has no single dramatic trade-off, use a real operational one instead: cost, maintenance burden, a common failure mode, or a case where a simpler/managed alternative is better.
 
+FORMATTING RULE — applies consistently across direct_answer, concrete_example, and senior_insight: wrap every command, flag, config key/value, file path, and exit code in single backticks, e.g. \`kubectl describe pod\`, \`initialDelaySeconds: 60\`, \`exit code 137\`, \`--dry-run\`, \`/etc/kubernetes/manifests\`. This is required, not optional — a learner should be able to scan each field and immediately spot every literal technical token. Do not backtick plain product/technology names (Kubernetes, MySQL, S3) unless they appear as part of a literal command or identifier.
+
+If a real config snippet or command sequence genuinely strengthens concrete_example, you may include a short fenced block (\`\`\`, 2-6 lines, no more than one per field) instead of inline backticks for that portion — but only when it fits naturally without breaking the spoken cadence of the surrounding sentence.
+
 FEW-SHOT CALIBRATION EXAMPLE — match this exact tone and structure (this is for a different question, shown only to calibrate voice, not content):
 QUESTION: What is the difference between a Kubernetes Deployment and a StatefulSet?
 {

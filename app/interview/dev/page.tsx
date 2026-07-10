@@ -15,6 +15,18 @@ interface FeedbackData {
   seniorAnswer: string;
 }
 
+// One-time context handed off from a Quick Practice result via sessionStorage —
+// no persistence, cleared immediately after being read.
+interface DevHandoffContext {
+  topic: string;
+  difficulty: string;
+  question: string;
+  answer: string;
+  seniorInsight: string;
+}
+
+const HANDOFF_KEY = "devHandoffContext";
+
 // ── Constants ─────────────────────────────────────────────────────────────────
 
 const TOPICS = [
@@ -74,6 +86,16 @@ function correctVoice(text: string): string {
   return VOICE_CORRECTIONS.reduce((t, [re, sub]) => t.replace(re, sub), text);
 }
 
+function buildContextKickoff(ctx: DevHandoffContext): string {
+  return `Hi Dev! I just practiced this question in Quick Practice: "${ctx.question}"
+
+Here's the answer I gave: "${ctx.answer}"
+
+I already got scored feedback, and the senior-level insight I received was: "${ctx.seniorInsight}"
+
+I want to go deeper on this with you specifically. Don't ask me a fresh unrelated question — instead, open with one short line in this style: "Let's go deeper on ${ctx.topic} — you mentioned [a brief summary of what I said], let's talk through [the specific gap or trade-off from that senior insight]." Then follow it with one pointed follow-up question that pushes on that exact gap.`;
+}
+
 function parseFeedback(text: string): FeedbackData {
   const score = text.match(/SCORE:\s*(.+)/)?.[1]?.trim() ?? "";
   const strong = stripMarkdown(text.match(/STRONG:\s*(.+)/)?.[1]?.trim() ?? "");
@@ -86,6 +108,7 @@ function parseFeedback(text: string): FeedbackData {
 
 export default function DevInterviewPage() {
   const [screen, setScreen] = useState<Screen>("setup");
+  const [checkingHandoff, setCheckingHandoff] = useState(true);
   const [topic, setTopic] = useState<string>("Docker");
   const [difficulty, setDifficulty] = useState<Difficulty>("Intermediate");
 
@@ -112,12 +135,14 @@ export default function DevInterviewPage() {
 
   async function fetchStream(
     apiMessages: Message[],
+    topicArg: string,
+    difficultyArg: string,
     onChunk: (accumulated: string) => void,
   ): Promise<string> {
     const res = await fetch("/api/interview/dev", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: apiMessages, topic, difficulty }),
+      body: JSON.stringify({ messages: apiMessages, topic: topicArg, difficulty: difficultyArg }),
     });
 
     if (!res.ok || !res.body) throw new Error(`Request failed: ${res.status}`);
@@ -138,15 +163,14 @@ export default function DevInterviewPage() {
 
   // ── Start interview ──────────────────────────────────────────────────────────
 
-  async function startInterview() {
+  // Shared by the normal setup flow and the Quick-Practice handoff — only the
+  // kickoff text and topic/difficulty differ.
+  async function beginChat(kickoffContent: string, topicArg: string, difficultyArg: string) {
     setError("");
     setFeedback(null);
     setVisibleMessages([]);
 
-    const kickoff: Message = {
-      role: "user",
-      content: `Hi Dev! I'm ready for my ${topic} interview at ${difficulty} level. Please ask me your first question.`,
-    };
+    const kickoff: Message = { role: "user", content: kickoffContent };
     apiHistoryRef.current = [kickoff];
 
     setScreen("chat");
@@ -156,7 +180,7 @@ export default function DevInterviewPage() {
     setVisibleMessages([{ role: "assistant", content: "" }]);
 
     try {
-      const devText = await fetchStream(apiHistoryRef.current, (acc) => {
+      const devText = await fetchStream(apiHistoryRef.current, topicArg, difficultyArg, (acc) => {
         setVisibleMessages([{ role: "assistant", content: acc }]);
       });
 
@@ -168,6 +192,39 @@ export default function DevInterviewPage() {
       setStreaming(false);
     }
   }
+
+  function startInterview() {
+    beginChat(
+      `Hi Dev! I'm ready for my ${topic} interview at ${difficulty} level. Please ask me your first question.`,
+      topic,
+      difficulty,
+    );
+  }
+
+  // Quick-Practice handoff: skip setup, open directly framed around the
+  // question/answer/insight the user already saw.
+  function startWithContext(ctx: DevHandoffContext) {
+    const validDifficulty: Difficulty = (DIFFICULTIES as readonly string[]).includes(ctx.difficulty)
+      ? (ctx.difficulty as Difficulty)
+      : "Intermediate";
+    setTopic(ctx.topic);
+    setDifficulty(validDifficulty);
+    beginChat(buildContextKickoff(ctx), ctx.topic, validDifficulty);
+  }
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem(HANDOFF_KEY);
+    if (raw) {
+      sessionStorage.removeItem(HANDOFF_KEY);
+      try {
+        startWithContext(JSON.parse(raw) as DevHandoffContext);
+      } catch {
+        // malformed/stale context — fall through to the normal setup screen
+      }
+    }
+    setCheckingHandoff(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Send user message ────────────────────────────────────────────────────────
 
@@ -190,7 +247,7 @@ export default function DevInterviewPage() {
     setStreaming(true);
 
     try {
-      const devText = await fetchStream(nextApiHistory, (acc) => {
+      const devText = await fetchStream(nextApiHistory, topic, difficulty, (acc) => {
         setVisibleMessages((prev) => [
           ...prev.slice(0, -1),
           { role: "assistant", content: acc },
@@ -283,6 +340,9 @@ export default function DevInterviewPage() {
     if (isListening) stopListening();
     else startListening();
   }
+
+  // Avoid flashing the setup screen while we check for a Quick-Practice handoff
+  if (checkingHandoff) return null;
 
   // ── Setup screen ─────────────────────────────────────────────────────────────
 

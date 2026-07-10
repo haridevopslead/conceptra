@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SeniorAnswerBox, { RichText } from "./senior-answer-box";
 
@@ -184,6 +185,36 @@ function ResultBox({
       <p className="text-xs font-bold tracking-wider" style={{ color }}>{icon} {label}</p>
       <RichText text={body} />
     </div>
+  );
+}
+
+// ── Go deeper with Dev ──────────────────────────────────────────────────────────
+
+type DevHandoffContext = {
+  topic: string;
+  difficulty: string;
+  question: string;
+  answer: string;
+  seniorInsight: string;
+};
+
+// Must match HANDOFF_KEY in app/interview/dev/page.tsx. sessionStorage, not a
+// DB write — a one-time context handoff into the stateless Dev chat flow.
+const DEV_HANDOFF_KEY = "devHandoffContext";
+
+function GoDeeperButton({ ctx }: { ctx: DevHandoffContext }) {
+  const router = useRouter();
+  return (
+    <button
+      onClick={() => {
+        sessionStorage.setItem(DEV_HANDOFF_KEY, JSON.stringify(ctx));
+        router.push("/interview/dev");
+      }}
+      className="w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:bg-white/5"
+      style={{ borderColor: "rgba(245,166,35,0.35)", color: "#F5A623", background: "transparent" }}
+    >
+      Ask Dev to go deeper on this →
+    </button>
   );
 }
 
@@ -720,6 +751,7 @@ export default function Evaluator() {
           color="#F5A623" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
           directAnswer={r.direct_answer} concreteExample={r.concrete_example} seniorInsight={r.senior_insight}
         />
+        <GoDeeperButton ctx={{ topic, difficulty, question: entry.question, answer: entry.answer, seniorInsight: r.senior_insight }} />
 
         <button
           onClick={() => setViewIndex(null)}
@@ -903,6 +935,7 @@ export default function Evaluator() {
             color="#F5A623" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
             directAnswer={result.direct_answer} concreteExample={result.concrete_example} seniorInsight={result.senior_insight}
           />
+          <GoDeeperButton ctx={{ topic, difficulty, question, answer, seniorInsight: result.senior_insight }} />
 
           <button
             onClick={next}

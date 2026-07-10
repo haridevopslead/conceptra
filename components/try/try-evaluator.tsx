@@ -16,7 +16,9 @@ type EvalResult = {
   production_awareness_score: number;
   what_was_strong: string;
   what_was_weak: string;
-  ideal_answer: string;
+  direct_answer: string;
+  concrete_example: string;
+  senior_insight: string;
 };
 
 // Web Speech API types (not in default TS lib)
@@ -92,6 +94,33 @@ function ResultBox({
     <div className="rounded-xl border p-5 space-y-2" style={{ backgroundColor: bg, borderColor: border }}>
       <p className="text-xs font-bold tracking-wider" style={{ color }}>{icon} {label}</p>
       <p className="text-sm text-gray-300 leading-6">{body}</p>
+    </div>
+  );
+}
+
+// Three lightweight labeled beats inside one box, instead of one dense paragraph —
+// so the learner sees the thought process (direct answer → example → trade-off),
+// not just a polished final answer.
+function SeniorAnswerBox({
+  color, bg, border, directAnswer, concreteExample, seniorInsight,
+}: {
+  color: string; bg: string; border: string; directAnswer: string; concreteExample: string; seniorInsight: string;
+}) {
+  return (
+    <div className="rounded-xl border p-5 space-y-4" style={{ backgroundColor: bg, borderColor: border }}>
+      <p className="text-xs font-bold tracking-wider" style={{ color }}>⚡ HOW A SENIOR ENGINEER WOULD ANSWER</p>
+      <div className="space-y-1.5">
+        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Direct Answer</p>
+        <p className="text-sm text-gray-300 leading-6">{directAnswer}</p>
+      </div>
+      <div className="space-y-1.5">
+        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Real Example</p>
+        <p className="text-sm text-gray-300 leading-6">{concreteExample}</p>
+      </div>
+      <div className="space-y-1.5">
+        <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Senior Insight</p>
+        <p className="text-sm text-gray-300 leading-6">{seniorInsight}</p>
+      </div>
     </div>
   );
 }
@@ -367,9 +396,9 @@ export default function TryEvaluator() {
             color="#C57B6B" bg="rgba(197,123,107,0.06)" border="rgba(197,123,107,0.22)"
             icon="⚠" label="WHERE YOU CAN GROW" body={result.what_was_weak}
           />
-          <ResultBox
+          <SeniorAnswerBox
             color="#F5A623" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
-            icon="⚡" label="HOW A SENIOR ENGINEER WOULD ANSWER" body={result.ideal_answer}
+            directAnswer={result.direct_answer} concreteExample={result.concrete_example} seniorInsight={result.senior_insight}
           />
 
           {/* Single CTA — the result itself is never gated, only what comes next */}

@@ -14,7 +14,9 @@ export type EvalResult = {
   production_awareness_score: number;
   what_was_strong: string;
   what_was_weak: string;
-  ideal_answer: string;
+  direct_answer: string;
+  concrete_example: string;
+  senior_insight: string;
 };
 
 export class EvaluationError extends Error {}
@@ -54,7 +56,9 @@ Return ONLY valid JSON — no markdown, no code fences, no extra text. Use exact
   "production_awareness_score": <integer 1-10>,
   "what_was_strong": "<2-3 sentences on what the candidate got right, with specific technical terms>",
   "what_was_weak": "<2-3 sentences on what was missing, vague, or incorrect>",
-  "ideal_answer": "<the complete 9/10 answer a senior engineer would give — 4-6 sentences, specific and production-aware>"
+  "direct_answer": "<1-2 sentences that answer the actual question immediately, before any elaboration>",
+  "concrete_example": "<2-4 sentences: one real, specific example tying the concept to an actual system — not generic, must prove production experience>",
+  "senior_insight": "<2-4 sentences: an honest limitation, trade-off, or 'here's when I'd avoid this' — the line that separates a 6/10 from a 9/10. Never generic praise.>"
 }
 
 Scoring rubric:
@@ -63,11 +67,27 @@ Scoring rubric:
 - accuracy_score: factual correctness and precision of every claim made
 - production_awareness_score: did the answer show real production experience — consequences, trade-offs, failure modes?
 
-Be honest and specific. Vague praise or criticism is useless to the candidate.`;
+Be honest and specific. Vague praise or criticism is useless to the candidate.
+
+TONE FOR direct_answer, concrete_example, and senior_insight — a learner reads these to learn the thought process, not just the content, so they must sound like a senior engineer actually talking, not a textbook or an AI summary:
+- First-person, conversational, natural spoken cadence. Use contractions ("I'll", "it's", "doesn't", "won't").
+- Signal phrases are encouraged where they fit naturally: "So actually,", "See,", "Let's say,", "But honestly,", "I'll be very frank —", or "right?" as a check-in with the listener.
+- No bullet points, no "Firstly/Secondly/In conclusion", no dense compound sentences stacked with commas. Sound like someone answering out loud in an interview room, not writing documentation.
+- senior_insight is the most important field and the hardest to fake. It must contain one specific, honest trade-off, limitation, or "here's when I'd actually avoid this" — never generic praise or a restatement of the direct answer. If the topic has no single dramatic trade-off, use a real operational one instead: cost, maintenance burden, a common failure mode, or a case where a simpler/managed alternative is better.
+
+FEW-SHOT CALIBRATION EXAMPLE — match this exact tone and structure (this is for a different question, shown only to calibrate voice, not content):
+QUESTION: What is the difference between a Kubernetes Deployment and a StatefulSet?
+{
+  "direct_answer": "So actually, the simple way to put it is — Deployments are for pods where identity doesn't matter, StatefulSets are for pods where identity matters.",
+  "concrete_example": "See, if I'm running something stateless, like an API server, I'll go with a Deployment — pods get created, get replaced, doesn't matter which one. But let's say I'm running MySQL, with one primary and one replica — now identity matters, right? Pod 0 has to always come back as pod 0, with the same storage attached, otherwise things will break.",
+  "senior_insight": "But honestly, I'll be very frank — I try to avoid StatefulSets wherever possible. They are more painful operationally, scaling is slower, and if something fails, mostly you end up doing manual cleanup instead of Kubernetes handling it automatically. So for databases, if I get an option to run it as a managed service outside the cluster, I will prefer that only. A StatefulSet is solving 'which pod is this,' it is not solving 'is this reliable.'"
+}
+
+Now write direct_answer, concrete_example, and senior_insight for the ACTUAL question above (not the calibration example), in this exact tone, at the quality level of a 9/10 senior answer.`;
 
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",
-    max_tokens: 1024,
+    max_tokens: 1536,
     messages: [{ role: "user", content: prompt }],
   });
 

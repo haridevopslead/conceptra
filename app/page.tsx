@@ -2,17 +2,12 @@ import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import FaqAccordion from "@/components/home/faq-accordion";
 
 const TESTIMONIALS = [
   { quote: "I went from failing Kubernetes rounds to getting an offer at PhonePe in six weeks.", initials: "AR", name: "Ananya R.", role: "SRE · hired at PhonePe" },
   { quote: "The 9/10 answer examples showed me exactly what I was missing.", initials: "RM", name: "Rohit M.", role: "DevOps Engineer" },
   { quote: "Finally, prep that feels like a senior engineer is coaching you — not a textbook.", initials: "KS", name: "Karthik S.", role: "Platform Engineer" },
-];
-
-const CARDS = [
-  { n: "01", text: "From nervous to confident in four weeks." },
-  { n: "02", text: "Know exactly what Razorpay and PhonePe interviewers want." },
-  { n: "03", text: "Answer like a senior engineer — not a textbook." },
 ];
 
 const BRANDS = ["Razorpay", "PhonePe", "Swiggy", "Flipkart"];
@@ -61,156 +56,147 @@ export default async function HomePage() {
         </div>
       </nav>
 
-      {/* Hero */}
+      {/* Hero — headline/CTA and the live demo card share the first screen */}
       <div className="relative overflow-hidden">
-        <div className="absolute pointer-events-none" style={{ top: 30, left: "50%", transform: "translateX(-50%)", width: "min(940px, 140vw)", height: 600, borderRadius: "50%", background: "radial-gradient(ellipse at center, rgba(245,166,35,0.17) 0%, rgba(245,166,35,0.055) 38%, rgba(28,25,23,0) 70%)" }} />
-        <div className="relative mx-auto flex flex-col items-center text-center px-5 sm:px-10" style={{ maxWidth: 1080, paddingTop: 150, paddingBottom: 60 }}>
+        <div className="absolute pointer-events-none" style={{ top: 20, left: "50%", transform: "translateX(-50%)", width: "min(1100px, 150vw)", height: 560, borderRadius: "50%", background: "radial-gradient(ellipse at center, rgba(245,166,35,0.15) 0%, rgba(245,166,35,0.05) 38%, rgba(28,25,23,0) 70%)" }} />
+        <div className="relative mx-auto px-5 sm:px-10" style={{ maxWidth: 1180, paddingTop: 128, paddingBottom: 60 }}>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-10 items-center">
 
-          <div className="flex items-center gap-3 mb-8">
-            <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
-            <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#F5A623" }}>AI-Powered DevOps Coaching</span>
-            <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
-          </div>
+            {/* Left: headline, subheadline, CTAs, quote */}
+            <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+              <div className="flex items-center gap-3 mb-7">
+                <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
+                <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#F5A623" }}>AI-Powered DevOps Coaching</span>
+              </div>
 
-          <h1
-            className="mb-6"
-            style={{ fontFamily: "'Newsreader', serif", fontWeight: 500, fontSize: "clamp(38px, 9vw, 76px)", lineHeight: 1.06, color: "#FDF6E3", letterSpacing: "-0.015em", maxWidth: 860 }}
-          >
-            Ace Your DevOps{" "}
-            <em style={{ fontStyle: "italic", color: "#F5A623" }}>Interview</em>
-          </h1>
+              <h1
+                className="mb-5"
+                style={{ fontFamily: "'Newsreader', serif", fontWeight: 500, fontSize: "clamp(36px, 6vw, 62px)", lineHeight: 1.08, color: "#FDF6E3", letterSpacing: "-0.015em" }}
+              >
+                Ace Your DevOps{" "}
+                <em style={{ fontStyle: "italic", color: "#F5A623" }}>Interview</em>
+              </h1>
 
-          <p className="mb-5" style={{ fontSize: "clamp(15px, 3vw, 20px)", lineHeight: 1.6, color: "#C9BFB2", maxWidth: 560 }}>
-            Coached by a Lead Engineer with 10+ years at top Indian tech companies.
-          </p>
-
-          <div className="flex items-center gap-3 mb-10 text-left">
-            <div className="shrink-0" style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 14, fontWeight: 600, color: "#F5A623" }}>HN</div>
-            <div>
-              <p style={{ fontFamily: "'Newsreader', serif", fontStyle: "italic", fontSize: "clamp(14px, 2.5vw, 17px)", color: "#8A8073", maxWidth: 420, lineHeight: 1.5 }}>&ldquo;Built by the engineer who&rsquo;s been on both sides of the interview table.&rdquo;</p>
-              <p style={{ fontSize: 12, color: "#6E665C", marginTop: 6 }}>Hari N. · Lead DevOps Engineer · 10+ years in production</p>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto sm:justify-center">
-            <Link href="/register" className="text-center font-semibold" style={{ background: "#F5A623", color: "#1C1917", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
-              Start Free Trial
-            </Link>
-            <Link href="/lessons" className="text-center font-medium" style={{ background: "transparent", color: "#FDF6E3", fontSize: 16, border: "1px solid rgba(253,246,227,0.18)", padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
-              Browse Interview Briefs
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* See it in action */}
-      <div className="mx-auto px-5 sm:px-10" style={{ maxWidth: 900, paddingTop: 20, paddingBottom: 70 }}>
-        <div className="text-center mb-10">
-          <h2 style={{ fontFamily: "'Newsreader', serif", fontWeight: 500, fontSize: "clamp(26px, 5vw, 40px)", color: "#FDF6E3", letterSpacing: "-0.01em", marginBottom: 12 }}>
-            See exactly how it works
-          </h2>
-          <p style={{ fontSize: "clamp(14px, 2.5vw, 17px)", color: "#B3A799", maxWidth: 520, margin: "0 auto", lineHeight: 1.5 }}>
-            Answer a question. Get scored like a senior engineer would score you.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border" style={{ backgroundColor: "#211C18", borderColor: "rgba(253,246,227,0.08)", padding: "8px" }}>
-          <div className="flex items-center gap-2 px-4 py-3">
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F5A623" }} />
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#8A8073" }}>
-              Live AI feedback — real example from the platform
-            </span>
-          </div>
-
-          <div className="rounded-xl p-5 sm:p-6 space-y-5" style={{ backgroundColor: "#17130F" }}>
-            <div>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#F5A623", marginBottom: 8 }}>
-                Question
+              <p className="mb-8" style={{ fontSize: "clamp(15px, 2.2vw, 18px)", lineHeight: 1.6, color: "#C9BFB2", maxWidth: 480 }}>
+                Coached by a Lead Engineer with 10+ years at top Indian tech companies. Know exactly what Razorpay and PhonePe interviewers want.
               </p>
-              <p style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(16px, 2.5vw, 19px)", color: "#FDF6E3", lineHeight: 1.4, fontWeight: 500 }}>
-                What happens when you run kubectl apply -f deployment.yaml?
-              </p>
-            </div>
 
-            <div className="rounded-2xl border border-white/10 p-5 sm:p-6" style={{ backgroundColor: "#211C18" }}>
-              <div className="flex items-center gap-6 flex-wrap">
-                <div className="text-center shrink-0">
-                  <div className="text-5xl font-black leading-none" style={{ color: "#F5A623" }}>
-                    8<span className="text-2xl font-bold text-gray-500">/10</span>
-                  </div>
-                  <p className="text-sm font-semibold mt-1" style={{ color: "#F5A623" }}>Excellent</p>
-                </div>
-                <div className="w-px h-14 bg-white/10 shrink-0 hidden sm:block" />
-                <div className="flex-1 grid grid-cols-3 gap-3">
-                  <div className="flex flex-col items-center px-3 py-3 rounded-xl border" style={{ backgroundColor: "rgba(197,123,107,0.06)", borderColor: "rgba(197,123,107,0.22)" }}>
-                    <span className="text-xl font-black" style={{ color: "#C57B6B" }}>7<span className="text-sm font-medium text-gray-500">/10</span></span>
-                    <span className="text-[11px] text-gray-400 mt-0.5 text-center leading-tight">Depth</span>
-                  </div>
-                  <div className="flex flex-col items-center px-3 py-3 rounded-xl border" style={{ backgroundColor: "rgba(156,174,134,0.06)", borderColor: "rgba(156,174,134,0.2)" }}>
-                    <span className="text-xl font-black" style={{ color: "#9CAE86" }}>9<span className="text-sm font-medium text-gray-500">/10</span></span>
-                    <span className="text-[11px] text-gray-400 mt-0.5 text-center leading-tight">Accuracy</span>
-                  </div>
-                  <div className="flex flex-col items-center px-3 py-3 rounded-xl border" style={{ backgroundColor: "rgba(245,166,35,0.06)", borderColor: "rgba(245,166,35,0.25)" }}>
-                    <span className="text-xl font-black" style={{ color: "#F5A623" }}>8<span className="text-sm font-medium text-gray-500">/10</span></span>
-                    <span className="text-[11px] text-gray-400 mt-0.5 text-center leading-tight">Production Awareness</span>
-                  </div>
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mb-5">
+                <Link href="/try" className="text-center font-semibold" style={{ background: "#F5A623", color: "#1C1917", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
+                  Try a real question — no signup
+                </Link>
+                <Link href="/register" className="text-center font-medium" style={{ background: "transparent", color: "#FDF6E3", fontSize: 16, border: "1px solid rgba(253,246,227,0.18)", padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
+                  Start Free Trial
+                </Link>
+              </div>
+
+              <Link href="/lessons" style={{ color: "#8A8073", fontSize: 14, textDecoration: "none" }}>
+                Browse Interview Briefs →
+              </Link>
+
+              <div className="flex items-center gap-3 mt-9 text-left">
+                <div className="shrink-0" style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 13, fontWeight: 600, color: "#F5A623" }}>HN</div>
+                <div>
+                  <p style={{ fontFamily: "'Newsreader', serif", fontStyle: "italic", fontSize: 14, color: "#8A8073", maxWidth: 380, lineHeight: 1.5 }}>&ldquo;Built by the engineer who&rsquo;s been on both sides of the interview table.&rdquo;</p>
+                  <p style={{ fontSize: 11.5, color: "#6E665C", marginTop: 4 }}>Hari N. · Lead DevOps Engineer · 10+ years in production</p>
                 </div>
               </div>
             </div>
 
-            <div className="rounded-xl border p-5 space-y-2" style={{ backgroundColor: "rgba(156,174,134,0.06)", borderColor: "rgba(156,174,134,0.2)" }}>
-              <p className="text-xs font-bold tracking-wider" style={{ color: "#9CAE86" }}>✓ WHAT WAS STRONG</p>
-              <p className="text-sm text-gray-300 leading-6">
-                Strong understanding of the declarative model and async nature of kubectl.
-              </p>
+            {/* Right: live scored demo — above the fold */}
+            <div className="w-full">
+              <div className="rounded-2xl border" style={{ backgroundColor: "#211C18", borderColor: "rgba(253,246,227,0.08)", padding: "8px" }}>
+                <div className="flex items-center gap-2 px-4 py-3">
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F5A623" }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#8A8073" }}>
+                    Live AI feedback — real example from the platform
+                  </span>
+                </div>
+
+                <div className="rounded-xl p-5 sm:p-6 space-y-5" style={{ backgroundColor: "#17130F" }}>
+                  <div>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#F5A623", marginBottom: 8 }}>
+                      Question
+                    </p>
+                    <p style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(16px, 2.5vw, 19px)", color: "#FDF6E3", lineHeight: 1.4, fontWeight: 500 }}>
+                      What happens when you run kubectl apply -f deployment.yaml?
+                    </p>
+                  </div>
+
+                  <div className="rounded-2xl border border-white/10 p-5 sm:p-6" style={{ backgroundColor: "#211C18" }}>
+                    <div className="flex items-center gap-6 flex-wrap">
+                      <div className="text-center shrink-0">
+                        <div className="text-5xl font-black leading-none" style={{ color: "#F5A623" }}>
+                          8<span className="text-2xl font-bold text-gray-500">/10</span>
+                        </div>
+                        <p className="text-sm font-semibold mt-1" style={{ color: "#F5A623" }}>Excellent</p>
+                      </div>
+                      <div className="w-px h-14 bg-white/10 shrink-0 hidden sm:block" />
+                      <div className="flex-1 grid grid-cols-3 gap-3">
+                        <div className="flex flex-col items-center px-3 py-3 rounded-xl border" style={{ backgroundColor: "rgba(197,123,107,0.06)", borderColor: "rgba(197,123,107,0.22)" }}>
+                          <span className="text-xl font-black" style={{ color: "#C57B6B" }}>7<span className="text-sm font-medium text-gray-500">/10</span></span>
+                          <span className="text-[11px] text-gray-400 mt-0.5 text-center leading-tight">Depth</span>
+                        </div>
+                        <div className="flex flex-col items-center px-3 py-3 rounded-xl border" style={{ backgroundColor: "rgba(156,174,134,0.06)", borderColor: "rgba(156,174,134,0.2)" }}>
+                          <span className="text-xl font-black" style={{ color: "#9CAE86" }}>9<span className="text-sm font-medium text-gray-500">/10</span></span>
+                          <span className="text-[11px] text-gray-400 mt-0.5 text-center leading-tight">Accuracy</span>
+                        </div>
+                        <div className="flex flex-col items-center px-3 py-3 rounded-xl border" style={{ backgroundColor: "rgba(245,166,35,0.06)", borderColor: "rgba(245,166,35,0.25)" }}>
+                          <span className="text-xl font-black" style={{ color: "#F5A623" }}>8<span className="text-sm font-medium text-gray-500">/10</span></span>
+                          <span className="text-[11px] text-gray-400 mt-0.5 text-center leading-tight">Production Awareness</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border p-5 space-y-2" style={{ backgroundColor: "rgba(156,174,134,0.06)", borderColor: "rgba(156,174,134,0.2)" }}>
+                    <p className="text-xs font-bold tracking-wider" style={{ color: "#9CAE86" }}>✓ WHAT WAS STRONG</p>
+                    <p className="text-sm text-gray-300 leading-6">
+                      Strong understanding of the declarative model and async nature of kubectl.
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border p-5 space-y-2" style={{ backgroundColor: "rgba(245,166,35,0.06)", borderColor: "rgba(245,166,35,0.25)" }}>
+                    <p className="text-xs font-bold tracking-wider" style={{ color: "#F5A623" }}>⚡ WHERE TO IMPROVE</p>
+                    <p className="text-sm text-gray-300 leading-6">
+                      Could mention etcd and the control plane reconciliation loop for a 10/10 answer.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-center mt-5">
+                <Link href="/try" className="text-center font-semibold" style={{ background: "#F5A623", color: "#1C1917", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
+                  Try this question yourself — no signup →
+                </Link>
+              </div>
             </div>
 
-            <div className="rounded-xl border p-5 space-y-2" style={{ backgroundColor: "rgba(245,166,35,0.06)", borderColor: "rgba(245,166,35,0.25)" }}>
-              <p className="text-xs font-bold tracking-wider" style={{ color: "#F5A623" }}>⚡ WHERE TO IMPROVE</p>
-              <p className="text-sm text-gray-300 leading-6">
-                Could mention etcd and the control plane reconciliation loop for a 10/10 answer.
-              </p>
-            </div>
           </div>
         </div>
-
-        <div className="flex justify-center mt-6">
-          <Link href="/try" className="text-center font-semibold" style={{ background: "#F5A623", color: "#1C1917", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
-            Try this question yourself — no signup →
-          </Link>
-        </div>
       </div>
 
-      {/* 01 02 03 cards */}
-      <div className="mx-auto px-5 sm:px-10" style={{ maxWidth: 1080, paddingBottom: 30 }}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {CARDS.map(({ n, text }) => (
-            <div key={n} style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: "30px 26px" }}>
-              <div style={{ fontFamily: "'Newsreader', serif", fontSize: 30, color: "rgba(245,166,35,0.5)", fontWeight: 500, marginBottom: 18 }}>{n}</div>
-              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 21, lineHeight: 1.35, color: "#FDF6E3", fontWeight: 500 }}>{text}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Testimonials */}
+      {/* Testimonials — compact single-row strip */}
       <div className="mx-auto px-5 sm:px-10" style={{ maxWidth: 1080, paddingTop: 50, paddingBottom: 10 }}>
-        <div className="flex items-center gap-3 justify-center mb-8">
-          <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
-          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#F5A623" }}>What engineers say</span>
-          <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-          {TESTIMONIALS.map(({ quote, initials, name, role }) => (
-            <div key={name} style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: "26px 24px" }}>
-              <div style={{ fontFamily: "'Newsreader', serif", fontSize: 44, lineHeight: 0.4, color: "rgba(245,166,35,0.4)", height: 20 }}>&ldquo;</div>
-              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 17, lineHeight: 1.5, color: "#FDF6E3", marginBottom: 20, marginTop: 12 }}>{quote}</p>
-              <div className="flex items-center gap-3">
-                <div className="shrink-0" style={{ width: 34, height: 34, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 13, color: "#F5A623" }}>{initials}</div>
-                <div>
-                  <p style={{ fontSize: 13, color: "#FDF6E3", fontWeight: 600 }}>{name}</p>
-                  <p style={{ fontSize: 11.5, color: "#8A8073" }}>{role}</p>
-                </div>
+        <div
+          className="flex flex-wrap items-center justify-center gap-x-10 gap-y-5"
+          style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: "22px 28px" }}
+        >
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#F5A623", flexShrink: 0 }}>
+            What engineers say
+          </span>
+          {TESTIMONIALS.map(({ initials, name, role }, i) => (
+            <div
+              key={name}
+              className="flex items-center gap-2.5"
+              style={i > 0 ? { paddingLeft: 40, borderLeft: "1px solid rgba(253,246,227,0.1)" } : undefined}
+            >
+              <div className="shrink-0" style={{ width: 30, height: 30, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 12, color: "#F5A623" }}>
+                {initials}
+              </div>
+              <div className="text-left">
+                <p style={{ fontSize: 13, color: "#FDF6E3", fontWeight: 600 }}>{name}</p>
+                <p style={{ fontSize: 11.5, color: "#8A8073" }}>{role}</p>
               </div>
             </div>
           ))}
@@ -234,14 +220,7 @@ export default async function HomePage() {
           <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#F5A623" }}>Questions</span>
           <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
         </div>
-        <div className="flex flex-col gap-4">
-          {FAQS.map(({ q, a }) => (
-            <div key={q} style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: "24px 26px" }}>
-              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 18, lineHeight: 1.35, color: "#FDF6E3", fontWeight: 500, marginBottom: 10 }}>{q}</p>
-              <p style={{ fontSize: 14.5, lineHeight: 1.65, color: "#B3A799" }}>{a}</p>
-            </div>
-          ))}
-        </div>
+        <FaqAccordion items={FAQS} />
       </div>
 
       {/* Footer */}

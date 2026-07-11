@@ -109,6 +109,10 @@ type EvalResult = {
   direct_answer: string;
   concrete_example: string;
   senior_insight: string;
+  // Present when the DB write succeeded — null if persistence failed, in
+  // which case the bookmark button just doesn't render for this result.
+  sessionId: string | null;
+  bookmarked: boolean;
 };
 
 // Web Speech API types (not in default TS lib)
@@ -153,6 +157,14 @@ function MicIcon({ className }: { className?: string }) {
       <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
       <line x1="12" y1="19" x2="12" y2="23" />
       <line x1="8" y1="23" x2="16" y2="23" />
+    </svg>
+  );
+}
+
+function BookmarkIcon({ filled, className }: { filled: boolean; className?: string }) {
+  return (
+    <svg className={className} fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+      <path d="M6 2a2 2 0 0 0-2 2v18l8-6 8 6V4a2 2 0 0 0-2-2H6z" />
     </svg>
   );
 }
@@ -214,6 +226,57 @@ function GoDeeperButton({ ctx }: { ctx: DevHandoffContext }) {
       style={{ borderColor: "rgba(245,166,35,0.35)", color: "#F5A623", background: "transparent" }}
     >
       Ask Dev to go deeper on this →
+    </button>
+  );
+}
+
+// ── Bookmark toggle ──────────────────────────────────────────────────────────────
+
+// Controlled by the parent (not local state) so the correct saved/unsaved
+// state survives navigating away and back via QuestionNav's review mode.
+function BookmarkButton({
+  sessionId, bookmarked, onToggle,
+}: {
+  sessionId: string | null; bookmarked: boolean; onToggle: (next: boolean) => void;
+}) {
+  const [saving, setSaving] = useState(false);
+
+  // Persistence failed for this result server-side — nothing to bookmark.
+  if (!sessionId) return null;
+
+  async function toggle() {
+    if (saving) return;
+    const next = !bookmarked;
+    onToggle(next);
+    setSaving(true);
+    try {
+      const res = await fetch(`/api/interview/sessions/${sessionId}/bookmark`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookmarked: next }),
+      });
+      if (!res.ok) onToggle(!next);
+    } catch {
+      onToggle(!next);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <button
+      onClick={toggle}
+      disabled={saving}
+      aria-label={bookmarked ? "Remove bookmark" : "Save this answer for later review"}
+      aria-pressed={bookmarked}
+      title={bookmarked ? "Saved for review" : "Save for review"}
+      className="flex items-center justify-center w-9 h-9 rounded-lg transition-colors disabled:opacity-50 shrink-0"
+      style={{
+        color: bookmarked ? "#F5A623" : "#8A8073",
+        background: bookmarked ? "rgba(245,166,35,0.12)" : "transparent",
+      }}
+    >
+      <BookmarkIcon filled={bookmarked} className="w-[18px] h-[18px]" />
     </button>
   );
 }
@@ -625,7 +688,8 @@ export default function Evaluator() {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data: EvalResult = await res.json();
-      setResult(data);
+      // A freshly-submitted answer is never already bookmarked.
+      setResult({ ...data, bookmarked: false });
       setSessionScores((prev) => [
         ...prev,
         {
@@ -743,6 +807,15 @@ export default function Evaluator() {
               <SubScore label="Accuracy" score={r.accuracy_score} />
               <SubScore label="Production Awareness" score={r.production_awareness_score} />
             </div>
+            <BookmarkButton
+              sessionId={r.sessionId}
+              bookmarked={r.bookmarked}
+              onToggle={(next) =>
+                setHistory((prev) =>
+                  prev.map((h, i) => (i === viewIndex ? { ...h, result: { ...h.result, bookmarked: next } } : h))
+                )
+              }
+            />
           </div>
         </div>
         <ResultBox color="#9CAE86" bg="rgba(156,174,134,0.06)" border="rgba(156,174,134,0.2)" icon="✓" label="WHAT LANDED WELL" body={r.what_was_strong} />
@@ -920,6 +993,11 @@ export default function Evaluator() {
                 <SubScore label="Accuracy" score={result.accuracy_score} />
                 <SubScore label="Production Awareness" score={result.production_awareness_score} />
               </div>
+              <BookmarkButton
+                sessionId={result.sessionId}
+                bookmarked={result.bookmarked}
+                onToggle={(next) => setResult((r) => (r ? { ...r, bookmarked: next } : r))}
+              />
             </div>
           </div>
 

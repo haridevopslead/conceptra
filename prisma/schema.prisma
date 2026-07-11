@@ -120,10 +120,17 @@ model InterviewSession {
   accuracyScore             Int?
   productionAwarenessScore  Int?
   topic                     String?
+  question                  String?
+  answer                    String?
+  directAnswer              String?
+  concreteExample           String?
+  seniorInsight             String?
+  bookmarked                Boolean  @default(false)
   createdAt                 DateTime @default(now())
 
   @@index([userId])
   @@index([userId, createdAt])
+  @@index([userId, bookmarked])
 }
 
 model UserLessonProgress {

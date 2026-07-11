@@ -24,21 +24,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: message }, { status: 500 });
   }
 
-  // Save the interview result — fire-and-forget so a DB error never blocks the response
+  // Save the interview result. Awaited (unlike before) because the client needs
+  // the row id to bookmark it — but a DB failure still must not fail the response,
+  // it just means no bookmark button renders for this result.
   const score = typeof result.overall_score === "number" ? result.overall_score : 0;
-  db.interviewSession.create({
-    data: {
-      userId: session.user.id,
-      score,
-      topic: topicCtx,
-      depthScore: typeof result.depth_score === "number" ? result.depth_score : null,
-      accuracyScore: typeof result.accuracy_score === "number" ? result.accuracy_score : null,
-      productionAwarenessScore:
-        typeof result.production_awareness_score === "number" ? result.production_awareness_score : null,
-    },
-  }).catch(() => { /* silent — don't break the UX for a logging failure */ });
+  let sessionId: string | null = null;
+  try {
+    const saved = await db.interviewSession.create({
+      data: {
+        userId: session.user.id,
+        score,
+        topic: topicCtx,
+        depthScore: typeof result.depth_score === "number" ? result.depth_score : null,
+        accuracyScore: typeof result.accuracy_score === "number" ? result.accuracy_score : null,
+        productionAwarenessScore:
+          typeof result.production_awareness_score === "number" ? result.production_awareness_score : null,
+        question,
+        answer,
+        directAnswer: result.direct_answer,
+        concreteExample: result.concrete_example,
+        seniorInsight: result.senior_insight,
+      },
+      select: { id: true },
+    });
+    sessionId = saved.id;
+  } catch {
+    // silent — don't break the UX for a logging failure
+  }
 
   recordPracticeStreak(session.user.id).catch(() => { /* silent — streak update is non-critical */ });
 
-  return NextResponse.json(result);
+  return NextResponse.json({ ...result, sessionId });
 }

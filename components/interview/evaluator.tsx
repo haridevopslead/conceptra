@@ -121,6 +121,9 @@ interface SpeechRecognitionEvent extends Event {
   resultIndex: number;
   results: SpeechRecognitionResultList;
 }
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
 interface SpeechRecognitionInstance extends EventTarget {
   continuous: boolean;
   interimResults: boolean;
@@ -128,7 +131,7 @@ interface SpeechRecognitionInstance extends EventTarget {
   start(): void;
   stop(): void;
   onresult: ((e: SpeechRecognitionEvent) => void) | null;
-  onerror: ((e: Event) => void) | null;
+  onerror: ((e: SpeechRecognitionErrorEvent) => void) | null;
   onend: (() => void) | null;
 }
 declare const webkitSpeechRecognition: new () => SpeechRecognitionInstance;
@@ -600,6 +603,10 @@ export default function Evaluator() {
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const baseTextRef = useRef("");
   const finalTranscriptRef = useRef("");
+  // True once the user (or a fatal error) has actually asked recognition to
+  // stop — distinguishes that from the browser silently ending the session
+  // on its own, which onend should recover from by restarting.
+  const intentionalStopRef = useRef(false);
 
   const questions = topic ? (QUESTION_BANK[topic] ?? []) : [];
   const question = questions[qIndex] ?? "";
@@ -608,6 +615,7 @@ export default function Evaluator() {
   // ── Voice input ─────────────────────────────────────────────────────────────
 
   const stopListening = useCallback(() => {
+    intentionalStopRef.current = true;
     recognitionRef.current?.stop();
     recognitionRef.current = null;
     setIsListening(false);
@@ -626,6 +634,7 @@ export default function Evaluator() {
 
     baseTextRef.current = answer;
     finalTranscriptRef.current = "";
+    intentionalStopRef.current = false;
 
     const recognition: SpeechRecognitionInstance = new SR();
     recognition.continuous = true;
@@ -648,15 +657,32 @@ export default function Evaluator() {
       setAnswer(base + spacer + voiced);
     };
 
-    recognition.onerror = () => {
+    recognition.onerror = (e: SpeechRecognitionErrorEvent) => {
+      // "no-speech" fires on an ordinary pause between sentences — not a
+      // real failure. Let onend handle it (it restarts the session below)
+      // instead of killing the mic mid-answer.
+      if (e.error === "no-speech") return;
+      intentionalStopRef.current = true;
       setIsListening(false);
       recognitionRef.current = null;
     };
 
     recognition.onend = () => {
-      // commit any trailing interim as final, then stop
-      setIsListening(false);
-      recognitionRef.current = null;
+      if (intentionalStopRef.current) {
+        setIsListening(false);
+        recognitionRef.current = null;
+        return;
+      }
+      // The browser ended the session on its own (Chrome imposes an internal
+      // duration/silence limit even with continuous:true) while the mic is
+      // still meant to be on — restart seamlessly so capturing doesn't
+      // silently stop while the user keeps talking.
+      try {
+        recognition.start();
+      } catch {
+        setIsListening(false);
+        recognitionRef.current = null;
+      }
     };
 
     recognition.start();

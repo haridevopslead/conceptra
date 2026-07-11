@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { evaluateAnswer, EvaluationError } from "@/lib/interview/evaluate";
 import { recordPracticeStreak } from "@/lib/streak";
+import { checkEvaluateQuota, quotaErrorMessage } from "@/lib/ai-quota";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -12,6 +13,19 @@ export async function POST(req: NextRequest) {
   const { question, answer, topic, difficulty } = await req.json();
   if (!question?.trim() || !answer?.trim()) {
     return NextResponse.json({ error: "Missing question or answer" }, { status: 400 });
+  }
+
+  // Fetch fresh from DB rather than trusting the JWT — session.user.plan can
+  // be stale until re-login if the user upgraded mid-session.
+  const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } });
+  const plan = dbUser?.plan ?? "FREE";
+
+  const quota = await checkEvaluateQuota(session.user.id, plan);
+  if (!quota.allowed) {
+    return NextResponse.json(
+      { error: quotaErrorMessage(quota, plan, "AI answers"), resetAt: quota.resetAt },
+      { status: 429 }
+    );
   }
 
   const topicCtx = topic ?? "General DevOps";

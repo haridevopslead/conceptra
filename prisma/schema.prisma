@@ -48,6 +48,7 @@ model User {
   sessions          Session[]
   interviewSessions InterviewSession[]
   lessonProgress    UserLessonProgress[]
+  aiUsage           AiUsage[]
 }
 
 model Session {
@@ -131,6 +132,21 @@ model InterviewSession {
   @@index([userId])
   @@index([userId, createdAt])
   @@index([userId, bookmarked])
+}
+
+// Conversation-level usage log for AI features that don't otherwise persist
+// a per-call record (e.g. Interview with Dev's streaming chat). One row per
+// conversation, not per message turn — see lib/ai-quota.ts. Quick Practice
+// doesn't need a row here since InterviewSession already logs one row per
+// graded answer and is used directly for that quota.
+model AiUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String
+  createdAt DateTime @default(now())
+
+  @@index([userId, kind, createdAt])
 }
 
 model UserLessonProgress {

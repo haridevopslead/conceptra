@@ -710,8 +710,12 @@ export default function Evaluator() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question, answer, topic: topic ?? "General DevOps", difficulty }),
       });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: EvalResult = await res.json();
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.error ?? `Evaluation failed (${res.status}). Please try again.`);
+        setPhase("idle");
+        return;
+      }
       // A freshly-submitted answer is never already bookmarked.
       const scoredResult: EvalResult = { ...data, bookmarked: false };
       setResult(scoredResult);

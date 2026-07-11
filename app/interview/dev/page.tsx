@@ -149,7 +149,16 @@ export default function DevInterviewPage() {
       body: JSON.stringify({ messages: apiMessages, topic: topicArg, difficulty: difficultyArg }),
     });
 
-    if (!res.ok || !res.body) throw new Error(`Request failed: ${res.status}`);
+    if (!res.ok || !res.body) {
+      let message = `Request failed: ${res.status}`;
+      try {
+        const data = await res.json();
+        if (data?.error) message = data.error;
+      } catch {
+        // response wasn't JSON (e.g. a network-level failure) — keep the fallback
+      }
+      throw new Error(message);
+    }
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -189,8 +198,8 @@ export default function DevInterviewPage() {
       });
 
       apiHistoryRef.current = [kickoff, { role: "assistant", content: devText }];
-    } catch {
-      setError("Couldn't reach Dev. Check your connection and try again.");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Couldn't reach Dev. Check your connection and try again.");
       setScreen("setup");
     } finally {
       setStreaming(false);

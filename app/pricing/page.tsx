@@ -3,7 +3,29 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import PricingClient from "@/components/pricing/pricing-client";
 
-export const metadata = { title: "Pricing — Conceptra" };
+const PRICING_TITLE = "Pricing — Conceptra";
+const PRICING_DESCRIPTION =
+  "Simple pricing for DevOps interview prep. Start free with 3 AI mock interviews a month, or go Pro for unlimited practice, every interview brief, and detailed scoring.";
+
+export const metadata = {
+  title: PRICING_TITLE,
+  description: PRICING_DESCRIPTION,
+  openGraph: {
+    title: PRICING_TITLE,
+    description: PRICING_DESCRIPTION,
+    url: "https://conceptra.in/pricing",
+    siteName: "Conceptra",
+    // Reuse the site-wide dynamic OG image (app/opengraph-image.tsx) — a
+    // page-level openGraph object isn't auto-merged with it otherwise.
+    images: ["/opengraph-image"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: PRICING_TITLE,
+    description: PRICING_DESCRIPTION,
+  },
+};
 
 export default async function PricingPage() {
   const session = await getServerSession(authOptions);

@@ -72,6 +72,8 @@ export default function Image() {
         {/* Subtitle */}
         <div
           style={{
+            display: "flex",
+            flexDirection: "column",
             fontSize: 28,
             color: "#B3A799",
             fontFamily: "system-ui, sans-serif",
@@ -80,9 +82,8 @@ export default function Image() {
             maxWidth: 860,
           }}
         >
-          AI-powered coaching by a Lead DevOps Engineer.
-          <br />
-          Real scenarios · Honest feedback · Land the role.
+          <span>AI-powered coaching by a Lead DevOps Engineer.</span>
+          <span>Real scenarios · Honest feedback · Land the role.</span>
         </div>
 
         {/* Bottom decorative line */}

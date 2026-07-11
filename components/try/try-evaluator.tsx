@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import SeniorAnswerBox, { RichText } from "@/components/interview/senior-answer-box";
+import CompareAnswer from "@/components/interview/compare-answer";
 
 const TRY_QUESTION = "What happens when you run kubectl apply -f deployment.yaml?";
 
@@ -374,6 +375,7 @@ export default function TryEvaluator() {
             color="#F5A623" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
             directAnswer={result.direct_answer} concreteExample={result.concrete_example} seniorInsight={result.senior_insight}
           />
+          <CompareAnswer userAnswer={answer} concreteExample={result.concrete_example} seniorInsight={result.senior_insight} />
 
           {/* Dev chat is an authenticated-only feature — prompt signup rather
               than bouncing an anonymous visitor through a login wall. */}

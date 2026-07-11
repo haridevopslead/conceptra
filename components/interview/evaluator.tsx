@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import SeniorAnswerBox, { RichText } from "./senior-answer-box";
+import CompareAnswer from "./compare-answer";
 
 // ── Question bank ─────────────────────────────────────────────────────────────
 
@@ -824,6 +825,7 @@ export default function Evaluator() {
           color="#F5A623" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
           directAnswer={r.direct_answer} concreteExample={r.concrete_example} seniorInsight={r.senior_insight}
         />
+        <CompareAnswer userAnswer={entry.answer} concreteExample={r.concrete_example} seniorInsight={r.senior_insight} />
         <GoDeeperButton ctx={{ topic, difficulty, question: entry.question, answer: entry.answer, seniorInsight: r.senior_insight }} />
 
         <button
@@ -1013,6 +1015,7 @@ export default function Evaluator() {
             color="#F5A623" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
             directAnswer={result.direct_answer} concreteExample={result.concrete_example} seniorInsight={result.senior_insight}
           />
+          <CompareAnswer userAnswer={answer} concreteExample={result.concrete_example} seniorInsight={result.senior_insight} />
           <GoDeeperButton ctx={{ topic, difficulty, question, answer, seniorInsight: result.senior_insight }} />
 
           <button

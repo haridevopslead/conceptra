@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import Link from "next/link";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -109,6 +110,9 @@ function parseFeedback(text: string): FeedbackData {
 export default function DevInterviewPage() {
   const [screen, setScreen] = useState<Screen>("setup");
   const [checkingHandoff, setCheckingHandoff] = useState(true);
+  // Only true when this chat was opened via the Quick Practice handoff —
+  // a manually-started Dev session has no practice session to link back to.
+  const [cameFromPractice, setCameFromPractice] = useState(false);
   const [topic, setTopic] = useState<string>("Docker");
   const [difficulty, setDifficulty] = useState<Difficulty>("Intermediate");
 
@@ -207,6 +211,7 @@ export default function DevInterviewPage() {
     const validDifficulty: Difficulty = (DIFFICULTIES as readonly string[]).includes(ctx.difficulty)
       ? (ctx.difficulty as Difficulty)
       : "Intermediate";
+    setCameFromPractice(true);
     setTopic(ctx.topic);
     setDifficulty(validDifficulty);
     beginChat(buildContextKickoff(ctx), ctx.topic, validDifficulty);
@@ -529,6 +534,14 @@ export default function DevInterviewPage() {
 
   return (
     <div className="chat-root">
+      {/* Back to Quick Practice — only shown when this chat came from that
+          handoff; a manually-started session has nothing to return to. */}
+      {cameFromPractice && (
+        <Link href="/interview/practice" className="chat-back-link">
+          ← Back to your practice session
+        </Link>
+      )}
+
       {/* Header */}
       <div className="chat-header">
         <div className="chat-avatar">🤖</div>
@@ -606,6 +619,14 @@ export default function DevInterviewPage() {
           height: 100vh; background: #1C1917; color: #E7DDD5;
           display: flex; flex-direction: column;
         }
+        .chat-back-link {
+          display: block; flex-shrink: 0;
+          padding: 0.6rem 1.25rem;
+          font-size: 0.8rem; color: #9E8E85;
+          background: #1C1917; border-bottom: 1px solid #2C2420;
+          text-decoration: none; transition: color 0.15s;
+        }
+        .chat-back-link:hover { color: #F5A623; }
         .chat-header {
           display: flex; align-items: center; gap: 0.75rem;
           padding: 0.875rem 1.25rem;

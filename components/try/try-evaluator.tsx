@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import SeniorAnswerBox, { RichText } from "@/components/interview/senior-answer-box";
 import CompareAnswer from "@/components/interview/compare-answer";
+import MicButton from "@/components/interview/mic-button";
+import { useVoiceRecorder } from "@/components/interview/use-voice-recorder";
 
 const TRY_QUESTION = "What happens when you run kubectl apply -f deployment.yaml?";
 
@@ -23,26 +25,6 @@ type EvalResult = {
   senior_insight: string;
 };
 
-// Web Speech API types (not in default TS lib)
-interface SpeechRecognitionEvent extends Event {
-  resultIndex: number;
-  results: SpeechRecognitionResultList;
-}
-interface SpeechRecognitionErrorEvent extends Event {
-  error: string;
-}
-interface SpeechRecognitionInstance extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start(): void;
-  stop(): void;
-  onresult: ((e: SpeechRecognitionEvent) => void) | null;
-  onerror: ((e: SpeechRecognitionErrorEvent) => void) | null;
-  onend: (() => void) | null;
-}
-declare const webkitSpeechRecognition: new () => SpeechRecognitionInstance;
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function scoreColor(n: number) {
@@ -57,19 +39,6 @@ function scoreLabel(n: number) {
   if (n >= 6) return "Good";
   if (n >= 4) return "Needs Work";
   return "Keep Practicing";
-}
-
-// ── Icons ─────────────────────────────────────────────────────────────────────
-
-function MicIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-      <line x1="12" y1="19" x2="12" y2="23" />
-      <line x1="8" y1="23" x2="16" y2="23" />
-    </svg>
-  );
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -110,107 +79,23 @@ export default function TryEvaluator() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [result, setResult] = useState<EvalResult | null>(null);
   const [error, setError] = useState("");
-  const [isListening, setIsListening] = useState(false);
 
-  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-  const baseTextRef = useRef("");
-  const finalTranscriptRef = useRef("");
-  // True once the user (or a fatal error) has actually asked recognition to
-  // stop — distinguishes that from the browser silently ending the session
-  // on its own, which onend should recover from by restarting.
-  const intentionalStopRef = useRef(false);
+  // ── Voice input — record, then transcribe via Groq Whisper on stop ───────────
 
-  // ── Voice input ─────────────────────────────────────────────────────────────
-
-  const stopListening = useCallback(() => {
-    intentionalStopRef.current = true;
-    recognitionRef.current?.stop();
-    recognitionRef.current = null;
-    setIsListening(false);
-  }, []);
-
-  const startListening = useCallback(() => {
-    const SR =
-      typeof window !== "undefined" &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
-
-    if (!SR) {
-      setError("Voice input requires Chrome or Edge. Please use one of those browsers.");
-      return;
-    }
-
-    baseTextRef.current = answer;
-    finalTranscriptRef.current = "";
-    intentionalStopRef.current = false;
-
-    const recognition: SpeechRecognitionInstance = new SR();
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "en-IN";
-
-    recognition.onresult = (e: SpeechRecognitionEvent) => {
-      let interim = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) {
-          finalTranscriptRef.current += t + " ";
-        } else {
-          interim += t;
-        }
-      }
-      const base = baseTextRef.current;
-      const voiced = finalTranscriptRef.current + interim;
-      const spacer = base && voiced ? " " : "";
-      setAnswer(base + spacer + voiced);
-    };
-
-    recognition.onerror = (e: SpeechRecognitionErrorEvent) => {
-      // "no-speech" fires on an ordinary pause between sentences — not a
-      // real failure. Let onend handle it (it restarts the session below)
-      // instead of killing the mic mid-answer.
-      if (e.error === "no-speech") return;
-      intentionalStopRef.current = true;
-      setIsListening(false);
-      recognitionRef.current = null;
-    };
-
-    recognition.onend = () => {
-      if (intentionalStopRef.current) {
-        setIsListening(false);
-        recognitionRef.current = null;
-        return;
-      }
-      // The browser ended the session on its own (Chrome imposes an internal
-      // duration/silence limit even with continuous:true) while the mic is
-      // still meant to be on — restart seamlessly so capturing doesn't
-      // silently stop while the user keeps talking.
-      try {
-        recognition.start();
-      } catch {
-        setIsListening(false);
-        recognitionRef.current = null;
-      }
-    };
-
-    recognition.start();
-    recognitionRef.current = recognition;
-    setIsListening(true);
-  }, [answer]);
-
-  function toggleMic() {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
-  }
+  const {
+    micState,
+    error: voiceError,
+    toggleMic,
+    cancelRecording,
+  } = useVoiceRecorder("/api/try/transcribe", (text) => {
+    setAnswer((prev) => prev + (prev ? " " : "") + text);
+  });
 
   // ── Submit ──────────────────────────────────────────────────────────────────
 
   async function submit() {
-    if (!answer.trim() || phase !== "idle") return;
-    if (isListening) stopListening();
+    if (!answer.trim() || phase !== "idle" || micState !== "idle") return;
+    cancelRecording();
     setPhase("submitting");
     setError("");
     setResult(null);
@@ -265,10 +150,15 @@ export default function TryEvaluator() {
           <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
             Your Answer
           </label>
-          {isListening && (
+          {micState === "recording" && (
             <span className="flex items-center gap-1.5 text-xs font-semibold text-red-400 animate-pulse">
               <span className="w-1.5 h-1.5 rounded-full bg-red-400 inline-block" />
-              Listening…
+              Recording…
+            </span>
+          )}
+          {micState === "transcribing" && (
+            <span className="text-xs font-semibold" style={{ color: "#F5A623" }}>
+              Transcribing…
             </span>
           )}
         </div>
@@ -282,40 +172,15 @@ export default function TryEvaluator() {
           className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 border focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent resize-none disabled:opacity-50 transition-all"
           style={{
             backgroundColor: "#2C2420",
-            borderColor: isListening ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.1)",
+            borderColor: micState === "recording" ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.1)",
           }}
         />
 
-        {phase === "idle" && (
-          <div className="flex flex-col items-center gap-1.5 py-1">
-            <button
-              onClick={toggleMic}
-              aria-label={isListening ? "Stop recording" : "Start voice input"}
-              className="relative flex items-center justify-center w-12 h-12 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0A0E1A]"
-              style={{
-                backgroundColor: isListening ? "#EF4444" : "rgba(245,166,35,0.12)",
-                border: isListening ? "2px solid #EF4444" : "2px solid rgba(245,166,35,0.4)",
-                color: isListening ? "#fff" : "#F5A623",
-                boxShadow: isListening ? "0 0 0 0 rgba(239,68,68,0.4)" : "none",
-              }}
-            >
-              {isListening && (
-                <span
-                  className="absolute inset-0 rounded-full animate-ping"
-                  style={{ backgroundColor: "rgba(239,68,68,0.35)" }}
-                />
-              )}
-              <MicIcon className="w-5 h-5 relative z-10" />
-            </button>
-            <p className="text-xs text-gray-500">
-              {isListening ? "Click to stop recording" : "Click to speak your answer"}
-            </p>
-          </div>
-        )}
+        {phase === "idle" && <MicButton micState={micState} onToggle={toggleMic} />}
 
-        {error && (
+        {(error || voiceError) && (
           <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-3">
-            {error}
+            {error || voiceError}
           </p>
         )}
 
@@ -323,7 +188,7 @@ export default function TryEvaluator() {
           <>
             <button
               onClick={submit}
-              disabled={phase === "submitting" || !answer.trim()}
+              disabled={phase === "submitting" || !answer.trim() || micState !== "idle"}
               className="w-full py-3.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
               style={{
                 backgroundColor:

@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { CATEGORY_COLOR, DIFFICULTY_COLOR, FALLBACK_COLOR } from "@/lib/lesson-style";
+import { isPublicLesson } from "@/lib/public-lessons";
 
 type LessonRow = {
   id: string;
@@ -16,7 +17,7 @@ type LessonRow = {
   tier: string;
 };
 
-type Props = { plan: string; visitedSlugs: string[]; lessons: LessonRow[] };
+type Props = { plan: string; visitedSlugs: string[]; lessons: LessonRow[]; anonymous: boolean };
 
 function LockIcon() {
   return (
@@ -36,8 +37,12 @@ function ClockIcon() {
   );
 }
 
-function LessonCard({ lesson, plan, visited }: { lesson: LessonRow; plan: string; visited: boolean }) {
-  const locked = lesson.tier !== "FREE" && plan === "FREE";
+function LessonCard({
+  lesson, plan, visited, anonymous,
+}: {
+  lesson: LessonRow; plan: string; visited: boolean; anonymous: boolean;
+}) {
+  const locked = anonymous ? !isPublicLesson(lesson.slug) : lesson.tier !== "FREE" && plan === "FREE";
   const categoryColor = CATEGORY_COLOR[lesson.category] ?? FALLBACK_COLOR;
   const difficultyColor = DIFFICULTY_COLOR[lesson.difficulty] ?? FALLBACK_COLOR;
 
@@ -57,7 +62,7 @@ function LessonCard({ lesson, plan, visited }: { lesson: LessonRow; plan: string
           style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
         >
           <LockIcon />
-          Pro
+          {anonymous ? "Sign up" : "Pro"}
         </div>
       )}
       {visited && !locked && (
@@ -120,11 +125,11 @@ function LessonCard({ lesson, plan, visited }: { lesson: LessonRow; plan: string
 
         {locked ? (
           <Link
-            href="/pricing"
+            href={anonymous ? "/register" : "/pricing"}
             className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80"
             style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
           >
-            Upgrade to unlock
+            {anonymous ? "Sign up to unlock" : "Upgrade to unlock"}
           </Link>
         ) : (
           <Link
@@ -140,7 +145,7 @@ function LessonCard({ lesson, plan, visited }: { lesson: LessonRow; plan: string
   );
 }
 
-export default function LessonsClient({ plan, visitedSlugs, lessons }: Props) {
+export default function LessonsClient({ plan, visitedSlugs, lessons, anonymous }: Props) {
   const visitedSet = new Set(visitedSlugs);
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("All");
@@ -169,8 +174,10 @@ export default function LessonsClient({ plan, visitedSlugs, lessons }: Props) {
       ? lessons.length
       : lessons.filter((l) => l.category === cat).length;
 
-  const freeCount = filtered.filter((l) => l.tier === "FREE").length;
-  const proCount = filtered.filter((l) => l.tier !== "FREE").length;
+  const openCount = anonymous
+    ? filtered.filter((l) => isPublicLesson(l.slug)).length
+    : filtered.filter((l) => l.tier === "FREE").length;
+  const gatedCount = filtered.length - openCount;
 
   return (
     <div className="p-4 sm:p-8 max-w-5xl mx-auto space-y-6">
@@ -246,8 +253,11 @@ export default function LessonsClient({ plan, visitedSlugs, lessons }: Props) {
       {filtered.length > 0 && (
         <p className="text-xs text-gray-500">
           Showing {filtered.length} brief{filtered.length !== 1 ? "s" : ""}
-          {plan === "FREE" && proCount > 0 && (
-            <> &mdash; <span className="text-gray-400">{freeCount} free</span>, {proCount} require Pro to unlock</>
+          {anonymous && gatedCount > 0 && (
+            <> &mdash; <span className="text-gray-400">{openCount} open now</span>, {gatedCount} unlock after you sign up</>
+          )}
+          {!anonymous && plan === "FREE" && gatedCount > 0 && (
+            <> &mdash; <span className="text-gray-400">{openCount} free</span>, {gatedCount} require Pro to unlock</>
           )}
         </p>
       )}
@@ -256,7 +266,13 @@ export default function LessonsClient({ plan, visitedSlugs, lessons }: Props) {
       {filtered.length > 0 ? (
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filtered.map((lesson) => (
-            <LessonCard key={lesson.id} lesson={lesson} plan={plan} visited={visitedSet.has(lesson.slug)} />
+            <LessonCard
+              key={lesson.id}
+              lesson={lesson}
+              plan={plan}
+              visited={visitedSet.has(lesson.slug)}
+              anonymous={anonymous}
+            />
           ))}
         </div>
       ) : (

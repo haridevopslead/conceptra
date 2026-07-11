@@ -1,9 +1,10 @@
 import { CATEGORY_COLOR, DIFFICULTY_COLOR, FALLBACK_COLOR } from "@/lib/lesson-style";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { isPublicLesson } from "@/lib/public-lessons";
 import LessonTracker from "@/components/lessons/lesson-tracker";
 import LessonComplete from "@/components/lessons/lesson-complete";
 import CopyButton from "@/components/lessons/copy-button";
@@ -277,6 +278,10 @@ export default async function LessonDetailPage({
   const dbLesson = await db.lesson.findUnique({ where: { slug: params.slug } });
   if (!dbLesson || !dbLesson.published) notFound();
 
+  // Only the whitelisted briefs are readable without an account — everything
+  // else keeps today's behavior of sending logged-out visitors to sign in.
+  if (!session && !isPublicLesson(params.slug)) redirect("/login");
+
   let isCompleted = false;
   let nextLesson: { slug: string; title: string; topics: string[]; durationMinutes: number } | null = null;
   try {
@@ -310,7 +315,7 @@ export default async function LessonDetailPage({
 
   return (
     <div className="lesson-detail-page p-4 sm:p-8 w-full max-w-[860px]">
-      <LessonTracker slug={params.slug} />
+      {session && <LessonTracker slug={params.slug} />}
       {/* Back */}
       <Link
         href="/lessons"
@@ -400,11 +405,21 @@ export default async function LessonDetailPage({
               </div>
             );
           })}
-          <LessonComplete
-            slug={params.slug}
-            nextLesson={nextLesson}
-            initialCompleted={isCompleted}
-          />
+          {session ? (
+            <LessonComplete
+              slug={params.slug}
+              nextLesson={nextLesson}
+              initialCompleted={isCompleted}
+            />
+          ) : (
+            <Link
+              href="/register"
+              className="block w-full text-center py-3.5 rounded-xl font-bold text-sm transition-opacity hover:opacity-90"
+              style={{ backgroundColor: "#F5A623", color: "#1C1917", textDecoration: "none" }}
+            >
+              Sign up for the full library + AI-graded practice on this topic →
+            </Link>
+          )}
         </div>
       ) : (
         <div

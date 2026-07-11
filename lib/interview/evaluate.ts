@@ -75,6 +75,8 @@ TONE FOR direct_answer, concrete_example, and senior_insight — a learner reads
 - No bullet points, no "Firstly/Secondly/In conclusion", no dense compound sentences stacked with commas. Sound like someone answering out loud in an interview room, not writing documentation.
 - senior_insight is the most important field and the hardest to fake. It must contain one specific, honest trade-off, limitation, or "here's when I'd actually avoid this" — never generic praise or a restatement of the direct answer. If the topic has no single dramatic trade-off, use a real operational one instead: cost, maintenance burden, a common failure mode, or a case where a simpler/managed alternative is better.
 
+CRITICAL RULE — direct_answer, concrete_example, and senior_insight must NEVER reference the candidate, the response, or the fact that an answer was submitted at all. Never write phrases like "the candidate," "the response," "your answer," "I'm not able to evaluate a meaningful answer here," "the response doesn't contain any recognizable technical content," or "here's what a real answer might look like." These three fields are Dev directly answering the original interview question in first person, cold — exactly as if asked fresh, with zero awareness that anyone attempted an answer. This holds true regardless of whether the candidate's answer was excellent, mediocre, garbled, blank, or complete nonsense — the quality of the submitted answer must never leak into these three fields. Commentary about the actual submitted answer — including saying it's unintelligible, off-topic, or contains no recognizable content, when true — belongs ONLY in what_was_strong and what_was_weak. Never in direct_answer, concrete_example, or senior_insight.
+
 FORMATTING RULE — applies consistently across direct_answer, concrete_example, and senior_insight: wrap every command, flag, config key/value, file path, and exit code in single backticks, e.g. \`kubectl describe pod\`, \`initialDelaySeconds: 60\`, \`exit code 137\`, \`--dry-run\`, \`/etc/kubernetes/manifests\`. This is required, not optional — a learner should be able to scan each field and immediately spot every literal technical token. Do not backtick plain product/technology names (Kubernetes, MySQL, S3) unless they appear as part of a literal command or identifier.
 
 If a real config snippet or command sequence genuinely strengthens concrete_example, you may include a short fenced block (\`\`\`, 2-6 lines, no more than one per field) instead of inline backticks for that portion — but only when it fits naturally without breaking the spoken cadence of the surrounding sentence.
@@ -87,7 +89,24 @@ QUESTION: What is the difference between a Kubernetes Deployment and a StatefulS
   "senior_insight": "But honestly, I'll be very frank — I try to avoid StatefulSets wherever possible. They are more painful operationally, scaling is slower, and if something fails, mostly you end up doing manual cleanup instead of Kubernetes handling it automatically. So for databases, if I get an option to run it as a managed service outside the cluster, I will prefer that only. A StatefulSet is solving 'which pod is this,' it is not solving 'is this reliable.'"
 }
 
-Now write direct_answer, concrete_example, and senior_insight for the ACTUAL question above (not the calibration example), in this exact tone, at the quality level of a 9/10 senior answer.`;
+SECOND CALIBRATION EXAMPLE — this is a real case that exposed a bug, showing why the CRITICAL RULE above matters:
+QUESTION: How would you design a zero-downtime deployment pipeline for a service that requires a database schema migration?
+CANDIDATE'S ANSWER (garbled — this can happen with voice-transcription glitches): "diploma pipeline I will create a separate and from where the application in panel interested and dance which is the version application"
+
+WRONG — do not do this, even though the answer above is nonsense:
+{
+  "direct_answer": "I'm not able to evaluate a meaningful answer here because the response doesn't contain any recognizable technical content. To answer this properly, you'd want to talk about separating schema changes from application code..."
+}
+This is wrong because it acknowledges the submitted answer at all. That commentary belongs in what_was_weak, not here.
+
+CORRECT — direct_answer reads as a clean, independent answer to the question, with zero acknowledgment that anything was submitted:
+{
+  "direct_answer": "So the key move is separating the schema change from the application deploy — you deploy the database migration first, in a backward-compatible way, then deploy the new app code separately, so there's never a moment where either version of the app can't talk to the database."
+}
+
+The same independence applies no matter how bad, blank, or off-topic the candidate's answer is — concrete_example and senior_insight follow the exact same rule as direct_answer here.
+
+Now write direct_answer, concrete_example, and senior_insight for the ACTUAL question above (not either calibration example), in this exact tone, at the quality level of a 9/10 senior answer. If the candidate's answer is weak, garbled, or nonsensical, that only affects the scores and what_was_strong/what_was_weak — it must have zero effect on direct_answer, concrete_example, and senior_insight.`;
 
   const message = await anthropic.messages.create({
     model: "claude-haiku-4-5-20251001",

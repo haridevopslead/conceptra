@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import SeniorAnswerBox, { RichText } from "@/components/interview/senior-answer-box";
 import CompareAnswer from "@/components/interview/compare-answer";
@@ -79,23 +79,54 @@ export default function TryEvaluator() {
   const [phase, setPhase] = useState<Phase>("idle");
   const [result, setResult] = useState<EvalResult | null>(null);
   const [error, setError] = useState("");
+  // Whether the textarea currently holds a rough live Web Speech caption
+  // (dimmed/italic) rather than the accurate Groq transcript or typed text.
+  const [isLiveText, setIsLiveText] = useState(false);
+  const baseAnswerRef = useRef("");
 
-  // ── Voice input — record, then transcribe via Groq Whisper on stop ───────────
+  // ── Voice input ──────────────────────────────────────────────────────────────
+  // A best-effort Web Speech API layer shows rough live captions while
+  // speaking (appended to whatever answer text existed before this recording
+  // started); the moment the accurate Groq Whisper transcript comes back on
+  // stop, it fully replaces that rough text — never appended alongside it.
+
+  function handleLiveText(liveTranscript: string) {
+    setIsLiveText(true);
+    setAnswer(baseAnswerRef.current ? `${baseAnswerRef.current} ${liveTranscript}` : liveTranscript);
+  }
+
+  function handleFinalText(finalTranscript: string) {
+    setIsLiveText(false);
+    setAnswer(baseAnswerRef.current ? `${baseAnswerRef.current} ${finalTranscript}` : finalTranscript);
+  }
 
   const {
     micState,
     error: voiceError,
     toggleMic,
     cancelRecording,
-  } = useVoiceRecorder("/api/try/transcribe", (text) => {
-    setAnswer((prev) => prev + (prev ? " " : "") + text);
-  });
+  } = useVoiceRecorder("/api/try/transcribe", handleLiveText, handleFinalText);
+
+  // Groq failed after live captions already showed rough text — that rough
+  // text is the best we have, so stop flagging it as a placeholder.
+  useEffect(() => {
+    if (voiceError) setIsLiveText(false);
+  }, [voiceError]);
+
+  function handleMicToggle() {
+    if (micState === "idle") {
+      baseAnswerRef.current = answer;
+      setIsLiveText(true);
+    }
+    toggleMic();
+  }
 
   // ── Submit ──────────────────────────────────────────────────────────────────
 
   async function submit() {
     if (!answer.trim() || phase !== "idle" || micState !== "idle") return;
     cancelRecording();
+    setIsLiveText(false);
     setPhase("submitting");
     setError("");
     setResult(null);
@@ -165,7 +196,10 @@ export default function TryEvaluator() {
 
         <textarea
           value={answer}
-          onChange={(e) => setAnswer(e.target.value)}
+          onChange={(e) => {
+            setAnswer(e.target.value);
+            setIsLiveText(false);
+          }}
           disabled={phase !== "idle"}
           rows={8}
           placeholder="Type your answer here — or use the mic below to speak it. Aim for the depth a senior engineer would give: trade-offs, failure modes, production consequences."
@@ -173,10 +207,12 @@ export default function TryEvaluator() {
           style={{
             backgroundColor: "#2C2420",
             borderColor: micState === "recording" ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.1)",
+            fontStyle: isLiveText ? "italic" : "normal",
+            opacity: isLiveText ? 0.7 : 1,
           }}
         />
 
-        {phase === "idle" && <MicButton micState={micState} onToggle={toggleMic} />}
+        {phase === "idle" && <MicButton micState={micState} onToggle={handleMicToggle} />}
 
         {(error || voiceError) && (
           <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-3">

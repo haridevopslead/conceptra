@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import { createVerificationToken } from "@/lib/verification";
+import { sendVerificationEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,6 +35,17 @@ export async function POST(req: NextRequest) {
     await db.user.create({
       data: { name, email, hashedPassword },
     });
+
+    // Best-effort — a failed send shouldn't fail registration itself; the
+    // account still exists and the user can hit "Resend verification email."
+    try {
+      const token = await createVerificationToken(email);
+      const baseUrl = process.env.NEXTAUTH_URL ?? "https://conceptra.in";
+      const verifyUrl = `${baseUrl}/verify-email?token=${token}`;
+      await sendVerificationEmail(email, verifyUrl);
+    } catch (err) {
+      console.error("[REGISTER] Failed to send verification email", err);
+    }
 
     return NextResponse.json({ success: true }, { status: 201 });
   } catch (err) {

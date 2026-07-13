@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import Link from "next/link";
 import WelcomeBanner from "@/components/dashboard/welcome-banner";
+import VerifyEmailBanner from "@/components/dashboard/verify-email-banner";
 import { computeReadinessScore, READINESS_WINDOW } from "@/lib/readiness";
 
 const DAY_INITIAL = ["S", "M", "T", "W", "T", "F", "S"]; // indexed by getUTCDay() (0=Sun)
@@ -66,6 +67,7 @@ export default async function DashboardPage() {
 
   let freshPlan = user.plan;
   let streak = 0;
+  let emailVerified: Date | null = null;
   let interviews: {
     score: number;
     topic: string | null;
@@ -78,7 +80,7 @@ export default async function DashboardPage() {
   let totalLessons = 8;
   try {
     const [dbUser, dbInterviews, dbProgress, dbLessonCount] = await Promise.all([
-      db.user.findUnique({ where: { id: user.id }, select: { plan: true, currentStreak: true } }),
+      db.user.findUnique({ where: { id: user.id }, select: { plan: true, currentStreak: true, emailVerified: true } }),
       db.interviewSession.findMany({
         where: { userId: user.id },
         select: {
@@ -100,6 +102,7 @@ export default async function DashboardPage() {
     if (dbUser) {
       freshPlan = dbUser.plan;
       streak = dbUser.currentStreak;
+      emailVerified = dbUser.emailVerified;
     }
     interviews = dbInterviews;
     lessonProgress = dbProgress;
@@ -142,6 +145,7 @@ export default async function DashboardPage() {
     <div className="dash-page" style={{ maxWidth: 920, margin: "0 auto", padding: "56px 64px 80px", display: "flex", flexDirection: "column", gap: 26 }}>
 
       {isFirstTimeUser && <WelcomeBanner />}
+      {!emailVerified && user.email && <VerifyEmailBanner email={user.email} />}
 
       {/* Header */}
       <div className="dash-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20 }}>

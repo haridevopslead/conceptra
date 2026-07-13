@@ -17,8 +17,15 @@ export async function POST(req: NextRequest) {
 
   // Fetch fresh from DB rather than trusting the JWT — session.user.plan can
   // be stale until re-login if the user upgraded mid-session.
-  const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } });
+  const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true, emailVerified: true } });
   const plan = dbUser?.plan ?? "FREE";
+
+  if (!dbUser?.emailVerified) {
+    return NextResponse.json(
+      { error: "Please verify your email to start AI mock interviews. Check your inbox, or resend the link from your dashboard." },
+      { status: 403 }
+    );
+  }
 
   const quota = await checkEvaluateQuota(session.user.id, plan);
   if (!quota.allowed) {

@@ -11,13 +11,21 @@ export async function POST(req: NextRequest) {
 
   const { messages, topic, difficulty } = await req.json();
 
+  const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true, emailVerified: true } });
+
+  if (!dbUser?.emailVerified) {
+    return new Response(
+      JSON.stringify({ error: "Please verify your email to start Interview with Hari. Check your inbox, or resend the link from your dashboard." }),
+      { status: 403, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   // The client always sends the full running conversation history, so the
   // very first call of a new conversation is the only one with exactly one
   // message (the kickoff) — every later turn has 3+. Quota is charged once
   // per conversation here, not per message turn.
   const isNewConversation = Array.isArray(messages) && messages.length === 1;
   if (isNewConversation) {
-    const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } });
     const plan = dbUser?.plan ?? "FREE";
 
     const quota = await checkDevChatQuota(session.user.id, plan);

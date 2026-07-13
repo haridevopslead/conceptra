@@ -17,6 +17,12 @@ type SpeechRecognitionLike = {
   stop: () => void;
 };
 
+// Stable reference so the default doesn't defeat useCallback memoization
+// below by producing a new function identity on every render.
+function identity(text: string): string {
+  return text;
+}
+
 function getSpeechRecognitionCtor(): (new () => SpeechRecognitionLike) | null {
   if (typeof window === "undefined") return null;
   const w = window as unknown as {
@@ -37,8 +43,19 @@ function getSpeechRecognitionCtor(): (new () => SpeechRecognitionLike) | null {
 export function useVoiceRecorder(
   endpoint: string,
   onLiveText: (text: string) => void,
-  onFinalText: (text: string) => void
+  onFinalText: (text: string) => void,
+  options?: {
+    // Web Speech recognition locale — defaults to "en-US". Callers with a
+    // different primary audience (e.g. Indian English) can override this.
+    lang?: string;
+    // Optional post-processing applied to both live and final text before
+    // it's handed to the callbacks above — e.g. a domain term-correction
+    // dictionary. Identity by default.
+    correctText?: (text: string) => string;
+  }
 ) {
+  const lang = options?.lang ?? "en-US";
+  const correctText = options?.correctText ?? identity;
   const [micState, setMicState] = useState<MicState>("idle");
   const [error, setError] = useState("");
 
@@ -99,7 +116,7 @@ export function useVoiceRecorder(
         if (!res.ok) {
           setError(data?.error ?? "Transcription failed. Please try again.");
         } else if (typeof data.text === "string" && data.text.trim()) {
-          onFinalText(data.text.trim());
+          onFinalText(correctText(data.text.trim()));
         }
       } catch {
         if (!cancelledRef.current) {
@@ -121,14 +138,14 @@ export function useVoiceRecorder(
         const recognition = new SpeechRecognitionCtor();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = "en-US";
+        recognition.lang = lang;
 
         recognition.onresult = (event) => {
           let transcript = "";
           for (let i = 0; i < event.results.length; i++) {
             transcript += event.results[i][0].transcript;
           }
-          if (!cancelledRef.current) onLiveText(transcript.trim());
+          if (!cancelledRef.current) onLiveText(correctText(transcript.trim()));
         };
         // "no-speech" and other errors are common and non-fatal for a
         // best-effort layer — just stop contributing live text quietly.
@@ -145,7 +162,7 @@ export function useVoiceRecorder(
     }
 
     setMicState("recording");
-  }, [endpoint, onFinalText, onLiveText]);
+  }, [endpoint, onFinalText, onLiveText, lang, correctText]);
 
   const stopRecording = useCallback(() => {
     mediaRecorderRef.current?.stop();

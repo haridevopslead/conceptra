@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useVoiceRecorder } from "@/components/interview/use-voice-recorder";
+import MicButton from "@/components/interview/mic-button";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -42,23 +44,6 @@ const TOPIC_CODE: Record<string, string> = {
 
 const DIFFICULTIES = ["Beginner", "Intermediate", "Senior"] as const;
 type Difficulty = typeof DIFFICULTIES[number];
-
-// ── Web Speech API types ───────────────────────────────────────────────────────
-
-interface SpeechRecognitionEvent extends Event {
-  resultIndex: number;
-  results: SpeechRecognitionResultList;
-}
-interface SpeechRecognitionInstance extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start(): void;
-  stop(): void;
-  onresult: ((e: SpeechRecognitionEvent) => void) | null;
-  onerror: ((e: Event) => void) | null;
-  onend: (() => void) | null;
-}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -120,16 +105,17 @@ export default function DevInterviewPage() {
   const [visibleMessages, setVisibleMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
-  const [isListening, setIsListening] = useState(false);
+  const [isLiveText, setIsLiveText] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackData | null>(null);
   const [error, setError] = useState("");
 
   // Full API conversation history (includes the hidden kickoff)
   const apiHistoryRef = useRef<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
-  const baseTextRef = useRef("");
-  const finalTranscriptRef = useRef("");
+  // Snapshot of `input` the instant recording starts, so live captions and
+  // the final Groq transcript both append after whatever was already typed,
+  // the same base/live/final pattern used in Quick Practice.
+  const baseInputRef = useRef("");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -244,8 +230,9 @@ export default function DevInterviewPage() {
 
   async function sendMessage() {
     const text = input.trim();
-    if (!text || streaming) return;
-    if (isListening) stopListening();
+    if (!text || streaming || micState !== "idle") return;
+    cancelRecording();
+    setIsLiveText(false);
     setInput("");
     setError("");
 
@@ -294,65 +281,37 @@ export default function DevInterviewPage() {
   }
 
   // ── Voice input ──────────────────────────────────────────────────────────────
+  // Same hybrid system as Quick Practice: MediaRecorder + Groq Whisper for
+  // the accurate final transcript, Web Speech API for rough live captions
+  // while speaking. Indian English locale and the DevOps term-correction
+  // dictionary carry over from this page's earlier Web Speech-only version.
 
-  const stopListening = useCallback(() => {
-    recognitionRef.current?.stop();
-    recognitionRef.current = null;
-    setIsListening(false);
-  }, []);
+  function handleLiveText(liveTranscript: string) {
+    setIsLiveText(true);
+    setInput(baseInputRef.current ? `${baseInputRef.current} ${liveTranscript}` : liveTranscript);
+  }
 
-  const startListening = useCallback(() => {
-    const SR =
-      typeof window !== "undefined" &&
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition);
-    if (!SR) {
-      setError("Voice input requires Chrome or Edge.");
-      return;
+  function handleFinalText(finalTranscript: string) {
+    setIsLiveText(false);
+    setInput(baseInputRef.current ? `${baseInputRef.current} ${finalTranscript}` : finalTranscript);
+  }
+
+  const {
+    micState,
+    error: voiceError,
+    toggleMic,
+    cancelRecording,
+  } = useVoiceRecorder("/api/interview/transcribe", handleLiveText, handleFinalText, {
+    lang: "en-IN",
+    correctText: correctVoice,
+  });
+
+  function handleMicToggle() {
+    if (micState === "idle") {
+      baseInputRef.current = input;
+      setIsLiveText(true);
     }
-
-    baseTextRef.current = input;
-    finalTranscriptRef.current = "";
-
-    const recognition = new SR() as SpeechRecognitionInstance;
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    recognition.lang = "en-IN";
-
-    recognition.onresult = (e: SpeechRecognitionEvent) => {
-      let interim = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        const t = e.results[i][0].transcript;
-        if (e.results[i].isFinal) finalTranscriptRef.current += t;
-        else interim += t;
-      }
-      setInput(
-        correctVoice(
-          baseTextRef.current +
-            finalTranscriptRef.current +
-            (interim ? " " + interim : ""),
-        ),
-      );
-    };
-
-    recognition.onerror = () => {
-      setIsListening(false);
-      recognitionRef.current = null;
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-      recognitionRef.current = null;
-    };
-
-    recognition.start();
-    recognitionRef.current = recognition;
-    setIsListening(true);
-  }, [input]);
-
-  function toggleMic() {
-    if (isListening) stopListening();
-    else startListening();
+    toggleMic();
   }
 
   // Avoid flashing the setup screen while we check for a Quick-Practice handoff
@@ -591,32 +550,30 @@ export default function DevInterviewPage() {
             </div>
           );
         })}
-        {error && <p className="chat-error">{error}</p>}
+        {(error || voiceError) && <p className="chat-error">{error || voiceError}</p>}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input area */}
       <div className="chat-input-area">
+        <MicButton micState={micState} onToggle={handleMicToggle} />
         <textarea
           value={input}
-          onChange={(e) => setInput(e.target.value)}
+          onChange={(e) => {
+            setInput(e.target.value);
+            setIsLiveText(false);
+          }}
           onKeyDown={handleKeyDown}
           placeholder="Type your answer… or press the mic"
           rows={3}
           disabled={streaming}
           className="chat-textarea"
+          style={{ fontStyle: isLiveText ? "italic" : "normal", opacity: isLiveText ? 0.7 : 1 }}
         />
         <div className="chat-actions">
           <button
-            onClick={toggleMic}
-            className={`chat-icon-btn${isListening ? " mic-active" : ""}`}
-            title={isListening ? "Stop recording" : "Start voice input"}
-          >
-            🎤
-          </button>
-          <button
             onClick={sendMessage}
-            disabled={!input.trim() || streaming}
+            disabled={!input.trim() || streaming || micState !== "idle"}
             className="chat-icon-btn chat-send-btn"
           >
             ↑
@@ -709,9 +666,6 @@ export default function DevInterviewPage() {
           color: #9E8E85; font-size: 1.1rem; cursor: pointer;
           display: flex; align-items: center; justify-content: center;
           transition: all 0.15s; flex-shrink: 0;
-        }
-        .chat-icon-btn.mic-active {
-          background: #F5A623; border-color: #F5A623; color: #1C1917;
         }
         .chat-send-btn:not(:disabled) {
           background: #F5A623; border-color: #F5A623; color: #1C1917;

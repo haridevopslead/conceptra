@@ -288,6 +288,34 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
         </form>
       </section>
 
+      {/* Session — a sign-out affordance that lives on the page itself, not
+          just the sidebar, which is hidden on mobile (< md breakpoint). */}
+      <section style={CARD}>
+        <p style={{ fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase", color: "#F5A623", fontWeight: 600, marginBottom: 18 }}>
+          Session
+        </p>
+        <p style={{ fontSize: 14, color: "#B3A799", lineHeight: 1.6, marginBottom: 18 }}>
+          Sign out of Conceptra on this device.
+        </p>
+        <button
+          type="button"
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          style={{
+            padding: "11px 22px",
+            borderRadius: 10,
+            background: "transparent",
+            border: "1px solid rgba(253,246,227,0.18)",
+            color: "#C9BFB2",
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: "pointer",
+            fontFamily: "inherit",
+          }}
+        >
+          Sign Out
+        </button>
+      </section>
+
       {/* Danger Zone */}
       <section style={{ ...CARD, border: "1px solid rgba(197,66,66,0.35)" }}>
         <p style={{ fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase", color: "#C57B6B", fontWeight: 600, marginBottom: 18 }}>

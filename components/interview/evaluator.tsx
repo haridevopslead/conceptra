@@ -7,6 +7,7 @@ import SeniorAnswerBox, { RichText } from "./senior-answer-box";
 import CompareAnswer from "./compare-answer";
 import MicButton from "./mic-button";
 import { useVoiceRecorder } from "./use-voice-recorder";
+import { getBriefForTopic } from "@/lib/interview/topic-briefs";
 
 // ── Question bank ─────────────────────────────────────────────────────────────
 
@@ -112,6 +113,11 @@ type EvalResult = {
   direct_answer: string;
   concrete_example: string;
   senior_insight: string;
+  // True only for an honest "I don't know" — never for a merely weak/wrong
+  // attempt. Drives the concept-explanation card below instead of the usual
+  // punitive-reading score treatment.
+  is_dont_know: boolean;
+  concept_explanation: string;
   // Present when the DB write succeeded — null if persistence failed, in
   // which case the bookmark button just doesn't render for this result.
   sessionId: string | null;
@@ -171,6 +177,33 @@ function ResultBox({
     <div className="rounded-xl border p-5 space-y-2" style={{ backgroundColor: bg, borderColor: border }}>
       <p className="text-xs font-bold tracking-wider" style={{ color }}>{icon} {label}</p>
       <RichText text={body} />
+    </div>
+  );
+}
+
+// Shown instead of a punitive score treatment when the answer was an honest
+// "I don't know" — leads the results so it reads as a teaching moment, not
+// just another (low) score. Matches the brief detail page's CONCEPT color.
+function ConceptExplanationCard({ topic, explanation }: { topic: string | null; explanation: string }) {
+  const brief = getBriefForTopic(topic ?? undefined);
+  return (
+    <div
+      className="rounded-2xl border p-6 space-y-3"
+      style={{ backgroundColor: "rgba(59,130,246,0.06)", borderColor: "rgba(59,130,246,0.25)", borderLeft: "3px solid #3B82F6" }}
+    >
+      <p className="text-xs font-bold tracking-widest" style={{ color: "#3B82F6" }}>
+        📘 LET&apos;S COVER THE CONCEPT
+      </p>
+      <RichText text={explanation} />
+      {brief && (
+        <Link
+          href={`/lessons/${brief.slug}#concept`}
+          className="inline-block text-sm font-semibold hover:underline"
+          style={{ color: "#3B82F6" }}
+        >
+          Want the full breakdown? Read the {brief.title} brief →
+        </Link>
+      )}
     </div>
   );
 }
@@ -852,14 +885,27 @@ export default function Evaluator() {
           </div>
         </div>
 
+        {/* Concept explanation — same as the fresh result view */}
+        {r.is_dont_know && (
+          <ConceptExplanationCard topic={topic} explanation={r.concept_explanation} />
+        )}
+
         {/* Score */}
         <div className="rounded-2xl border border-white/10 p-6" style={{ backgroundColor: "#211C18" }}>
           <div className="flex items-center gap-6 flex-wrap">
             <div className="text-center shrink-0">
-              <div className="text-5xl font-black leading-none" style={{ color: scoreColor(r.overall_score) }}>
+              <div
+                className="text-5xl font-black leading-none"
+                style={{ color: r.is_dont_know ? "#3B82F6" : scoreColor(r.overall_score) }}
+              >
                 {r.overall_score}<span className="text-2xl font-bold text-gray-500">/10</span>
               </div>
-              <p className="text-sm font-semibold mt-1" style={{ color: scoreColor(r.overall_score) }}>{scoreLabel(r.overall_score)}</p>
+              <p
+                className="text-sm font-semibold mt-1"
+                style={{ color: r.is_dont_know ? "#3B82F6" : scoreColor(r.overall_score) }}
+              >
+                {r.is_dont_know ? "Knowledge gap, not a wrong answer" : scoreLabel(r.overall_score)}
+              </p>
             </div>
             <div className="w-px h-14 bg-white/10 shrink-0 hidden sm:block" />
             <div className="flex-1 grid grid-cols-3 gap-3">
@@ -1015,6 +1061,12 @@ export default function Evaluator() {
       {phase === "done" && result && (
         <div className="space-y-4">
 
+          {/* Leads the results for an honest "I don't know" — a teaching
+              moment, not just another score. */}
+          {result.is_dont_know && (
+            <ConceptExplanationCard topic={topic} explanation={result.concept_explanation} />
+          )}
+
           {/* Score banner */}
           <div
             className="rounded-2xl border border-white/10 p-6"
@@ -1022,12 +1074,18 @@ export default function Evaluator() {
           >
             <div className="flex items-center gap-6 flex-wrap">
               <div className="text-center shrink-0">
-                <div className="text-5xl font-black leading-none" style={{ color: scoreColor(result.overall_score) }}>
+                <div
+                  className="text-5xl font-black leading-none"
+                  style={{ color: result.is_dont_know ? "#3B82F6" : scoreColor(result.overall_score) }}
+                >
                   {result.overall_score}
                   <span className="text-2xl font-bold text-gray-500">/10</span>
                 </div>
-                <p className="text-sm font-semibold mt-1" style={{ color: scoreColor(result.overall_score) }}>
-                  {scoreLabel(result.overall_score)}
+                <p
+                  className="text-sm font-semibold mt-1"
+                  style={{ color: result.is_dont_know ? "#3B82F6" : scoreColor(result.overall_score) }}
+                >
+                  {result.is_dont_know ? "Knowledge gap, not a wrong answer" : scoreLabel(result.overall_score)}
                 </p>
               </div>
               <div className="w-px h-14 bg-white/10 shrink-0 hidden sm:block" />

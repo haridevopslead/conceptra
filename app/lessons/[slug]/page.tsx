@@ -392,7 +392,8 @@ export default async function LessonDetailPage({
             return (
               <div
                 key={i}
-                className="rounded-2xl border border-white/10 p-6 space-y-4"
+                id={layer.type}
+                className="rounded-2xl border border-white/10 p-6 space-y-4 scroll-mt-6"
                 style={{ backgroundColor: "#211C18", borderLeft: `3px solid ${cfg.color}` }}
               >
                 <div>

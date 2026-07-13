@@ -88,7 +88,7 @@ function correctVoice(text: string): string {
 }
 
 function buildContextKickoff(ctx: DevHandoffContext): string {
-  return `Hi Dev! I just practiced this question in Quick Practice: "${ctx.question}"
+  return `Hi Hari! I just practiced this question in Quick Practice: "${ctx.question}"
 
 Here's the answer I gave: "${ctx.answer}"
 
@@ -111,7 +111,7 @@ export default function DevInterviewPage() {
   const [screen, setScreen] = useState<Screen>("setup");
   const [checkingHandoff, setCheckingHandoff] = useState(true);
   // Only true when this chat was opened via the Quick Practice handoff —
-  // a manually-started Dev session has no practice session to link back to.
+  // a manually-started Hari session has no practice session to link back to.
   const [cameFromPractice, setCameFromPractice] = useState(false);
   const [topic, setTopic] = useState<string>("Docker");
   const [difficulty, setDifficulty] = useState<Difficulty>("Intermediate");
@@ -189,7 +189,7 @@ export default function DevInterviewPage() {
     setScreen("chat");
     setStreaming(true);
 
-    // Placeholder for Dev's opening question
+    // Placeholder for Hari's opening question
     setVisibleMessages([{ role: "assistant", content: "" }]);
 
     try {
@@ -199,7 +199,7 @@ export default function DevInterviewPage() {
 
       apiHistoryRef.current = [kickoff, { role: "assistant", content: devText }];
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Couldn't reach Dev. Check your connection and try again.");
+      setError(err instanceof Error ? err.message : "Couldn't reach Hari. Check your connection and try again.");
       setScreen("setup");
     } finally {
       setStreaming(false);
@@ -208,7 +208,7 @@ export default function DevInterviewPage() {
 
   function startInterview() {
     beginChat(
-      `Hi Dev! I'm ready for my ${topic} interview at ${difficulty} level. Please ask me your first question.`,
+      `Hi Hari! I'm ready for my ${topic} interview at ${difficulty} level. Please ask me your first question.`,
       topic,
       difficulty,
     );
@@ -270,7 +270,7 @@ export default function DevInterviewPage() {
 
       apiHistoryRef.current = [...nextApiHistory, { role: "assistant", content: devText }];
 
-      // Switch to feedback screen if Dev's response contains structured feedback
+      // Switch to feedback screen if Hari's response contains structured feedback
       if (devText.includes("SCORE:") && devText.includes("SENIOR_ANSWER:")) {
         const parsed = parseFeedback(devText);
         setFeedback(parsed);
@@ -364,10 +364,11 @@ export default function DevInterviewPage() {
     return (
       <div className="dev-wrap">
         <div className="dev-avatar-ring">🤖</div>
-        <h1 className="dev-title">Interview with Dev</h1>
+        <h1 className="dev-title">Interview with Hari</h1>
         <p className="dev-subtitle">
-          Dev is a Senior DevOps Mentor who&apos;ll challenge you with real
-          interview questions and give you honest feedback after 5–6 exchanges.
+          Hari is an AI mentor, trained on a real Lead DevOps Engineer&apos;s
+          interview experience. He&apos;ll challenge you with real interview
+          questions and give you honest feedback after 5–6 exchanges.
         </p>
 
         {error && <p className="dev-error">{error}</p>}
@@ -485,7 +486,7 @@ export default function DevInterviewPage() {
           <div className="fb-score-ring" style={{ color: scoreColor }}>
             {feedback.score}
           </div>
-          <p className="fb-byline">Dev&apos;s honest feedback</p>
+          <p className="fb-byline">Hari&apos;s honest feedback</p>
 
           {[
             { label: "What You Did Well", value: feedback.strong, icon: "✅", bg: "#4ADE8018", border: "#4ADE8033" },
@@ -555,8 +556,8 @@ export default function DevInterviewPage() {
       <div className="chat-header">
         <div className="chat-avatar">🤖</div>
         <div>
-          <p className="chat-dev-name">Dev</p>
-          <p className="chat-dev-role">Senior DevOps Mentor</p>
+          <p className="chat-dev-name">Hari</p>
+          <p className="chat-dev-role">AI Mentor · trained on Hari&apos;s interview experience</p>
         </div>
         <div className="chat-badges">
           <span className="chat-badge gold">{topic}</span>

@@ -305,14 +305,14 @@ export default function TryEvaluator() {
           />
           <CompareAnswer userAnswer={answer} concreteExample={result.concrete_example} seniorInsight={result.senior_insight} />
 
-          {/* Dev chat is an authenticated-only feature — prompt signup rather
+          {/* Hari chat is an authenticated-only feature — prompt signup rather
               than bouncing an anonymous visitor through a login wall. */}
           <Link
             href="/register"
             className="block w-full text-center py-3 rounded-xl font-semibold text-sm border transition-colors hover:bg-white/5"
             style={{ borderColor: "rgba(245,166,35,0.35)", color: "#F5A623", background: "transparent", textDecoration: "none" }}
           >
-            Sign up to ask Dev to go deeper on this →
+            Sign up to ask Hari to go deeper on this →
           </Link>
 
           {/* Single CTA — the result itself is never gated, only what comes next */}

@@ -208,7 +208,7 @@ function ConceptExplanationCard({ topic, explanation }: { topic: string | null; 
   );
 }
 
-// ── Go deeper with Dev ──────────────────────────────────────────────────────────
+// ── Go deeper with Hari ──────────────────────────────────────────────────────────
 
 type DevHandoffContext = {
   topic: string;
@@ -219,7 +219,7 @@ type DevHandoffContext = {
 };
 
 // Must match HANDOFF_KEY in app/interview/dev/page.tsx. sessionStorage, not a
-// DB write — a one-time context handoff into the stateless Dev chat flow.
+// DB write — a one-time context handoff into the stateless Hari chat flow.
 const DEV_HANDOFF_KEY = "devHandoffContext";
 
 function GoDeeperButton({ ctx }: { ctx: DevHandoffContext }) {
@@ -233,7 +233,7 @@ function GoDeeperButton({ ctx }: { ctx: DevHandoffContext }) {
       className="w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:bg-white/5"
       style={{ borderColor: "rgba(245,166,35,0.35)", color: "#F5A623", background: "transparent" }}
     >
-      Ask Dev to go deeper on this →
+      Ask Hari to go deeper on this →
     </button>
   );
 }
@@ -453,7 +453,7 @@ type HistoryEntry = {
 };
 
 // ── In-progress session persistence ─────────────────────────────────────────
-// So navigating away mid-session (e.g. "Ask Dev to go deeper") and coming
+// So navigating away mid-session (e.g. "Ask Hari to go deeper") and coming
 // back — via that screen's link, browser Back, or a fresh mount — resumes
 // exactly where the user left off, not just at the right question index but
 // with prior answers/scores intact. sessionStorage, not a DB write.
@@ -670,7 +670,7 @@ export default function Evaluator() {
           setHistory(parsed.history);
           setSessionScores(parsed.sessionScores);
         } else if (shapeValid && parsed.sessionScores.length >= totalQuestions) {
-          // All questions were already scored (e.g. clicked "Ask Dev" right
+          // All questions were already scored (e.g. clicked "Ask Hari" right
           // after the 7th answer, before "See Session Results") — show the
           // summary instead of silently losing a completed session.
           setTopic(parsed.topic);
@@ -763,7 +763,7 @@ export default function Evaluator() {
       setPhase("done");
 
       // Persist as though this question were already advanced past, so
-      // navigating away right now (e.g. "Ask Dev to go deeper," before
+      // navigating away right now (e.g. "Ask Hari to go deeper," before
       // clicking "Next Question") resumes at the *next* question with this
       // one already recorded — not re-asking the same question.
       if (topic) {

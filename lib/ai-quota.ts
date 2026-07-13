@@ -7,7 +7,8 @@ import { db } from "@/lib/db";
 export const FREE_MONTHLY_EVALUATE_LIMIT = 3;   // matches pricing page's "3 AI mock interviews per month"
 export const PRO_MONTHLY_EVALUATE_LIMIT = 300;  // placeholder generous ceiling for "Unlimited AI mock interviews"
 
-// Interview with Dev is a separate feature from graded Quick Practice
+// Interview with Hari (the conversational AI mentor persona) is a separate
+// feature from graded Quick Practice
 // answers, so it gets its own pool rather than sharing the evaluate quota.
 export const FREE_MONTHLY_DEV_CHAT_LIMIT = 3;
 export const PRO_MONTHLY_DEV_CHAT_LIMIT = 300;

@@ -24,18 +24,19 @@ export default function ModeSelector() {
           <span className="ms-card-cta">Start practicing →</span>
         </Link>
 
-        {/* Interview with Dev card */}
+        {/* Interview with Hari card */}
         <Link href="/interview/dev" className="ms-card ms-card-gold">
           <div className="ms-card-icon ms-card-icon-gold">
             <Mic2 size={28} strokeWidth={2} />
           </div>
-          <h2 className="ms-card-title">Interview with Dev</h2>
+          <h2 className="ms-card-title">Interview with Hari</h2>
           <p className="ms-card-desc">
-            Have a real back-and-forth conversation with Dev, a Senior DevOps
-            Mentor. He&apos;ll probe your answers, follow up naturally, and give
-            you honest holistic feedback.
+            Have a real back-and-forth conversation with Hari — an AI mentor
+            trained on a real Lead DevOps Engineer&apos;s interview experience.
+            He&apos;ll probe your answers, follow up naturally, and give you
+            honest holistic feedback.
           </p>
-          <span className="ms-card-cta ms-card-cta-gold">Meet Dev →</span>
+          <span className="ms-card-cta ms-card-cta-gold">Meet Hari →</span>
         </Link>
       </div>
 

@@ -68,6 +68,9 @@ export default async function DashboardPage() {
   let freshPlan = user.plan;
   let streak = 0;
   let emailVerified: Date | null = null;
+  // Fetch fresh from DB rather than trusting the JWT — session.user.email
+  // can be stale if the user just changed it via the verify-gate banner.
+  let currentEmail = user.email;
   let interviews: {
     score: number;
     topic: string | null;
@@ -80,7 +83,7 @@ export default async function DashboardPage() {
   let totalLessons = 8;
   try {
     const [dbUser, dbInterviews, dbProgress, dbLessonCount] = await Promise.all([
-      db.user.findUnique({ where: { id: user.id }, select: { plan: true, currentStreak: true, emailVerified: true } }),
+      db.user.findUnique({ where: { id: user.id }, select: { plan: true, currentStreak: true, emailVerified: true, email: true } }),
       db.interviewSession.findMany({
         where: { userId: user.id },
         select: {
@@ -103,6 +106,7 @@ export default async function DashboardPage() {
       freshPlan = dbUser.plan;
       streak = dbUser.currentStreak;
       emailVerified = dbUser.emailVerified;
+      if (dbUser.email) currentEmail = dbUser.email;
     }
     interviews = dbInterviews;
     lessonProgress = dbProgress;
@@ -145,7 +149,7 @@ export default async function DashboardPage() {
     <div className="dash-page" style={{ maxWidth: 920, margin: "0 auto", padding: "56px 64px 80px", display: "flex", flexDirection: "column", gap: 26 }}>
 
       {isFirstTimeUser && <WelcomeBanner />}
-      {!emailVerified && user.email && <VerifyEmailBanner email={user.email} />}
+      {!emailVerified && currentEmail && <VerifyEmailBanner email={currentEmail} />}
 
       {/* Header */}
       <div className="dash-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20 }}>

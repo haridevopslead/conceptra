@@ -12,15 +12,19 @@ export default async function InterviewPage() {
   if (!session) redirect("/login");
 
   let emailVerified: Date | null = null;
+  // Fetch fresh from DB rather than trusting the JWT — session.user.email
+  // can be stale if the user just changed it via the verify-gate banner.
+  let currentEmail = session.user.email;
   try {
-    const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { emailVerified: true } });
+    const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { emailVerified: true, email: true } });
     emailVerified = dbUser?.emailVerified ?? null;
+    if (dbUser?.email) currentEmail = dbUser.email;
   } catch {
     // DB unavailable — fail open rather than block practice over a transient outage
     emailVerified = new Date();
   }
 
-  if (!emailVerified && session.user.email) {
+  if (!emailVerified && currentEmail) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: "#1C1917" }}>
         <div className="w-full max-w-md">
@@ -33,7 +37,7 @@ export default async function InterviewPage() {
               this keeps AI mock interviews available for real learners.
             </p>
           </div>
-          <VerifyEmailBanner email={session.user.email} />
+          <VerifyEmailBanner email={currentEmail} />
         </div>
       </div>
     );

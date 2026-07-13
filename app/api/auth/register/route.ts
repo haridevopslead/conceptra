@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { createVerificationToken } from "@/lib/verification";
 import { sendVerificationEmail } from "@/lib/email";
+import { domainAcceptsMail } from "@/lib/mx-check";
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,6 +28,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "An account with this email already exists." },
         { status: 409 }
+      );
+    }
+
+    if (!(await domainAcceptsMail(email))) {
+      return NextResponse.json(
+        { error: "This email domain doesn't appear to accept mail — double-check for a typo." },
+        { status: 400 }
       );
     }
 

@@ -134,6 +134,24 @@ export default function DevInterviewPage() {
   // the final Groq transcript both append after whatever was already typed,
   // the same base/live/final pattern used in Quick Practice.
   const baseInputRef = useRef("");
+  // Pasting defeats the point of practicing a real interview, where you
+  // can't paste in a prepared answer — blocked on the textarea, surfaced
+  // briefly here rather than silently eaten.
+  const [pasteBlocked, setPasteBlocked] = useState(false);
+  const pasteBlockedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pasteBlockedTimeoutRef.current) clearTimeout(pasteBlockedTimeoutRef.current);
+    };
+  }, []);
+
+  function blockPaste(e: React.ClipboardEvent<HTMLTextAreaElement> | React.DragEvent<HTMLTextAreaElement>) {
+    e.preventDefault();
+    setPasteBlocked(true);
+    if (pasteBlockedTimeoutRef.current) clearTimeout(pasteBlockedTimeoutRef.current);
+    pasteBlockedTimeoutRef.current = setTimeout(() => setPasteBlocked(false), 2500);
+  }
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -582,6 +600,8 @@ export default function DevInterviewPage() {
             setIsLiveText(false);
           }}
           onKeyDown={handleKeyDown}
+          onPaste={blockPaste}
+          onDrop={blockPaste}
           placeholder="Type your answer… or press the mic"
           rows={3}
           disabled={streaming}
@@ -598,6 +618,11 @@ export default function DevInterviewPage() {
           </button>
         </div>
       </div>
+      {pasteBlocked && (
+        <p className="chat-paste-blocked">
+          Paste is disabled here — type your answer to practice for the real thing.
+        </p>
+      )}
 
       <style>{`
         .chat-root {
@@ -677,6 +702,11 @@ export default function DevInterviewPage() {
           line-height: 1.5; font-family: inherit;
         }
         .chat-textarea:focus { border-color: #F5A623; }
+        .chat-paste-blocked {
+          padding: 0 1.25rem 0.75rem;
+          font-size: 0.75rem; color: #F5A623;
+          background: #1C1917; flex-shrink: 0;
+        }
         .chat-actions { display: flex; flex-direction: column; gap: 0.5rem; }
         .chat-icon-btn {
           width: 44px; height: 44px; border-radius: 50%;

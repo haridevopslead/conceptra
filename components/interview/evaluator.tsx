@@ -640,6 +640,24 @@ export default function Evaluator() {
   // (dimmed/italic) rather than the accurate Groq transcript or typed text.
   const [isLiveText, setIsLiveText] = useState(false);
   const baseAnswerRef = useRef("");
+  // Pasting defeats the point of practicing a real interview, where you
+  // can't paste in a prepared answer — blocked on the textarea, surfaced
+  // briefly here rather than silently eaten.
+  const [pasteBlocked, setPasteBlocked] = useState(false);
+  const pasteBlockedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (pasteBlockedTimeoutRef.current) clearTimeout(pasteBlockedTimeoutRef.current);
+    };
+  }, []);
+
+  function blockPaste(e: React.ClipboardEvent<HTMLTextAreaElement> | React.DragEvent<HTMLTextAreaElement>) {
+    e.preventDefault();
+    setPasteBlocked(true);
+    if (pasteBlockedTimeoutRef.current) clearTimeout(pasteBlockedTimeoutRef.current);
+    pasteBlockedTimeoutRef.current = setTimeout(() => setPasteBlocked(false), 2500);
+  }
 
   const questions = topic ? (QUESTION_BANK[topic] ?? []) : [];
   const question = questions[qIndex] ?? "";
@@ -988,6 +1006,8 @@ export default function Evaluator() {
             setAnswer(e.target.value);
             setIsLiveText(false);
           }}
+          onPaste={blockPaste}
+          onDrop={blockPaste}
           disabled={phase !== "idle"}
           rows={8}
           placeholder="Type your answer here — or use the mic below to speak it. Aim for the depth a senior engineer would give: trade-offs, failure modes, production consequences."
@@ -999,6 +1019,12 @@ export default function Evaluator() {
             opacity: isLiveText ? 0.7 : 1,
           }}
         />
+
+        {pasteBlocked && (
+          <p className="text-xs" style={{ color: "#F5A623" }}>
+            Paste is disabled here — type your answer to practice for the real thing.
+          </p>
+        )}
 
         {/* Mic button row */}
         {phase === "idle" && <MicButton micState={micState} onToggle={handleMicToggle} />}

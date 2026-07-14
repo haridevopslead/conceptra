@@ -49,9 +49,9 @@ type Difficulty = typeof DIFFICULTIES[number];
 
 function stripMarkdown(text: string): string {
   return text
-    .replace(/#{1,6}\s+/g, "")       // # headings
-    .replace(/\*\*(.+?)\*\*/g, "$1") // **bold**
-    .replace(/\*(.+?)\*/g, "$1");    // *italic*
+    .replace(/#{1,6}\s+/g, "")            // # headings
+    .replace(/\*\*([\s\S]+?)\*\*/g, "$1") // **bold**, may span lines
+    .replace(/\*([\s\S]+?)\*/g, "$1");    // *italic*, may span lines
 }
 
 const VOICE_CORRECTIONS: [RegExp, string][] = [
@@ -82,11 +82,29 @@ I already got scored feedback, and the senior-level insight I received was: "${c
 I want to go deeper on this with you specifically. Don't ask me a fresh unrelated question — instead, open with one short line in this style: "Let's go deeper on ${ctx.topic} — you mentioned [a brief summary of what I said], let's talk through [the specific gap or trade-off from that senior insight]." Then follow it with one pointed follow-up question that pushes on that exact gap.`;
 }
 
+// A field is "meaningful" once markdown delimiters and whitespace are stripped —
+// guards against the model wrapping a bare label like **STRONG:** (no body)
+// leaving only punctuation behind after parsing.
+function meaningful(value: string): string {
+  return /[a-zA-Z0-9]/.test(value) ? value : "";
+}
+
 function parseFeedback(text: string): FeedbackData {
-  const score = text.match(/SCORE:\s*(.+)/)?.[1]?.trim() ?? "";
-  const strong = stripMarkdown(text.match(/STRONG:\s*(.+)/)?.[1]?.trim() ?? "");
-  const improve = stripMarkdown(text.match(/IMPROVE:\s*(.+)/)?.[1]?.trim() ?? "");
-  const seniorAnswer = stripMarkdown(text.match(/SENIOR_ANSWER:\s*([\s\S]+)/)?.[1]?.trim() ?? "");
+  // Strip markdown from the whole response first. The model sometimes bolds the
+  // field labels themselves (e.g. "**STRONG:**\nbody..." instead of the requested
+  // "STRONG: body"), which previously broke label matching and left the body on
+  // its own line, undetected by the old single-line field regexes.
+  const clean = stripMarkdown(text);
+  const score = clean.match(/SCORE:\s*(.+)/)?.[1]?.trim() ?? "";
+  const strong = meaningful(
+    clean.match(/STRONG:\s*([\s\S]*?)(?=\s*IMPROVE:|\s*SENIOR_ANSWER:|$)/)?.[1]?.trim() ?? ""
+  );
+  const improve = meaningful(
+    clean.match(/IMPROVE:\s*([\s\S]*?)(?=\s*SENIOR_ANSWER:|$)/)?.[1]?.trim() ?? ""
+  );
+  const seniorAnswer = meaningful(
+    clean.match(/SENIOR_ANSWER:\s*([\s\S]+)/)?.[1]?.trim() ?? ""
+  );
   return { score, strong, improve, seniorAnswer };
 }
 

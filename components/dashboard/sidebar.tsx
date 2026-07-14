@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
+import ThemeToggle from "@/components/ui/theme-toggle";
 
 const NAV = [
   {
@@ -82,11 +83,11 @@ export default function Sidebar({ user }: Props) {
     <aside
       className="hidden md:flex flex-col shrink-0"
       aria-hidden={ariaHidden}
-      style={{ width: 248, background: "#17130F", borderRight: "1px solid rgba(253,246,227,0.06)", position: "sticky", top: 0, height: "100vh" }}
+      style={{ width: 248, background: "var(--nav-bg)", borderRight: "1px solid var(--border)", position: "sticky", top: 0, height: "100vh" }}
     >
       {/* Logo */}
-      <div style={{ padding: "28px 26px 22px", borderBottom: "1px solid rgba(253,246,227,0.06)" }}>
-        <Link href="/" style={{ fontFamily: "'Newsreader', serif", fontSize: 23, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>
+      <div style={{ padding: "28px 26px 22px", borderBottom: "1px solid var(--border)" }}>
+        <Link href="/" style={{ fontFamily: "'Newsreader', serif", fontSize: 23, fontWeight: 600, color: "var(--accent-text)", textDecoration: "none" }}>
           Conceptra
         </Link>
       </div>
@@ -108,9 +109,9 @@ export default function Sidebar({ user }: Props) {
                 background: active
                   ? "rgba(245,166,35,0.12)"
                   : hovered
-                  ? "rgba(255,255,255,0.05)"
+                  ? "var(--hover-overlay)"
                   : "transparent",
-                color: active ? "#F5A623" : "#9C9286",
+                color: active ? "var(--accent-text)" : "var(--muted)",
               }}
             >
               {icon}
@@ -121,23 +122,29 @@ export default function Sidebar({ user }: Props) {
       </nav>
 
       {/* Footer */}
-      <div style={{ padding: "18px 18px 22px", borderTop: "1px solid rgba(253,246,227,0.06)", display: "flex", flexDirection: "column", gap: 16 }}>
+      <div style={{ padding: "18px 18px 22px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Plan badge */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px" }}>
-          <span style={{ fontSize: 12, color: "#8A8073" }}>Current plan</span>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.04em", padding: "3px 9px", borderRadius: 999, background: isFreePlan ? "#2C2420" : "#F5A623", color: isFreePlan ? "#B3A799" : "#1C1917", border: isFreePlan ? "1px solid rgba(253,246,227,0.08)" : "none" }}>
+          <span style={{ fontSize: 12, color: "var(--muted)" }}>Current plan</span>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.04em", padding: "3px 9px", borderRadius: 999, background: isFreePlan ? "var(--surface-2)" : "var(--accent)", color: isFreePlan ? "var(--muted)" : "var(--accent-contrast)", border: isFreePlan ? "1px solid var(--border)" : "none" }}>
             {user.plan ?? "FREE"}
           </span>
         </div>
 
+        {/* Theme toggle */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px" }}>
+          <span style={{ fontSize: 12, color: "var(--muted)" }}>Theme</span>
+          <ThemeToggle />
+        </div>
+
         {/* User info */}
         <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "0 4px" }}>
-          <div style={{ width: 34, height: 34, borderRadius: "50%", background: "#F5A623", color: "#1C1917", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 15, flexShrink: 0 }}>
+          <div style={{ width: 34, height: 34, borderRadius: "50%", background: "var(--accent)", color: "var(--accent-contrast)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 15, flexShrink: 0 }}>
             {user.name?.[0]?.toUpperCase() ?? user.email?.[0]?.toUpperCase() ?? "?"}
           </div>
           <div style={{ minWidth: 0 }}>
-            <p style={{ fontSize: 14, fontWeight: 600, color: "#FDF6E3", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name ?? "User"}</p>
-            <p style={{ fontSize: 12, color: "#8A8073", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.name ?? "User"}</p>
+            <p style={{ fontSize: 12, color: "var(--muted)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{user.email}</p>
           </div>
         </div>
 
@@ -145,7 +152,7 @@ export default function Sidebar({ user }: Props) {
         {isFreePlan && (
           <Link
             href="/pricing"
-            style={{ display: "flex", alignItems: "center", gap: 9, padding: "10px 12px", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none", color: "#F5A623", background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.22)" }}
+            style={{ display: "flex", alignItems: "center", gap: 9, padding: "10px 12px", borderRadius: 10, fontSize: 14, fontWeight: 600, textDecoration: "none", color: "var(--accent-text)", background: "rgba(245,166,35,0.1)", border: "1px solid rgba(245,166,35,0.22)" }}
           >
             <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
@@ -157,7 +164,7 @@ export default function Sidebar({ user }: Props) {
         {/* Sign out */}
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-          style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", borderRadius: 10, background: "none", border: "none", color: "#8A8073", fontSize: 14, cursor: "pointer", width: "100%", fontFamily: "inherit" }}
+          style={{ display: "flex", alignItems: "center", gap: 9, padding: "9px 12px", borderRadius: 10, background: "none", border: "none", color: "var(--muted)", fontSize: 14, cursor: "pointer", width: "100%", fontFamily: "inherit" }}
         >
           <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import FaqAccordion from "@/components/home/faq-accordion";
+import ThemeToggle from "@/components/ui/theme-toggle";
 
 const TESTIMONIALS = [
   { quote: "I went from failing Kubernetes rounds to getting an offer at PhonePe in six weeks.", initials: "AR", name: "Ananya R.", role: "SRE · hired at PhonePe" },
@@ -36,23 +37,24 @@ export default async function HomePage() {
   if (session) redirect("/dashboard");
 
   return (
-    <main className="min-h-screen" style={{ background: "#1C1917", fontFamily: "'Hanken Grotesk', system-ui, sans-serif" }}>
+    <main className="min-h-screen" style={{ background: "var(--background)", fontFamily: "'Hanken Grotesk', system-ui, sans-serif" }}>
 
       {/* Nav */}
       <nav
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
         style={{
           padding: "18px 20px",
-          background: "rgba(28,25,23,0.82)",
+          background: "var(--nav-bg-translucent)",
           backdropFilter: "blur(14px)",
-          borderBottom: "1px solid rgba(253,246,227,0.06)",
+          borderBottom: "1px solid var(--border)",
         }}
       >
-        <Link href="/" style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>Conceptra</Link>
+        <Link href="/" style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 600, color: "var(--accent-text)", textDecoration: "none" }}>Conceptra</Link>
         <div className="flex items-center gap-4 sm:gap-8">
-          <Link href="/pricing" style={{ color: "#B3A799", fontSize: 14, textDecoration: "none" }}>Pricing</Link>
-          <Link href="/login" style={{ color: "#B3A799", fontSize: 14, textDecoration: "none" }}>Sign In</Link>
-          <Link href="/register" style={{ background: "#F5A623", color: "#1C1917", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 9, textDecoration: "none" }}>Get Started</Link>
+          <ThemeToggle />
+          <Link href="/pricing" style={{ color: "var(--muted)", fontSize: 14, textDecoration: "none" }}>Pricing</Link>
+          <Link href="/login" style={{ color: "var(--muted)", fontSize: 14, textDecoration: "none" }}>Sign In</Link>
+          <Link href="/register" style={{ background: "var(--accent)", color: "var(--accent-contrast)", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 9, textDecoration: "none" }}>Get Started</Link>
         </div>
       </nav>
 
@@ -66,39 +68,39 @@ export default async function HomePage() {
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
               <div className="flex items-center gap-3 mb-7">
                 <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
-                <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#F5A623" }}>AI-Powered DevOps Coaching</span>
+                <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--accent-text)" }}>AI-Powered DevOps Coaching</span>
               </div>
 
               <h1
                 className="mb-5"
-                style={{ fontFamily: "'Newsreader', serif", fontWeight: 500, fontSize: "clamp(36px, 6vw, 62px)", lineHeight: 1.08, color: "#FDF6E3", letterSpacing: "-0.015em" }}
+                style={{ fontFamily: "'Newsreader', serif", fontWeight: 500, fontSize: "clamp(36px, 6vw, 62px)", lineHeight: 1.08, color: "var(--foreground)", letterSpacing: "-0.015em" }}
               >
                 Ace Your DevOps{" "}
-                <em style={{ fontStyle: "italic", color: "#F5A623" }}>Interview</em>
+                <em style={{ fontStyle: "italic", color: "var(--accent-text)" }}>Interview</em>
               </h1>
 
-              <p className="mb-8" style={{ fontSize: "clamp(15px, 2.2vw, 18px)", lineHeight: 1.6, color: "#C9BFB2", maxWidth: 480 }}>
+              <p className="mb-8" style={{ fontSize: "clamp(15px, 2.2vw, 18px)", lineHeight: 1.6, color: "var(--muted)", maxWidth: 480 }}>
                 Coached by a Lead Engineer with 10+ years at top Indian tech companies. Know exactly what Razorpay and PhonePe interviewers want.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mb-5">
-                <Link href="/try" className="text-center font-semibold" style={{ background: "#F5A623", color: "#1C1917", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
+                <Link href="/try" className="text-center font-semibold" style={{ background: "var(--accent)", color: "var(--accent-contrast)", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
                   Try a real question — no signup
                 </Link>
-                <Link href="/register" className="text-center font-medium" style={{ background: "transparent", color: "#FDF6E3", fontSize: 16, border: "1px solid rgba(253,246,227,0.18)", padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
+                <Link href="/register" className="text-center font-medium" style={{ background: "transparent", color: "var(--foreground)", fontSize: 16, border: "1px solid var(--border)", padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
                   Start Free Trial
                 </Link>
               </div>
 
-              <Link href="/lessons" style={{ color: "#8A8073", fontSize: 14, textDecoration: "none" }}>
+              <Link href="/lessons" style={{ color: "var(--muted)", fontSize: 14, textDecoration: "none" }}>
                 Browse Interview Briefs →
               </Link>
 
               <div className="flex items-center gap-3 mt-9 text-left">
-                <div className="shrink-0" style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 13, fontWeight: 600, color: "#F5A623" }}>HN</div>
+                <div className="shrink-0" style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 13, fontWeight: 600, color: "var(--accent-text)" }}>HN</div>
                 <div>
-                  <p style={{ fontFamily: "'Newsreader', serif", fontStyle: "italic", fontSize: 14, color: "#8A8073", maxWidth: 380, lineHeight: 1.5 }}>&ldquo;Built by the engineer who&rsquo;s been on both sides of the interview table.&rdquo;</p>
-                  <p style={{ fontSize: 11.5, color: "#6E665C", marginTop: 4 }}>Hari N. · Lead DevOps Engineer · 10+ years in production</p>
+                  <p style={{ fontFamily: "'Newsreader', serif", fontStyle: "italic", fontSize: 14, color: "var(--muted)", maxWidth: 380, lineHeight: 1.5 }}>&ldquo;Built by the engineer who&rsquo;s been on both sides of the interview table.&rdquo;</p>
+                  <p style={{ fontSize: 11.5, color: "var(--muted)", marginTop: 4 }}>Hari N. · Lead DevOps Engineer · 10+ years in production</p>
                 </div>
               </div>
             </div>
@@ -180,23 +182,23 @@ export default async function HomePage() {
       <div className="mx-auto px-5 sm:px-10" style={{ maxWidth: 1080, paddingTop: 50, paddingBottom: 10 }}>
         <div
           className="flex flex-wrap items-center justify-center gap-x-10 gap-y-5"
-          style={{ background: "#2C2420", border: "1px solid rgba(253,246,227,0.07)", borderRadius: 18, padding: "22px 28px" }}
+          style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 18, padding: "22px 28px" }}
         >
-          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#F5A623", flexShrink: 0 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--accent-text)", flexShrink: 0 }}>
             What engineers say
           </span>
           {TESTIMONIALS.map(({ initials, name, role }, i) => (
             <div
               key={name}
               className="flex items-center gap-2.5"
-              style={i > 0 ? { paddingLeft: 40, borderLeft: "1px solid rgba(253,246,227,0.1)" } : undefined}
+              style={i > 0 ? { paddingLeft: 40, borderLeft: "1px solid var(--border)" } : undefined}
             >
-              <div className="shrink-0" style={{ width: 30, height: 30, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 12, color: "#F5A623" }}>
+              <div className="shrink-0" style={{ width: 30, height: 30, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 12, color: "var(--accent-text)" }}>
                 {initials}
               </div>
               <div className="text-left">
-                <p style={{ fontSize: 13, color: "#FDF6E3", fontWeight: 600 }}>{name}</p>
-                <p style={{ fontSize: 11.5, color: "#8A8073" }}>{role}</p>
+                <p style={{ fontSize: 13, color: "var(--foreground)", fontWeight: 600 }}>{name}</p>
+                <p style={{ fontSize: 11.5, color: "var(--muted)" }}>{role}</p>
               </div>
             </div>
           ))}
@@ -205,10 +207,10 @@ export default async function HomePage() {
 
       {/* Brand logos */}
       <div className="mx-auto px-5 sm:px-10 flex flex-col items-center gap-6" style={{ maxWidth: 1080, paddingTop: 56, paddingBottom: 28 }}>
-        <p style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "#8A8073", fontWeight: 600, textAlign: "center", maxWidth: 640 }}>Our content is built around real interview patterns from companies like</p>
+        <p style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--muted)", fontWeight: 600, textAlign: "center", maxWidth: 640 }}>Our content is built around real interview patterns from companies like</p>
         <div className="flex flex-wrap gap-6 sm:gap-12 justify-center items-center">
           {BRANDS.map(b => (
-            <span key={b} style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(18px, 4vw, 26px)", color: "#C9BFB2", fontWeight: 500 }}>{b}</span>
+            <span key={b} style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(18px, 4vw, 26px)", color: "var(--muted)", fontWeight: 500 }}>{b}</span>
           ))}
         </div>
       </div>
@@ -217,21 +219,21 @@ export default async function HomePage() {
       <div className="mx-auto px-5 sm:px-10" style={{ maxWidth: 760, paddingTop: 56, paddingBottom: 30 }}>
         <div className="flex items-center gap-3 justify-center mb-10">
           <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
-          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "#F5A623" }}>Questions</span>
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--accent-text)" }}>Questions</span>
           <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
         </div>
         <FaqAccordion items={FAQS} />
       </div>
 
       {/* Footer */}
-      <footer className="mx-auto px-5 sm:px-10 text-center" style={{ maxWidth: 1080, marginTop: 32, paddingTop: 40, paddingBottom: 40, borderTop: "1px solid rgba(253,246,227,0.06)", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
-        <span style={{ fontSize: 12.5, color: "#6E665C" }}>© 2026 Conceptra · Crafted for engineers who refuse to wing it.</span>
+      <footer className="mx-auto px-5 sm:px-10 text-center" style={{ maxWidth: 1080, marginTop: 32, paddingTop: 40, paddingBottom: 40, borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+        <span style={{ fontSize: 12.5, color: "var(--muted)" }}>© 2026 Conceptra · Crafted for engineers who refuse to wing it.</span>
         <div className="flex items-center gap-4 flex-wrap justify-center">
-          <Link href="/terms" style={{ fontSize: 12, color: "#6E665C", textDecoration: "none" }}>Terms of Service</Link>
-          <span style={{ fontSize: 12, color: "#3A322C" }}>·</span>
-          <Link href="/privacy" style={{ fontSize: 12, color: "#6E665C", textDecoration: "none" }}>Privacy Policy</Link>
-          <span style={{ fontSize: 12, color: "#3A322C" }}>·</span>
-          <a href="mailto:support@conceptra.in" style={{ fontSize: 12, color: "#6E665C", textDecoration: "none" }}>support@conceptra.in</a>
+          <Link href="/terms" style={{ fontSize: 12, color: "var(--muted)", textDecoration: "none" }}>Terms of Service</Link>
+          <span style={{ fontSize: 12, color: "var(--muted)" }}>·</span>
+          <Link href="/privacy" style={{ fontSize: 12, color: "var(--muted)", textDecoration: "none" }}>Privacy Policy</Link>
+          <span style={{ fontSize: 12, color: "var(--muted)" }}>·</span>
+          <a href="mailto:support@conceptra.in" style={{ fontSize: 12, color: "var(--muted)", textDecoration: "none" }}>support@conceptra.in</a>
         </div>
       </footer>
     </main>

@@ -23,7 +23,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#1C1917" }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar user={{ ...session.user, plan: freshPlan }} />
       <main className="flex-1 overflow-auto pb-20 md:pb-0 w-full max-w-5xl mx-auto">{children}</main>
       <BottomNav />

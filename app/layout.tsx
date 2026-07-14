@@ -20,9 +20,13 @@ export const metadata: Metadata = {
   },
 };
 
+// suppressHydrationWarning below is required by next-themes: its blocking
+// pre-hydration script sets the dark/light class on <html> before React
+// hydrates, which would otherwise trip React's server/client mismatch
+// warning for this one attribute.
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

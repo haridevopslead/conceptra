@@ -19,20 +19,20 @@ export default async function LessonsLayout({
 
   if (!session) {
     return (
-      <div className="min-h-screen" style={{ backgroundColor: "#1C1917" }}>
+      <div className="min-h-screen" style={{ backgroundColor: "var(--background)" }}>
         <nav
           className="flex items-center justify-between"
           style={{
             padding: "18px 20px",
-            background: "rgba(28,25,23,0.82)",
+            background: "var(--nav-bg-translucent)",
             backdropFilter: "blur(14px)",
-            borderBottom: "1px solid rgba(253,246,227,0.06)",
+            borderBottom: "1px solid var(--border)",
           }}
         >
-          <Link href="/" style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>Conceptra</Link>
+          <Link href="/" style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 600, color: "var(--accent-text)", textDecoration: "none" }}>Conceptra</Link>
           <div className="flex items-center gap-4 sm:gap-8">
-            <Link href="/login" style={{ color: "#B3A799", fontSize: 14, textDecoration: "none" }}>Sign In</Link>
-            <Link href="/register" style={{ background: "#F5A623", color: "#1C1917", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 9, textDecoration: "none" }}>Get Started</Link>
+            <Link href="/login" style={{ color: "var(--muted)", fontSize: 14, textDecoration: "none" }}>Sign In</Link>
+            <Link href="/register" style={{ background: "var(--accent)", color: "var(--accent-contrast)", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 9, textDecoration: "none" }}>Get Started</Link>
           </div>
         </nav>
         <main className="w-full max-w-5xl mx-auto">{children}</main>
@@ -50,7 +50,7 @@ export default async function LessonsLayout({
   }
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#1C1917" }}>
+    <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar user={{ ...session.user, plan: freshPlan }} />
       <main className="flex-1 overflow-auto pb-20 md:pb-0 w-full max-w-5xl mx-auto">{children}</main>
       <BottomNav />

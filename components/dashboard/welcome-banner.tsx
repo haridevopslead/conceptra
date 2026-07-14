@@ -22,7 +22,7 @@ export default function WelcomeBanner() {
   return (
     <div
       style={{
-        background: "#F5A623",
+        background: "var(--accent)",
         borderRadius: 18,
         padding: "22px 24px",
         display: "flex",
@@ -48,7 +48,7 @@ export default function WelcomeBanner() {
           borderRadius: "50%",
           border: "none",
           background: "rgba(28,25,23,0.12)",
-          color: "#1C1917",
+          color: "var(--accent-contrast)",
           cursor: "pointer",
           fontSize: 15,
           lineHeight: 1,
@@ -57,7 +57,7 @@ export default function WelcomeBanner() {
         ✕
       </button>
       <div style={{ paddingRight: 32 }}>
-        <p style={{ fontSize: 16, fontWeight: 700, color: "#1C1917", lineHeight: 1.4 }}>
+        <p style={{ fontSize: 16, fontWeight: 700, color: "var(--accent-contrast)", lineHeight: 1.4 }}>
           Welcome to Conceptra! Start your first AI interview to see how you score. Takes 10 minutes.
         </p>
       </div>
@@ -65,8 +65,8 @@ export default function WelcomeBanner() {
         href="/interview"
         style={{
           flexShrink: 0,
-          background: "#1C1917",
-          color: "#F5A623",
+          background: "var(--accent-contrast)",
+          color: "var(--accent)",
           fontWeight: 700,
           fontSize: 14,
           padding: "12px 22px",

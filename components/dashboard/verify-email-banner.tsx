@@ -77,10 +77,10 @@ export default function VerifyEmailBanner({ email }: { email: string }) {
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
         <div>
-          <p style={{ fontSize: 14.5, fontWeight: 600, color: "#FDF6E3" }}>
+          <p style={{ fontSize: 14.5, fontWeight: 600, color: "var(--foreground)" }}>
             Verify your email to unlock AI mock interviews
           </p>
-          <p style={{ fontSize: 13, color: "#C9BFB2", marginTop: 3 }}>
+          <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 3 }}>
             {message ?? `We sent a verification link to ${currentEmail} — check your inbox.`}
           </p>
           {!showEdit && (
@@ -93,7 +93,7 @@ export default function VerifyEmailBanner({ email }: { email: string }) {
                 marginTop: 6,
                 fontSize: 12.5,
                 fontWeight: 600,
-                color: "#8A8073",
+                color: "var(--muted)",
                 textDecoration: "underline",
                 cursor: "pointer",
                 fontFamily: "inherit",
@@ -146,9 +146,9 @@ export default function VerifyEmailBanner({ email }: { email: string }) {
               flex: "1 1 220px",
               padding: "9px 12px",
               borderRadius: 8,
-              border: "1px solid rgba(253,246,227,0.15)",
-              background: "#17130F",
-              color: "#FDF6E3",
+              border: "1px solid var(--border)",
+              background: "var(--surface)",
+              color: "var(--foreground)",
               fontSize: 13.5,
               fontFamily: "inherit",
             }}
@@ -157,8 +157,8 @@ export default function VerifyEmailBanner({ email }: { email: string }) {
             type="submit"
             disabled={editStatus === "saving"}
             style={{
-              background: "#F5A623",
-              color: "#1C1917",
+              background: "var(--accent)",
+              color: "var(--accent-contrast)",
               fontWeight: 700,
               fontSize: 13.5,
               padding: "9px 16px",
@@ -177,7 +177,7 @@ export default function VerifyEmailBanner({ email }: { email: string }) {
             style={{
               background: "none",
               border: "none",
-              color: "#8A8073",
+              color: "var(--muted)",
               fontSize: 13,
               cursor: "pointer",
               fontFamily: "inherit",

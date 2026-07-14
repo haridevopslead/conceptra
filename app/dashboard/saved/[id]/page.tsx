@@ -55,17 +55,17 @@ export default async function SavedAnswerDetailPage({ params }: { params: { id: 
 
   return (
     <div style={{ maxWidth: 820, margin: "0 auto", padding: "56px 64px 80px", display: "flex", flexDirection: "column", gap: 20 }}>
-      <Link href="/dashboard/saved" style={{ fontSize: 13.5, fontWeight: 600, color: "#8A8073", textDecoration: "none" }}>
+      <Link href="/dashboard/saved" style={{ fontSize: 13.5, fontWeight: 600, color: "var(--muted)", textDecoration: "none" }}>
         ← Saved Answers
       </Link>
 
       {entry.topic && (
-        <span style={{ alignSelf: "flex-start", fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", padding: "5px 11px", borderRadius: 999, background: "#2C2420", color: "#F5A623" }}>
+        <span style={{ alignSelf: "flex-start", fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", padding: "5px 11px", borderRadius: 999, background: "var(--surface-2)", color: "var(--accent-text)" }}>
           {entry.topic.toUpperCase()}
         </span>
       )}
 
-      <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 26, fontWeight: 500, color: "#FDF6E3", lineHeight: 1.35 }}>
+      <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 26, fontWeight: 500, color: "var(--foreground)", lineHeight: 1.35 }}>
         {entry.question ?? "Mock Interview"}
       </h1>
 

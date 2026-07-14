@@ -41,13 +41,13 @@ export default async function SavedAnswersPage() {
   return (
     <div style={{ maxWidth: 820, margin: "0 auto", padding: "56px 64px 80px", display: "flex", flexDirection: "column", gap: 26 }}>
       <div>
-        <p style={{ fontSize: 13, letterSpacing: "0.16em", textTransform: "uppercase", color: "#8A8073", fontWeight: 600, marginBottom: 10 }}>
+        <p style={{ fontSize: 13, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--muted)", fontWeight: 600, marginBottom: 10 }}>
           Before the real thing
         </p>
-        <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 36, fontWeight: 500, color: "#FDF6E3", letterSpacing: "-0.01em" }}>
+        <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 36, fontWeight: 500, color: "var(--foreground)", letterSpacing: "-0.01em" }}>
           Saved Answers
         </h1>
-        <p style={{ fontSize: 15, color: "#C9BFB2", marginTop: 8 }}>
+        <p style={{ fontSize: 15, color: "var(--muted)", marginTop: 8 }}>
           Answers you bookmarked from Quick Practice — come back here to review them before your interview.
         </p>
       </div>

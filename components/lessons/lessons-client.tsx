@@ -184,8 +184,8 @@ export default function LessonsClient({ plan, visitedSlugs, lessons, anonymous }
 
       {/* ── Header ── */}
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: "#FDF6E3", fontFamily: "'Newsreader', serif", fontWeight: 500 }}>Interview Prep Briefs</h1>
-        <p className="text-sm mt-1" style={{ color: "#B3A799" }}>
+        <h1 className="text-2xl font-bold" style={{ color: "var(--foreground)", fontFamily: "'Newsreader', serif", fontWeight: 500 }}>Interview Prep Briefs</h1>
+        <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
           Know exactly what to say when they ask about Docker, Kubernetes, AWS, and more. Built for engineers who already work in DevOps — not beginners starting from scratch.
         </p>
       </div>

@@ -2,9 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Theme tokens ──────────────────────────────────────────────────────────
+   :root holds the light palette (Tailwind's dark: convention expects the
+   .dark class to carry the dark overrides). The app shipped dark-only for
+   months, so .dark below is an exact copy of the original hardcoded values —
+   existing users see zero visual change. next-themes applies .dark before
+   first paint (see components/providers.tsx), so light is never what a
+   default visitor actually sees. */
+:root {
+  --background: #FAF7F2;
+  --foreground: #1C1917;
+  --surface: #FFFFFF;
+  --surface-2: #F0EAE0;
+  --border: rgba(28, 25, 23, 0.10);
+  --muted: #6B6157;
+  --accent: #F5A623;
+  /* #F5A623 fails WCAG AA as text on a light background (~2:1) — this is
+     the same accent darkened for text-only use so links/labels stay
+     readable in light mode. Backgrounds/icons/borders keep --accent. */
+  --accent-text: #B45309;
+  --accent-contrast: #1C1917;
+  --scrollbar-thumb: #D8CFC2;
+  --code-bg: #F0EAE0;
+  --nav-bg: #F3EEE5;
+  --nav-bg-translucent: rgba(250, 247, 242, 0.82);
+  /* A hover tint that lightens on dark surfaces and darkens on light ones —
+     the same rgba(255,255,255,0.05) used for both would be invisible here. */
+  --hover-overlay: rgba(28, 25, 23, 0.05);
+}
+
+.dark {
+  --background: #1C1917;
+  --foreground: #FDF6E3;
+  --surface: #211C18;
+  --surface-2: #2C2420;
+  --border: rgba(253, 246, 227, 0.08);
+  --muted: #9E8E85;
+  --accent: #F5A623;
+  --accent-text: #F5A623;
+  --accent-contrast: #1C1917;
+  --scrollbar-thumb: #3D3530;
+  --code-bg: #130F0C;
+  --nav-bg: #17130F;
+  --nav-bg-translucent: rgba(28, 25, 23, 0.82);
+  --hover-overlay: rgba(255, 255, 255, 0.05);
+}
+
 body {
-  color: #FDF6E3;
-  background: #1C1917;
+  color: var(--foreground);
+  background: var(--background);
   font-family: 'Hanken Grotesk', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -14,18 +60,18 @@ body {
 }
 
 *:focus-visible {
-  outline: 2px solid #F5A623;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 button:focus-visible, a:focus-visible, input:focus-visible {
-  outline: 2px solid #F5A623;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-* { scrollbar-width: thin; scrollbar-color: #3D3530 transparent; }
+* { scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) transparent; }
 *::-webkit-scrollbar { width: 6px; }
 *::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background: #3D3530; border-radius: 3px; }
+*::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
 
 .lesson-card:hover {
   transform: translateY(-4px);
@@ -64,7 +110,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .shiki-block pre {
   margin: 0;
   padding: 16px;
-  background-color: #130F0C !important;
+  background-color: var(--code-bg) !important;
   font-size: 12px;
   line-height: 1.75;
   overflow-x: auto;
@@ -92,9 +138,9 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px #211C18 inset !important;
-  -webkit-text-fill-color: #FDF6E3 !important;
-  caret-color: #FDF6E3;
+  -webkit-box-shadow: 0 0 0 1000px var(--surface) inset !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  caret-color: var(--foreground);
 }
 
 @layer utilities {

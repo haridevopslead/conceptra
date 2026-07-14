@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
+import ThemeToggle from "@/components/ui/theme-toggle";
 
 const INPUT_STYLE: React.CSSProperties = {
   width: "100%",
@@ -153,6 +154,30 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
 
   return (
     <>
+      {/* Appearance section — deliberately themed with its own inline
+          styles (var(--...) tokens) rather than the shared CARD/LABEL_STYLE
+          constants below, which are still hardcoded to the dark palette.
+          Converting those would silently break light mode elsewhere on this
+          page (near-white text would go invisible on a light card). */}
+      <section
+        style={{
+          background: "var(--surface-2)",
+          border: "1px solid var(--border)",
+          borderRadius: 20,
+          padding: "28px 28px 24px",
+          marginBottom: 20,
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}
+      >
+        <div>
+          <p style={{ fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--accent-text)", fontWeight: 600, marginBottom: 6 }}>
+            Appearance
+          </p>
+          <p style={{ fontSize: 14, color: "var(--muted)" }}>Switch between light and dark mode.</p>
+        </div>
+        <ThemeToggle />
+      </section>
+
       {/* Profile section */}
       <section style={CARD}>
         <p style={{ fontSize: 12, letterSpacing: "0.16em", textTransform: "uppercase", color: "#F5A623", fontWeight: 600, marginBottom: 18 }}>

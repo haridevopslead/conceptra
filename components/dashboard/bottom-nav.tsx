@@ -77,8 +77,8 @@ export default function BottomNav() {
       aria-label="Mobile navigation"
       aria-hidden={ariaHidden}
       style={{
-        background: "#17130F",
-        borderTop: "1px solid rgba(253,246,227,0.08)",
+        background: "var(--nav-bg)",
+        borderTop: "1px solid var(--border)",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
@@ -90,7 +90,7 @@ export default function BottomNav() {
             href={href}
             className="flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors"
             style={{
-              color: active ? "#F5A623" : "#6E665C",
+              color: active ? "var(--accent-text)" : "var(--muted)",
               textDecoration: "none",
             }}
           >

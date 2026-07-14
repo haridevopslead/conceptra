@@ -150,7 +150,7 @@ export default function DevInterviewPage() {
     e.preventDefault();
     setPasteBlocked(true);
     if (pasteBlockedTimeoutRef.current) clearTimeout(pasteBlockedTimeoutRef.current);
-    pasteBlockedTimeoutRef.current = setTimeout(() => setPasteBlocked(false), 2500);
+    pasteBlockedTimeoutRef.current = setTimeout(() => setPasteBlocked(false), 3000);
   }
 
   useEffect(() => {
@@ -703,9 +703,13 @@ export default function DevInterviewPage() {
         }
         .chat-textarea:focus { border-color: #F5A623; }
         .chat-paste-blocked {
-          padding: 0 1.25rem 0.75rem;
-          font-size: 0.75rem; color: #F5A623;
-          background: #1C1917; flex-shrink: 0;
+          margin: 0 1.25rem 0.75rem;
+          padding: 0.6rem 0.9rem;
+          font-size: 0.8rem; color: #F5A623;
+          background: rgba(245,166,35,0.1);
+          border: 1px solid rgba(245,166,35,0.25);
+          border-radius: 8px;
+          flex-shrink: 0;
         }
         .chat-actions { display: flex; flex-direction: column; gap: 0.5rem; }
         .chat-icon-btn {

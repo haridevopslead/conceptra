@@ -656,7 +656,7 @@ export default function Evaluator() {
     e.preventDefault();
     setPasteBlocked(true);
     if (pasteBlockedTimeoutRef.current) clearTimeout(pasteBlockedTimeoutRef.current);
-    pasteBlockedTimeoutRef.current = setTimeout(() => setPasteBlocked(false), 2500);
+    pasteBlockedTimeoutRef.current = setTimeout(() => setPasteBlocked(false), 3000);
   }
 
   const questions = topic ? (QUESTION_BANK[topic] ?? []) : [];
@@ -1021,7 +1021,10 @@ export default function Evaluator() {
         />
 
         {pasteBlocked && (
-          <p className="text-xs" style={{ color: "#F5A623" }}>
+          <p
+            className="text-sm px-4 py-3 rounded-lg border"
+            style={{ color: "#F5A623", backgroundColor: "rgba(245,166,35,0.1)", borderColor: "rgba(245,166,35,0.25)" }}
+          >
             Paste is disabled here — type your answer to practice for the real thing.
           </p>
         )}

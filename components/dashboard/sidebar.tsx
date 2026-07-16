@@ -51,6 +51,17 @@ const NAV = [
     ),
   },
   {
+    href: "/dashboard/growth",
+    label: "Your Growth",
+    proOnly: true,
+    icon: (
+      <svg width="19" height="19" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <polyline points="3 17 9 11 13 15 21 6" />
+        <polyline points="14 6 21 6 21 13" />
+      </svg>
+    ),
+  },
+  {
     href: "/settings",
     label: "Settings",
     icon: (
@@ -94,9 +105,10 @@ export default function Sidebar({ user }: Props) {
 
       {/* Nav */}
       <nav aria-label="Primary navigation" style={{ flex: 1, padding: "22px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
-        {NAV.map(({ href, label, icon }) => {
+        {NAV.map(({ href, label, icon, proOnly }) => {
           const active = pathname === href;
           const hovered = hoveredHref === href;
+          const locked = proOnly && isFreePlan;
           return (
             <Link
               key={href}
@@ -115,7 +127,13 @@ export default function Sidebar({ user }: Props) {
               }}
             >
               {icon}
-              {label}
+              <span style={{ flex: 1 }}>{label}</span>
+              {locked && (
+                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24" style={{ flexShrink: 0, opacity: 0.7 }}>
+                  <rect x="4" y="11" width="16" height="10" rx="2" />
+                  <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                </svg>
+              )}
             </Link>
           );
         })}

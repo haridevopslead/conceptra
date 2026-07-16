@@ -49,6 +49,17 @@ const NAV = [
     ),
   },
   {
+    href: "/dashboard/growth",
+    label: "Growth",
+    proOnly: true,
+    icon: (
+      <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <polyline points="3 17 9 11 13 15 21 6" />
+        <polyline points="14 6 21 6 21 13" />
+      </svg>
+    ),
+  },
+  {
     href: "/settings",
     label: "Settings",
     icon: (
@@ -60,8 +71,13 @@ const NAV = [
   },
 ];
 
-export default function BottomNav() {
+type Props = {
+  plan?: string | null;
+};
+
+export default function BottomNav({ plan }: Props) {
   const pathname = usePathname();
+  const isFreePlan = !plan || plan === "FREE";
   const [ariaHidden, setAriaHidden] = useState(false);
 
   useEffect(() => {
@@ -82,8 +98,9 @@ export default function BottomNav() {
         paddingBottom: "env(safe-area-inset-bottom)",
       }}
     >
-      {NAV.map(({ href, label, icon }) => {
+      {NAV.map(({ href, label, icon, proOnly }) => {
         const active = pathname === href;
+        const locked = proOnly && isFreePlan;
         return (
           <Link
             key={href}
@@ -94,7 +111,15 @@ export default function BottomNav() {
               textDecoration: "none",
             }}
           >
-            {icon}
+            <span style={{ position: "relative", display: "inline-flex" }}>
+              {icon}
+              {locked && (
+                <svg width="9" height="9" fill="var(--nav-bg)" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" style={{ position: "absolute", top: -2, right: -4 }}>
+                  <rect x="4" y="11" width="16" height="10" rx="2" />
+                  <path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                </svg>
+              )}
+            </span>
             <span style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.04em" }}>{label}</span>
           </Link>
         );

@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     }
   }
   const memoryInstruction = priorOpeningQuestions.length
-    ? `\n\nThis candidate has practiced ${topic} with you before. Do not repeat these previous opening questions verbatim — ask something meaningfully different:\n${priorOpeningQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}`
+    ? `\n\nMEMORY — this candidate has already practiced ${topic} with you in past sessions. Here are their exact previous opening questions, in quotes:\n${priorOpeningQuestions.map((q, i) => `${i + 1}. "${q}"`).join("\n")}\n\nYou must not ask any of these again, reworded or otherwise, and your new question must not reuse the same specific command, tool invocation, or example they reference (e.g. if a previous question used \`docker run -d nginx\`, do not build a new question around that same command). Pick a genuinely different concept, command, failure mode, or real-world scenario within ${topic} that none of the above already cover.`
     : "";
 
   const systemPrompt = `You are Hari, an AI mentor trained on a real Lead DevOps Engineer's interview experience, conducting a mock interview.
@@ -103,7 +103,7 @@ Topic: ${topic} | Difficulty: ${difficulty}${memoryInstruction}`;
     messages,
     // PRO only — bumps variety so repeated sessions don't land on the same
     // phrasing even when the memory instruction above doesn't fully steer it.
-    ...(hasMemory ? { temperature: 0.85 } : {}),
+    ...(hasMemory ? { temperature: 0.9 } : {}),
   });
 
   const encoder = new TextEncoder();

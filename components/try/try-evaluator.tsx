@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import SeniorAnswerBox, { RichText } from "@/components/interview/senior-answer-box";
 import CompareAnswer from "@/components/interview/compare-answer";
@@ -131,8 +131,12 @@ export default function TryEvaluator() {
   // maxHeight/overflowY inline style below caps the growth and switches to
   // internal scrolling beyond that. Speech recognition appends text
   // programmatically with no native caret/keystroke event, so once at that
-  // cap we also force-follow the latest text ourselves.
-  useEffect(() => {
+  // cap we also force-follow the latest text ourselves. useLayoutEffect
+  // (not useEffect) so the resize commits in the same paint as the text
+  // update — with useEffect there's a real gap, since it's deferred until
+  // after the browser paints, which reads as a lag on a loaded mobile CPU
+  // mid-recognition.
+  useLayoutEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";
@@ -249,7 +253,7 @@ export default function TryEvaluator() {
           disabled={phase !== "idle"}
           rows={8}
           placeholder="Type your answer here — or use the mic below to speak it. Aim for the depth a senior engineer would give: trade-offs, failure modes, production consequences."
-          className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 border focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent resize-none disabled:opacity-50 transition-all duration-200 ease-out"
+          className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 border focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent resize-none disabled:opacity-50 transition-[background-color,border-color,opacity] duration-200 ease-out"
           style={{
             backgroundColor: "#2C2420",
             borderColor: micState === "recording" ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.1)",

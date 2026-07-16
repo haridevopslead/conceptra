@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import Link from "next/link";
 import { useVoiceRecorder } from "@/components/interview/use-voice-recorder";
 import MicButton from "@/components/interview/mic-button";
@@ -175,8 +175,12 @@ export default function DevInterviewPage() {
   // max-height/overflow-y on .chat-textarea caps the growth and switches to
   // internal scrolling beyond that. Speech recognition appends text
   // programmatically with no native caret/keystroke event, so once at that
-  // cap we also force-follow the latest text ourselves.
-  useEffect(() => {
+  // cap we also force-follow the latest text ourselves. useLayoutEffect
+  // (not useEffect) so the resize commits in the same paint as the text
+  // update — with useEffect there's a real gap, since it's deferred until
+  // after the browser paints, which reads as a lag on a loaded mobile CPU
+  // mid-recognition.
+  useLayoutEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
     el.style.height = "auto";

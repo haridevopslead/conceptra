@@ -88,6 +88,32 @@ export async function POST(req: NextRequest) {
     ? `\n\nMEMORY — this candidate has already practiced ${topic} with you in past sessions. Here are their exact previous opening questions, in quotes:\n${priorOpeningQuestions.map((q, i) => `${i + 1}. "${q}"`).join("\n")}\n\nYou must not ask any of these again, reworded or otherwise, and your new question must not reuse the same specific command, tool invocation, or example they reference (e.g. if a previous question used \`docker run -d nginx\`, do not build a new question around that same command). Pick a genuinely different concept, command, failure mode, or real-world scenario within ${topic} that none of the above already cover.`
     : "";
 
+  // PRO growth memory: surface this user's recurring weak areas on this
+  // topic (piece 2's HariWeakArea — read-only here, nothing written to it
+  // in this file). Aggregated at read time since piece 2 deliberately
+  // doesn't dedupe at write time; a concept flagged across more past
+  // sessions is a stronger signal and sorts first. Same best-effort
+  // fallback pattern as the no-repeat memory above.
+  let recurringWeakAreas: string[] = [];
+  if (isNewConversation && hasMemory) {
+    try {
+      const grouped = await db.hariWeakArea.groupBy({
+        by: ["concept"],
+        where: { userId: session.user.id, topic },
+        _count: { concept: true },
+        _max: { createdAt: true },
+        orderBy: [{ _count: { concept: "desc" } }, { _max: { createdAt: "desc" } }],
+        take: 5,
+      });
+      recurringWeakAreas = grouped.map((g) => g.concept);
+    } catch {
+      recurringWeakAreas = [];
+    }
+  }
+  const weakAreaInstruction = recurringWeakAreas.length
+    ? `\n\nGROWTH CONTEXT — in past ${topic} sessions, this candidate has specifically struggled with (most recurring first): ${recurringWeakAreas.map((c) => `"${c}"`).join(", ")}. Naturally work a callback to ONE of these into your opening question, the way a mentor who remembers the candidate would — e.g. "Let's dig back into layer caching — walk me through..." — not as a separate preamble sentence, and never as a listed recap of their weaknesses. Prefer the first one listed (it's recurred the most, so it's the strongest signal) unless it genuinely doesn't fit a good opening question. Only do this once, right at the start of the conversation; don't bring it up again later.`
+    : "";
+
   // PRO only — the model doesn't know in advance which turn will be the
   // feedback turn (it decides that itself per the "After 5-6 exchanges..."
   // instruction below), so this is included on every turn; the tool is only
@@ -127,7 +153,7 @@ scoring, good or bad. This does not apply to answers that are merely weak,
 confused, or wrong but still genuinely trying to address the question — grade
 those normally, same as any other real attempt.
 
-Topic: ${topic} | Difficulty: ${difficulty}${memoryInstruction}${weakConceptsInstruction}`;
+Topic: ${topic} | Difficulty: ${difficulty}${memoryInstruction}${weakAreaInstruction}${weakConceptsInstruction}`;
 
   const msgStream = anthropic.messages.stream({
     model: "claude-haiku-4-5-20251001",

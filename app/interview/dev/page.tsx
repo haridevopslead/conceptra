@@ -700,6 +700,7 @@ export default function DevInterviewPage() {
           color: #E7DDD5; padding: 0.75rem 1rem;
           font-size: 0.9rem; resize: none; outline: none;
           line-height: 1.5; font-family: inherit;
+          transition: opacity 200ms ease-out;
         }
         .chat-textarea:focus { border-color: #F5A623; }
         .chat-paste-blocked {

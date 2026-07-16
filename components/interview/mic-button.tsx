@@ -50,7 +50,7 @@ export default function MicButton({ micState, onToggle }: { micState: MicState; 
         )}
       </button>
       <p className="text-xs text-gray-500">
-        {recording ? "Click to stop recording" : transcribing ? "Transcribing…" : "Click to speak your answer"}
+        {recording ? "Listening… (refined once you stop)" : transcribing ? "Transcribing…" : "Click to speak your answer"}
       </p>
     </div>
   );

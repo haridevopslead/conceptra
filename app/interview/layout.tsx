@@ -13,9 +13,9 @@ export default async function InterviewLayout({
   if (!session) redirect("/login");
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
+    <div className="flex h-dvh" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar user={session.user} />
-      <main className="flex-1 overflow-auto pb-20 md:pb-0 w-full max-w-5xl mx-auto">{children}</main>
+      <main className="flex-1 h-full min-h-0 overflow-auto pb-20 md:pb-0 w-full max-w-5xl mx-auto">{children}</main>
       <BottomNav />
     </div>
   );

@@ -691,7 +691,7 @@ export default function DevInterviewPage() {
 
       <style>{`
         .chat-root {
-          height: 100vh; background: #1C1917; color: #E7DDD5;
+          height: 100%; background: #1C1917; color: #E7DDD5;
           display: flex; flex-direction: column;
         }
         .chat-back-link {

@@ -4,6 +4,31 @@ import { authOptions } from "@/lib/auth";
 import { anthropic } from "@/lib/ai";
 import { db } from "@/lib/db";
 import { checkDevChatQuota, recordDevChatUsage, quotaErrorMessage } from "@/lib/ai-quota";
+import type Anthropic from "@anthropic-ai/sdk";
+
+// PRO only — lets the model report weak concepts as a separate tool_use
+// content block in the same feedback-turn response, instead of a second AI
+// call or a fragile marker embedded in the streamed prose (which would risk
+// leaking into the SENIOR_ANSWER text the client parses out of the stream).
+const FLAG_WEAK_CONCEPTS_TOOL: Anthropic.Tool = {
+  name: "flag_weak_concepts",
+  description:
+    "Call this ONLY in the same response where you give your final SCORE/STRONG/IMPROVE/SENIOR_ANSWER feedback at the end of the interview. Never call it on any other turn.",
+  input_schema: {
+    type: "object",
+    properties: {
+      concepts: {
+        type: "array",
+        items: { type: "string" },
+        minItems: 1,
+        maxItems: 5,
+        description:
+          "3-5 short, specific concept phrases the candidate struggled with, e.g. \"Docker layer caching\", \"multi-stage builds\" — not the topic name alone, not full sentences.",
+      },
+    },
+    required: ["concepts"],
+  },
+};
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -63,6 +88,14 @@ export async function POST(req: NextRequest) {
     ? `\n\nMEMORY — this candidate has already practiced ${topic} with you in past sessions. Here are their exact previous opening questions, in quotes:\n${priorOpeningQuestions.map((q, i) => `${i + 1}. "${q}"`).join("\n")}\n\nYou must not ask any of these again, reworded or otherwise, and your new question must not reuse the same specific command, tool invocation, or example they reference (e.g. if a previous question used \`docker run -d nginx\`, do not build a new question around that same command). Pick a genuinely different concept, command, failure mode, or real-world scenario within ${topic} that none of the above already cover.`
     : "";
 
+  // PRO only — the model doesn't know in advance which turn will be the
+  // feedback turn (it decides that itself per the "After 5-6 exchanges..."
+  // instruction below), so this is included on every turn; the tool is only
+  // actually useful, and only actually called, on the one turn that matters.
+  const weakConceptsInstruction = hasMemory
+    ? `\n\nWhen (and only when) you give your final SCORE/STRONG/IMPROVE/SENIOR_ANSWER feedback in this response, also call the flag_weak_concepts tool with 3-5 short, specific concepts the candidate genuinely struggled with in this conversation, based on their actual answers. If they answered strongly throughout with no real gaps, call it with the 1-2 most advanced concepts they could still sharpen. Do not call this tool on any other turn.`
+    : "";
+
   const systemPrompt = `You are Hari, an AI mentor trained on a real Lead DevOps Engineer's interview experience, conducting a mock interview.
 Be direct, warm, and honest. Ask ONE question at a time.
 Follow up naturally based on the candidate's answer.
@@ -94,7 +127,7 @@ scoring, good or bad. This does not apply to answers that are merely weak,
 confused, or wrong but still genuinely trying to address the question — grade
 those normally, same as any other real attempt.
 
-Topic: ${topic} | Difficulty: ${difficulty}${memoryInstruction}`;
+Topic: ${topic} | Difficulty: ${difficulty}${memoryInstruction}${weakConceptsInstruction}`;
 
   const msgStream = anthropic.messages.stream({
     model: "claude-haiku-4-5-20251001",
@@ -104,6 +137,8 @@ Topic: ${topic} | Difficulty: ${difficulty}${memoryInstruction}`;
     // PRO only — bumps variety so repeated sessions don't land on the same
     // phrasing even when the memory instruction above doesn't fully steer it.
     ...(hasMemory ? { temperature: 0.9 } : {}),
+    // PRO only — Free gets zero extra tokens/capability offered to the model.
+    ...(hasMemory ? { tools: [FLAG_WEAK_CONCEPTS_TOOL] } : {}),
   });
 
   const encoder = new TextEncoder();
@@ -123,6 +158,55 @@ Topic: ${topic} | Difficulty: ${difficulty}${memoryInstruction}`;
           db.hariSessionLog
             .create({ data: { userId: session.user.id, topic, difficulty, openingQuestion: openingText } })
             .catch(() => {});
+        }
+
+        // PRO only, fire-and-forget — weak-area extraction is a best-effort
+        // side effect of the feedback turn, never allowed to affect what the
+        // user actually sees. A malformed/missing tool call is logged (not
+        // swallowed) so a recurring problem here is visible server-side.
+        if (hasMemory) {
+          msgStream
+            .finalMessage()
+            .then((finalMsg) => {
+              const textBlock = finalMsg.content.find((b): b is Anthropic.TextBlock => b.type === "text");
+              const fullText = textBlock?.text ?? "";
+              const isFeedbackTurn = fullText.includes("SCORE:") && fullText.includes("SENIOR_ANSWER:");
+              if (!isFeedbackTurn) return;
+
+              const toolBlock = finalMsg.content.find(
+                (b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === "flag_weak_concepts"
+              );
+              if (!toolBlock) {
+                console.error("[hari-weak-areas] feedback turn produced no flag_weak_concepts call", {
+                  userId: session.user.id,
+                  topic,
+                });
+                return;
+              }
+
+              const input = toolBlock.input as { concepts?: unknown } | null;
+              const concepts = Array.isArray(input?.concepts) ? input.concepts : null;
+              const cleaned = concepts
+                ?.filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+                .map((c) => c.trim())
+                .slice(0, 5);
+
+              if (!cleaned || cleaned.length === 0) {
+                console.error("[hari-weak-areas] malformed flag_weak_concepts input", {
+                  userId: session.user.id,
+                  topic,
+                  input: toolBlock.input,
+                });
+                return;
+              }
+
+              return db.hariWeakArea.createMany({
+                data: cleaned.map((concept) => ({ userId: session.user.id, topic, concept })),
+              });
+            })
+            .catch((err) => {
+              console.error("[hari-weak-areas] extraction failed", { userId: session.user.id, topic, err });
+            });
         }
       });
       msgStream.on("error", (err) => {

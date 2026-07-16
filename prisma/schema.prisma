@@ -50,6 +50,7 @@ model User {
   lessonProgress    UserLessonProgress[]
   aiUsage           AiUsage[]
   hariSessionLogs   HariSessionLog[]
+  hariWeakAreas     HariWeakArea[]
 }
 
 model Session {
@@ -166,6 +167,24 @@ model HariSessionLog {
   createdAt          DateTime @default(now())
 
   @@index([userId, topic, createdAt])
+}
+
+// One row per weak concept flagged at the end of a PRO Hari session (e.g.
+// "Docker layer caching", not just "Docker") — extracted by the same model
+// call that produces the end-of-conversation feedback, via a tool call, and
+// written best-effort (see app/api/interview/dev/route.ts). Not deduped at
+// write time: repeated concepts across sessions are useful signal for later
+// reads. Nothing reads this yet — piece 3 will query it for session-start
+// prompting, piece 4 will build UI on top of it.
+model HariWeakArea {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic     String
+  concept   String
+  createdAt DateTime @default(now())
+
+  @@index([userId, topic])
 }
 
 model UserLessonProgress {

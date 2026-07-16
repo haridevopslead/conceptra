@@ -83,6 +83,11 @@ export default function TryEvaluator() {
   // (dimmed/italic) rather than the accurate Groq transcript or typed text.
   const [isLiveText, setIsLiveText] = useState(false);
   const baseAnswerRef = useRef("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Set right before a voice-driven setAnswer() so the effect below knows to
+  // follow the caret — plain typing already scrolls natively and shouldn't
+  // be hijacked mid-edit.
+  const voiceUpdateRef = useRef(false);
   // Pasting defeats the point of practicing a real interview, where you
   // can't paste in a prepared answer — blocked on the textarea, surfaced
   // briefly here rather than silently eaten.
@@ -110,13 +115,26 @@ export default function TryEvaluator() {
 
   function handleLiveText(liveTranscript: string) {
     setIsLiveText(true);
+    voiceUpdateRef.current = true;
     setAnswer(baseAnswerRef.current ? `${baseAnswerRef.current} ${liveTranscript}` : liveTranscript);
   }
 
   function handleFinalText(finalTranscript: string) {
     setIsLiveText(false);
+    voiceUpdateRef.current = true;
     setAnswer(baseAnswerRef.current ? `${baseAnswerRef.current} ${finalTranscript}` : finalTranscript);
   }
+
+  // Speech recognition appends to `answer` programmatically — there's no
+  // native caret/keystroke event to make the browser follow it, so the
+  // textarea silently keeps growing off-screen while the user keeps
+  // talking unless we force it to follow the latest text ourselves.
+  useEffect(() => {
+    if (voiceUpdateRef.current && textareaRef.current) {
+      textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+      voiceUpdateRef.current = false;
+    }
+  }, [answer]);
 
   const {
     micState,
@@ -213,6 +231,7 @@ export default function TryEvaluator() {
         </div>
 
         <textarea
+          ref={textareaRef}
           value={answer}
           onChange={(e) => {
             setAnswer(e.target.value);

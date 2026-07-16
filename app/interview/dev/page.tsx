@@ -137,6 +137,11 @@ export default function DevInterviewPage() {
   // Full API conversation history (includes the hidden kickoff)
   const apiHistoryRef = useRef<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Set right before a voice-driven setInput() so the effect below knows to
+  // follow the caret — plain typing already scrolls natively and shouldn't
+  // be hijacked mid-edit.
+  const voiceUpdateRef = useRef(false);
   // Snapshot of `input` the instant recording starts, so live captions and
   // the final Groq transcript both append after whatever was already typed,
   // the same base/live/final pattern used in Quick Practice.
@@ -163,6 +168,17 @@ export default function DevInterviewPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [visibleMessages]);
+
+  // Speech recognition appends to `input` programmatically — there's no
+  // native caret/keystroke event to make the browser follow it, so the
+  // textarea silently keeps growing off-screen while the user keeps
+  // talking unless we force it to follow the latest text ourselves.
+  useEffect(() => {
+    if (voiceUpdateRef.current && textareaRef.current) {
+      textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+      voiceUpdateRef.current = false;
+    }
+  }, [input]);
 
   // Checks, per selected topic, whether this user has practiced it before —
   // only surfaces the nudge for FREE users (PRO doesn't need it, it gets
@@ -356,11 +372,13 @@ export default function DevInterviewPage() {
 
   function handleLiveText(liveTranscript: string) {
     setIsLiveText(true);
+    voiceUpdateRef.current = true;
     setInput(baseInputRef.current ? `${baseInputRef.current} ${liveTranscript}` : liveTranscript);
   }
 
   function handleFinalText(finalTranscript: string) {
     setIsLiveText(false);
+    voiceUpdateRef.current = true;
     setInput(baseInputRef.current ? `${baseInputRef.current} ${finalTranscript}` : finalTranscript);
   }
 
@@ -659,6 +677,7 @@ export default function DevInterviewPage() {
       <div className="chat-input-area">
         <MicButton micState={micState} onToggle={handleMicToggle} />
         <textarea
+          ref={textareaRef}
           value={input}
           onChange={(e) => {
             setInput(e.target.value);
@@ -691,7 +710,7 @@ export default function DevInterviewPage() {
 
       <style>{`
         .chat-root {
-          height: 100%; background: #1C1917; color: #E7DDD5;
+          min-height: 100%; background: #1C1917; color: #E7DDD5;
           display: flex; flex-direction: column;
         }
         .chat-back-link {
@@ -725,7 +744,7 @@ export default function DevInterviewPage() {
         .chat-badge.muted { background: #23201E; color: #9E8E85; }
 
         .chat-messages {
-          flex: 1; overflow-y: auto; padding: 1.25rem;
+          padding: 1.25rem;
           display: flex; flex-direction: column; gap: 1rem;
         }
         .chat-row { display: flex; align-items: flex-end; gap: 0.5rem; }
@@ -754,6 +773,7 @@ export default function DevInterviewPage() {
         .chat-error { color: #F87171; font-size: 0.85rem; text-align: center; }
 
         .chat-input-area {
+          position: sticky; bottom: 0;
           padding: 1rem 1.25rem;
           border-top: 1px solid #2C2420;
           background: #1C1917;

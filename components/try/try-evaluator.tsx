@@ -125,13 +125,20 @@ export default function TryEvaluator() {
     setAnswer(baseAnswerRef.current ? `${baseAnswerRef.current} ${finalTranscript}` : finalTranscript);
   }
 
-  // Speech recognition appends to `answer` programmatically — there's no
-  // native caret/keystroke event to make the browser follow it, so the
-  // textarea silently keeps growing off-screen while the user keeps
-  // talking unless we force it to follow the latest text ourselves.
+  // Auto-grow the textarea to fit its content (typing or voice) instead of
+  // staying a fixed size with hidden overflow — reset to auto so
+  // scrollHeight reflects the true content height, then apply it; the
+  // maxHeight/overflowY inline style below caps the growth and switches to
+  // internal scrolling beyond that. Speech recognition appends text
+  // programmatically with no native caret/keystroke event, so once at that
+  // cap we also force-follow the latest text ourselves.
   useEffect(() => {
-    if (voiceUpdateRef.current && textareaRef.current) {
-      textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+    if (voiceUpdateRef.current) {
+      el.scrollTop = el.scrollHeight;
       voiceUpdateRef.current = false;
     }
   }, [answer]);
@@ -248,6 +255,9 @@ export default function TryEvaluator() {
             borderColor: micState === "recording" ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.1)",
             fontStyle: isLiveText ? "italic" : "normal",
             opacity: isLiveText ? 0.7 : 1,
+            minHeight: "11.5rem",
+            maxHeight: "min(50vh, 360px)",
+            overflowY: "auto",
           }}
         />
 

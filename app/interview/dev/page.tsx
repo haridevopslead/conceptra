@@ -169,13 +169,20 @@ export default function DevInterviewPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [visibleMessages]);
 
-  // Speech recognition appends to `input` programmatically — there's no
-  // native caret/keystroke event to make the browser follow it, so the
-  // textarea silently keeps growing off-screen while the user keeps
-  // talking unless we force it to follow the latest text ourselves.
+  // Auto-grow the textarea to fit its content (typing or voice) instead of
+  // staying a fixed 3 lines with hidden overflow — reset to auto so
+  // scrollHeight reflects the true content height, then apply it; CSS
+  // max-height/overflow-y on .chat-textarea caps the growth and switches to
+  // internal scrolling beyond that. Speech recognition appends text
+  // programmatically with no native caret/keystroke event, so once at that
+  // cap we also force-follow the latest text ourselves.
   useEffect(() => {
-    if (voiceUpdateRef.current && textareaRef.current) {
-      textareaRef.current.scrollTop = textareaRef.current.scrollHeight;
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+    if (voiceUpdateRef.current) {
+      el.scrollTop = el.scrollHeight;
       voiceUpdateRef.current = false;
     }
   }, [input]);
@@ -786,6 +793,8 @@ export default function DevInterviewPage() {
           font-size: 0.9rem; resize: none; outline: none;
           line-height: 1.5; font-family: inherit;
           transition: opacity 200ms ease-out;
+          min-height: calc(2 * 0.75rem + 3 * 1.5em);
+          max-height: min(50vh, 360px); overflow-y: auto;
         }
         .chat-textarea:focus { border-color: #F5A623; }
         .chat-paste-blocked {

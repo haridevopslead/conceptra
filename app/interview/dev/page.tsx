@@ -119,6 +119,13 @@ export default function DevInterviewPage() {
   const [topic, setTopic] = useState<string>("Docker");
   const [difficulty, setDifficulty] = useState<Difficulty>("Intermediate");
 
+  // FREE-plan upgrade nudge: "you've done this topic before" — only ever
+  // set for FREE users (PRO gets real memory instead, see route.ts). Tracks
+  // dismissals per topic so switching away and back re-shows it, but
+  // dismissing it once for the current topic sticks for this visit.
+  const [priorTopicNudge, setPriorTopicNudge] = useState(false);
+  const dismissedNudgeTopicsRef = useRef<Set<string>>(new Set());
+
   // Visible messages only — the kickoff user message is hidden from the UI
   const [visibleMessages, setVisibleMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -156,6 +163,31 @@ export default function DevInterviewPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [visibleMessages]);
+
+  // Checks, per selected topic, whether this user has practiced it before —
+  // only surfaces the nudge for FREE users (PRO doesn't need it, it gets
+  // real memory instead). Runs on the setup screen only.
+  useEffect(() => {
+    if (checkingHandoff || screen !== "setup") return;
+    let cancelled = false;
+    fetch(`/api/interview/dev/history?topic=${encodeURIComponent(topic)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        setPriorTopicNudge(
+          data.plan === "FREE" && data.hasPriorSession && !dismissedNudgeTopicsRef.current.has(topic)
+        );
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [topic, screen, checkingHandoff]);
+
+  function dismissPriorTopicNudge() {
+    dismissedNudgeTopicsRef.current.add(topic);
+    setPriorTopicNudge(false);
+  }
 
   // ── Streaming fetch ──────────────────────────────────────────────────────────
 
@@ -395,6 +427,22 @@ export default function DevInterviewPage() {
           ))}
         </div>
 
+        {priorTopicNudge && (
+          <div className="dev-nudge">
+            <span>
+              You&apos;ve practiced {topic} before — <Link href="/pricing">upgrade to Pro</Link> so Hari
+              remembers this and builds on it instead of starting fresh.
+            </span>
+            <button
+              onClick={dismissPriorTopicNudge}
+              className="dev-nudge-dismiss"
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </div>
+        )}
+
         <button onClick={startInterview} className="dev-start-btn">
           Start Interview →
         </button>
@@ -463,6 +511,23 @@ export default function DevInterviewPage() {
             transition: opacity 0.15s;
           }
           .dev-start-btn:hover { opacity: 0.9; }
+          .dev-nudge {
+            display: flex; align-items: center; gap: 0.75rem;
+            width: 100%; max-width: 520px;
+            padding: 0.75rem 1rem; margin-bottom: 1.5rem;
+            font-size: 0.8rem; line-height: 1.5; color: #F5A623;
+            background: rgba(245,166,35,0.1);
+            border: 1px solid rgba(245,166,35,0.25);
+            border-radius: 10px;
+          }
+          .dev-nudge span { flex: 1; }
+          .dev-nudge a { color: #F5A623; font-weight: 700; text-decoration: underline; }
+          .dev-nudge-dismiss {
+            flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+            background: transparent; border: none; color: #F5A623;
+            font-size: 1.1rem; line-height: 1; cursor: pointer; opacity: 0.7;
+          }
+          .dev-nudge-dismiss:hover { opacity: 1; }
         `}</style>
       </div>
     );

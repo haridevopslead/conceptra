@@ -49,6 +49,7 @@ model User {
   interviewSessions InterviewSession[]
   lessonProgress    UserLessonProgress[]
   aiUsage           AiUsage[]
+  hariSessionLogs   HariSessionLog[]
 }
 
 model Session {
@@ -147,6 +148,24 @@ model AiUsage {
   createdAt DateTime @default(now())
 
   @@index([userId, kind, createdAt])
+}
+
+// One row per Interview with Hari session, written for every plan so the
+// data exists regardless of tier — only the PRO/ENTERPRISE prompt-building
+// path in app/api/interview/dev/route.ts actually reads it back (for
+// no-repeat opening questions); FREE reads it only to power the upgrade
+// nudge on app/interview/dev's setup screen.
+model HariSessionLog {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic              String
+  difficulty         String
+  openingQuestion    String   @db.Text
+  followUpQuestions  String[] @default([])
+  createdAt          DateTime @default(now())
+
+  @@index([userId, topic, createdAt])
 }
 
 model UserLessonProgress {

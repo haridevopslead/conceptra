@@ -20,14 +20,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const plan = dbUser?.plan ?? "FREE";
+  // PRO/ENTERPRISE get session memory (no-repeat opening questions); FREE
+  // keeps today's stateless behavior and instead sees an upgrade nudge in
+  // the UI (see /api/interview/dev/history).
+  const hasMemory = plan !== "FREE";
+
   // The client always sends the full running conversation history, so the
   // very first call of a new conversation is the only one with exactly one
   // message (the kickoff) — every later turn has 3+. Quota is charged once
   // per conversation here, not per message turn.
   const isNewConversation = Array.isArray(messages) && messages.length === 1;
   if (isNewConversation) {
-    const plan = dbUser?.plan ?? "FREE";
-
     const quota = await checkDevChatQuota(session.user.id, plan);
     if (!quota.allowed) {
       return new Response(
@@ -37,6 +41,27 @@ export async function POST(req: NextRequest) {
     }
     await recordDevChatUsage(session.user.id);
   }
+
+  // PRO memory: pull this user's recent opening questions for the same topic
+  // so Hari can be told not to repeat itself. Best-effort — a lookup failure
+  // just falls back to today's stateless prompt rather than failing the call.
+  let priorOpeningQuestions: string[] = [];
+  if (isNewConversation && hasMemory) {
+    try {
+      const priorLogs = await db.hariSessionLog.findMany({
+        where: { userId: session.user.id, topic },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: { openingQuestion: true },
+      });
+      priorOpeningQuestions = priorLogs.map((l) => l.openingQuestion);
+    } catch {
+      priorOpeningQuestions = [];
+    }
+  }
+  const memoryInstruction = priorOpeningQuestions.length
+    ? `\n\nThis candidate has practiced ${topic} with you before. Do not repeat these previous opening questions verbatim — ask something meaningfully different:\n${priorOpeningQuestions.map((q, i) => `${i + 1}. ${q}`).join("\n")}`
+    : "";
 
   const systemPrompt = `You are Hari, an AI mentor trained on a real Lead DevOps Engineer's interview experience, conducting a mock interview.
 Be direct, warm, and honest. Ask ONE question at a time.
@@ -69,24 +94,36 @@ scoring, good or bad. This does not apply to answers that are merely weak,
 confused, or wrong but still genuinely trying to address the question — grade
 those normally, same as any other real attempt.
 
-Topic: ${topic} | Difficulty: ${difficulty}`;
+Topic: ${topic} | Difficulty: ${difficulty}${memoryInstruction}`;
 
   const msgStream = anthropic.messages.stream({
     model: "claude-haiku-4-5-20251001",
     max_tokens: 1024,
     system: systemPrompt,
     messages,
+    // PRO only — bumps variety so repeated sessions don't land on the same
+    // phrasing even when the memory instruction above doesn't fully steer it.
+    ...(hasMemory ? { temperature: 0.85 } : {}),
   });
 
   const encoder = new TextEncoder();
+  let openingText = "";
 
   const readable = new ReadableStream({
     start(controller) {
       msgStream.on("text", (text) => {
         controller.enqueue(encoder.encode(text));
+        if (isNewConversation) openingText += text;
       });
       msgStream.on("end", () => {
         controller.close();
+        // Fire-and-forget — logged for every plan (not just PRO) so the data
+        // exists regardless of tier, without delaying the streamed response.
+        if (isNewConversation) {
+          db.hariSessionLog
+            .create({ data: { userId: session.user.id, topic, difficulty, openingQuestion: openingText } })
+            .catch(() => {});
+        }
       });
       msgStream.on("error", (err) => {
         controller.error(err);

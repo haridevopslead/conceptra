@@ -27,14 +27,48 @@ type TopicGroup = {
   sessionCount: number;
   concepts: ConceptStat[];
   mostRecentActivity: Date;
+  // Best-effort count of this topic's sessions that plausibly ran long
+  // enough to reach Hari's real feedback turn — see completedSessionCounts
+  // below for how this is estimated and why it's needed at all.
+  likelyCompletedSessionCount: number;
 };
 
 function maxDate(dates: Date[]): Date {
   return dates.reduce((max, d) => (d > max ? d : max), new Date(0));
 }
 
+// AiCostLog has no topic column (it logs the AI call, not the conversation
+// it belongs to), so a session's turn count can only be estimated by
+// bucketing cost-log rows into the time window between one HariSessionLog
+// row and the next, across ALL topics in chronological order — not per
+// topic in isolation. A window with at least this many HARI_CHAT calls
+// plausibly reached the "after 5-6 exchanges" feedback turn; fewer strongly
+// suggests the session was abandoned before Hari ever gave real feedback.
+// This is an estimate, not a certainty (AiCostLog also didn't exist before
+// 2026-07-20, so older sessions always read as 0 here) — used only to avoid
+// claiming "nice work" when there's no real evidence anyone finished a
+// conversation, never to claim a session definitely did or didn't complete.
+const LIKELY_COMPLETED_TURN_THRESHOLD = 5;
+
+function estimateLikelyCompletedByTopic(
+  sessionLogs: { topic: string; createdAt: Date }[],
+  costLogTimestamps: Date[]
+): Map<string, number> {
+  const FAR_FUTURE = new Date(8640000000000000);
+  const result = new Map<string, number>();
+  sessionLogs.forEach((s, i) => {
+    const windowStart = s.createdAt;
+    const windowEnd = sessionLogs[i + 1]?.createdAt ?? FAR_FUTURE;
+    const turnCount = costLogTimestamps.filter((t) => t >= windowStart && t < windowEnd).length;
+    if (turnCount >= LIKELY_COMPLETED_TURN_THRESHOLD) {
+      result.set(s.topic, (result.get(s.topic) ?? 0) + 1);
+    }
+  });
+  return result;
+}
+
 async function loadGrowthData(userId: string): Promise<{ groups: TopicGroup[]; totalSessions: number }> {
-  const [weakAreas, sessionLogs] = await Promise.all([
+  const [weakAreas, sessionLogs, costLogs] = await Promise.all([
     db.hariWeakArea.findMany({
       where: { userId },
       select: { topic: true, concept: true, createdAt: true },
@@ -45,7 +79,17 @@ async function loadGrowthData(userId: string): Promise<{ groups: TopicGroup[]; t
       select: { topic: true, createdAt: true },
       orderBy: { createdAt: "asc" },
     }),
+    db.aiCostLog.findMany({
+      where: { userId, feature: "HARI_CHAT" },
+      select: { createdAt: true },
+      orderBy: { createdAt: "asc" },
+    }),
   ]);
+
+  const likelyCompletedByTopic = estimateLikelyCompletedByTopic(
+    sessionLogs,
+    costLogs.map((c) => c.createdAt)
+  );
 
   const sessionsByTopic = new Map<string, Date[]>();
   for (const s of sessionLogs) {
@@ -88,6 +132,7 @@ async function loadGrowthData(userId: string): Promise<{ groups: TopicGroup[]; t
       sessionCount: sessions.length,
       concepts,
       mostRecentActivity: maxDate([...sessions, ...concepts.map((c) => c.lastFlaggedAt)]),
+      likelyCompletedSessionCount: likelyCompletedByTopic.get(topic) ?? 0,
     };
   });
 
@@ -175,6 +220,15 @@ async function GrowthContent({ userId }: { userId: string }) {
         {totalSessions} Hari session{totalSessions === 1 ? "" : "s"} across {groups.length} topic{groups.length === 1 ? "" : "s"}.
       </p>
 
+      <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 14, padding: "16px 20px" }}>
+        <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.6 }}>
+          <strong style={{ color: "var(--foreground)" }}>How to read this:</strong> each card below is a topic
+          you&apos;ve practiced with Hari. A concept only shows up once Hari specifically notices you struggling
+          with it during a full conversation — it&apos;s not a guess. The × count is how many separate sessions
+          it&apos;s come up in, so a concept flagged 3× is worth more of your practice time than a one-off.
+        </p>
+      </div>
+
       {groups.map((g) => (
         <div key={g.topic} style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 18, padding: "26px 28px" }}>
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, marginBottom: g.concepts.length ? 18 : 0 }}>
@@ -185,7 +239,23 @@ async function GrowthContent({ userId }: { userId: string }) {
           </div>
 
           {g.concepts.length === 0 ? (
-            <p style={{ fontSize: 13.5, color: "var(--muted)" }}>No specific weak areas flagged on this topic yet — nice work.</p>
+            g.likelyCompletedSessionCount > 0 ? (
+              <p style={{ fontSize: 13.5, color: "var(--muted)" }}>No specific weak areas flagged on this topic yet — nice work.</p>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <p style={{ fontSize: 13.5, color: "var(--muted)", lineHeight: 1.55 }}>
+                  Not enough completed sessions yet to show real patterns on {g.topic} — concepts only get
+                  flagged once a conversation reaches Hari&apos;s final feedback. Finish a full session to
+                  start building this out.
+                </p>
+                <Link
+                  href={`/interview/dev?topic=${encodeURIComponent(g.topic)}`}
+                  style={{ fontSize: 13, fontWeight: 600, color: "var(--accent-text)", textDecoration: "none" }}
+                >
+                  Practice {g.topic} with Hari →
+                </Link>
+              </div>
+            )
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
               {g.concepts.map((c, i) => (
@@ -219,6 +289,12 @@ async function GrowthContent({ userId }: { userId: string }) {
                         Not flagged in your last {c.sessionsSinceLastFlagged === 1 ? "session" : `${c.sessionsSinceLastFlagged} sessions`} on {g.topic}
                       </p>
                     )}
+                    <Link
+                      href={`/interview/dev?topic=${encodeURIComponent(g.topic)}`}
+                      style={{ display: "inline-block", marginTop: 6, fontSize: 12.5, fontWeight: 600, color: "var(--accent-text)", textDecoration: "none" }}
+                    >
+                      Practice this again →
+                    </Link>
                   </div>
                 </div>
               ))}
@@ -241,6 +317,7 @@ const SAMPLE_TOPICS: TopicGroup[] = [
     topic: "Kubernetes",
     sessionCount: 4,
     mostRecentActivity: new Date(),
+    likelyCompletedSessionCount: 4,
     concepts: [
       { concept: "CrashLoopBackOff root cause analysis", count: 3, firstFlaggedAt: new Date(), lastFlaggedAt: new Date(), sessionsSinceLastFlagged: 0 },
       { concept: "Readiness vs liveness probe configuration", count: 2, firstFlaggedAt: new Date(), lastFlaggedAt: new Date(), sessionsSinceLastFlagged: 1 },
@@ -250,6 +327,7 @@ const SAMPLE_TOPICS: TopicGroup[] = [
     topic: "Docker",
     sessionCount: 2,
     mostRecentActivity: new Date(),
+    likelyCompletedSessionCount: 2,
     concepts: [
       { concept: "Layer caching and COPY ordering", count: 2, firstFlaggedAt: new Date(), lastFlaggedAt: new Date(), sessionsSinceLastFlagged: 0 },
     ],

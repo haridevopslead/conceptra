@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useVoiceRecorder } from "@/components/interview/use-voice-recorder";
 import MicButton from "@/components/interview/mic-button";
 
@@ -150,7 +151,14 @@ export default function DevInterviewPage() {
   // Only true when this chat was opened via the Quick Practice handoff —
   // a manually-started Hari session has no practice session to link back to.
   const [cameFromPractice, setCameFromPractice] = useState(false);
-  const [topic, setTopic] = useState<string>("Docker");
+  // Lets the Growth page's "Practice this again" links preselect a topic
+  // (e.g. /interview/dev?topic=Docker) instead of always defaulting to
+  // Docker — falls back to the default for anything outside the fixed list.
+  const searchParams = useSearchParams();
+  const queryTopic = searchParams.get("topic");
+  const [topic, setTopic] = useState<string>(
+    queryTopic && (TOPICS as readonly string[]).includes(queryTopic) ? queryTopic : "Docker"
+  );
   const [difficulty, setDifficulty] = useState<Difficulty>("Intermediate");
 
   // JD-paste mode: an alternative to the fixed topic picker. Session-only —

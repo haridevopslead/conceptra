@@ -38,6 +38,19 @@ const FLAG_WEAK_CONCEPTS_TOOL: Anthropic.Tool = {
 const JD_MAX_LENGTH = 6000;
 const JD_MIN_LENGTH = 30;
 
+// Topic-mode interviews are calibrated for one narrow topic at 5-6
+// exchanges, which in practice is a few minutes of real back-and-forth. A
+// real job posting usually spans several distinct skill areas (Terraform,
+// Kubernetes, CI/CD, observability, etc. all in one JD), so that same 5-6
+// can't realistically touch most of it. JD mode scales the exchange count
+// to the JD's actual breadth instead of a fixed number, but still needs a
+// hard ceiling so an unusually dense JD can't produce an unbounded
+// conversation. 16 approximates a real ~20-30 minute interview (a topic
+// interview's 5-6 already covers a few minutes each; a JD spanning several
+// such areas reasonably lands around 2-3x that) while keeping a predictable
+// upper bound on cost and engagement length.
+const JD_MAX_EXCHANGES = 16;
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return new Response("Unauthorized", { status: 401 });
@@ -134,9 +147,9 @@ export async function POST(req: NextRequest) {
     : "";
 
   // PRO only — the model doesn't know in advance which turn will be the
-  // feedback turn (it decides that itself per the "After 5-6 exchanges..."
-  // instruction below), so this is included on every turn; the tool is only
-  // actually useful, and only actually called, on the one turn that matters.
+  // feedback turn (it decides that itself per the pacing instruction below),
+  // so this is included on every turn; the tool is only actually useful, and
+  // only actually called, on the one turn that matters.
   const weakConceptsInstruction = hasMemory
     ? `\n\nWhen (and only when) you give your final SCORE/STRONG/IMPROVE/SENIOR_ANSWER feedback in this response, also call the flag_weak_concepts tool with 3-5 short, specific concepts the candidate genuinely struggled with in this conversation, based on their actual answers. If they answered strongly throughout with no real gaps, call it with the 1-2 most advanced concepts they could still sharpen. Do not call this tool on any other turn.`
     : "";
@@ -149,13 +162,19 @@ export async function POST(req: NextRequest) {
     ? `Difficulty: ${difficulty}`
     : `Topic: ${topic} | Difficulty: ${difficulty}`;
   const jdInstruction = isJdMode
-    ? `\n\nJOB DESCRIPTION MODE — the candidate pasted this real job posting instead of picking a fixed topic. Read it, identify the specific technical areas, tools, and skills it emphasizes, and ground the entire interview in it: every question, not just the opening one, should reference real details, tools, or requirements from this posting rather than drifting into generic questions unrelated to it. Draw on a different part of the JD across the 5-6 exchanges so you're not stuck repeating the same line item.\n\nJOB DESCRIPTION:\n"""\n${jdText}\n"""`
+    ? `\n\nJOB DESCRIPTION MODE — the candidate pasted this real job posting instead of picking a fixed topic. Read it, identify the specific technical areas, tools, and skills it emphasizes, and ground the entire interview in it: every question, not just the opening one, should reference real details, tools, or requirements from this posting rather than drifting into generic questions unrelated to it. Draw on a different part of the JD as the conversation goes on so you're not stuck repeating the same line item, and make sure your questions collectively span the JD's different areas (e.g. infrastructure tooling, CI/CD, observability, security) rather than clustering on just one or two.\n\nJOB DESCRIPTION:\n"""\n${jdText}\n"""`
     : "";
+
+  // See JD_MAX_EXCHANGES above for why JD mode gets a scaled, capped target
+  // instead of topic mode's fixed 5-6.
+  const pacingInstruction = isJdMode
+    ? `Ask enough questions to reasonably cover the distinct skills, technologies, and responsibilities actually mentioned in the job description provided further down in this prompt — don't stop after just one or two areas the way a single narrow topic would. Scale the number of exchanges to the JD's genuine breadth: a narrower JD might only need 8-10 exchanges, one spanning many distinct technical areas may reasonably need more. Never exceed ${JD_MAX_EXCHANGES} exchanges total no matter how much ground is left uncovered — if you reach that point, wrap up with feedback anyway rather than continuing. Once you've reasonably represented the role's real breadth, or you hit that limit, whichever comes first, say "Let me give you my honest feedback." then write:`
+    : `After 5-6 exchanges, say "Let me give you my honest feedback." then write:`;
 
   const systemPrompt = `You are Hari, an AI mentor trained on a real Lead DevOps Engineer's interview experience, conducting a mock interview.
 Be direct, warm, and honest. Ask ONE question at a time.
 Follow up naturally based on the candidate's answer.
-After 5-6 exchanges, say "Let me give you my honest feedback." then write:
+${pacingInstruction}
 SCORE: X/10
 STRONG: what they did well
 IMPROVE: what needs work

@@ -499,8 +499,9 @@ export default function DevInterviewPage() {
         <h1 className="dev-title">Interview with Hari</h1>
         <p className="dev-subtitle">
           Hari is an AI mentor, trained on a real Lead DevOps Engineer&apos;s
-          interview experience. He&apos;ll challenge you with real interview
-          questions and give you honest feedback after 5–6 exchanges.
+          interview experience. {mode === "jd"
+            ? "He'll ask enough questions to cover what this role actually needs, then give you honest feedback."
+            : "He'll challenge you with real interview questions and give you honest feedback after 5–6 exchanges."}
         </p>
 
         {error && <p className="dev-error">{error}</p>}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { transcribeAudio, TranscriptionError } from "@/lib/interview/transcribe";
+import { logTranscribeCost } from "@/lib/ai-cost";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -14,7 +15,8 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const text = await transcribeAudio(file);
+    const { text, durationSeconds } = await transcribeAudio(file);
+    logTranscribeCost({ userId: session.user.id, audioSeconds: durationSeconds });
     return NextResponse.json({ text });
   } catch (err) {
     const message = err instanceof TranscriptionError ? err.message : "Transcription failed";

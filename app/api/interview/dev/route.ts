@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { anthropic } from "@/lib/ai";
 import { db } from "@/lib/db";
 import { checkDevChatQuota, recordDevChatUsage, quotaErrorMessage } from "@/lib/ai-quota";
+import { logHariChatCost } from "@/lib/ai-cost";
 import type Anthropic from "@anthropic-ai/sdk";
 
 // PRO only — lets the model report weak concepts as a separate tool_use
@@ -185,6 +186,26 @@ Topic: ${topic} | Difficulty: ${difficulty}${memoryInstruction}${weakAreaInstruc
             .create({ data: { userId: session.user.id, topic, difficulty, openingQuestion: openingText } })
             .catch(() => {});
         }
+
+        // Fire-and-forget, one row per Claude call (every turn, not just the
+        // opening one) — real usage.input_tokens/output_tokens from the
+        // Anthropic streaming response's accumulated final message, not an
+        // estimate from string length. finalMessage() is safe to call again
+        // below (it resolves from already-accumulated stream state, no
+        // second API call), so this doesn't interfere with the weak-concepts
+        // extraction that also reads it.
+        msgStream
+          .finalMessage()
+          .then((finalMsg) => {
+            logHariChatCost({
+              userId: session.user.id,
+              inputTokens: finalMsg.usage?.input_tokens,
+              outputTokens: finalMsg.usage?.output_tokens,
+            });
+          })
+          .catch((err) => {
+            console.error("[ai-cost] could not read usage from Hari stream", { userId: session.user.id, err });
+          });
 
         // PRO only, fire-and-forget — weak-area extraction is a best-effort
         // side effect of the feedback turn, never allowed to affect what the

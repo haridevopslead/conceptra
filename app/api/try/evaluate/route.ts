@@ -38,12 +38,15 @@ export async function POST(req: NextRequest) {
 
   let result;
   try {
-    result = await evaluateAnswer({
+    // Anonymous flow — no userId to attribute AI cost to, so usage is
+    // discarded here rather than logged (unlike the authenticated
+    // Quick Practice route).
+    ({ result } = await evaluateAnswer({
       question: TRY_QUESTION,
       answer,
       topic: TRY_TOPIC,
       difficulty: TRY_DIFFICULTY,
-    });
+    }));
   } catch (err) {
     const message = err instanceof EvaluationError ? err.message : "Evaluation failed";
     return NextResponse.json({ error: message }, { status: 500 });

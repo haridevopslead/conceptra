@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { evaluateAnswer, EvaluationError } from "@/lib/interview/evaluate";
 import { recordPracticeStreak } from "@/lib/streak";
 import { checkEvaluateQuota, quotaErrorMessage } from "@/lib/ai-quota";
+import { logQuickPracticeCost } from "@/lib/ai-cost";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -39,7 +40,13 @@ export async function POST(req: NextRequest) {
 
   let result;
   try {
-    result = await evaluateAnswer({ question, answer, topic, difficulty });
+    const evaluation = await evaluateAnswer({ question, answer, topic, difficulty });
+    result = evaluation.result;
+    logQuickPracticeCost({
+      userId: session.user.id,
+      inputTokens: evaluation.usage.inputTokens,
+      outputTokens: evaluation.usage.outputTokens,
+    });
   } catch (err) {
     const message = err instanceof EvaluationError ? err.message : "Evaluation failed";
     return NextResponse.json({ error: message }, { status: 500 });

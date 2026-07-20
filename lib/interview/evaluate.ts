@@ -31,14 +31,19 @@ export type EvalResult = {
 
 export class EvaluationError extends Error {}
 
+export type EvalUsage = { inputTokens: number; outputTokens: number };
+
 // Single source of truth for Depth/Accuracy/Production Awareness scoring.
 // Used by both the authenticated practice flow and the public /try flow.
+// Token usage is returned alongside the result (not merged into it) so
+// callers can log real AI cost without it leaking into the client-facing
+// JSON response, which spreads the result verbatim.
 export async function evaluateAnswer({
   question,
   answer,
   topic,
   difficulty,
-}: EvalInput): Promise<EvalResult> {
+}: EvalInput): Promise<{ result: EvalResult; usage: EvalUsage }> {
   const topicCtx = topic ?? "General DevOps";
   const difficultyCtx = difficulty ?? "Intermediate";
   const matchingBrief = getBriefForTopic(topic);
@@ -207,8 +212,13 @@ Now write direct_answer, concrete_example, and senior_insight for the ACTUAL que
     throw new EvaluationError("Malformed evaluation response");
   }
 
+  const usage: EvalUsage = {
+    inputTokens: message.usage.input_tokens,
+    outputTokens: message.usage.output_tokens,
+  };
+
   try {
-    return JSON.parse(match[0]) as EvalResult;
+    return { result: JSON.parse(match[0]) as EvalResult, usage };
   } catch {
     throw new EvaluationError("Failed to parse evaluation JSON");
   }

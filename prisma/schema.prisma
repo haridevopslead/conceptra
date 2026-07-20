@@ -22,6 +22,14 @@ enum Role {
   ADMIN
 }
 
+// Add a value here (and a migration) when a new AI-calling feature ships —
+// TTS is the known next one, see lib/ai-pricing.ts.
+enum AiFeature {
+  HARI_CHAT
+  QUICK_PRACTICE
+  TRANSCRIBE
+}
+
 // ---------------------------------------------------------------------------
 // Core models
 // ---------------------------------------------------------------------------
@@ -51,6 +59,7 @@ model User {
   aiUsage           AiUsage[]
   hariSessionLogs   HariSessionLog[]
   hariWeakAreas     HariWeakArea[]
+  aiCostLogs        AiCostLog[]
 }
 
 model Session {
@@ -185,6 +194,30 @@ model HariWeakArea {
   createdAt DateTime @default(now())
 
   @@index([userId, topic])
+}
+
+// One row per real AI provider call (Claude or Groq), written so pricing
+// decisions can be based on measured usage instead of estimates — see
+// lib/ai-pricing.ts for the per-unit rates computedCostUsd is derived from
+// at write time. Raw usage (tokens/seconds/chars) is stored alongside the
+// computed dollar figure, not instead of it, so historical rows can be
+// re-priced later if a provider's rate changes. Not every field applies to
+// every feature: HARI_CHAT/QUICK_PRACTICE use input/outputTokens, TRANSCRIBE
+// uses audioSeconds, a future TTS feature would use characterCount.
+model AiCostLog {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feature         AiFeature
+  inputTokens     Int?
+  outputTokens    Int?
+  audioSeconds    Float?
+  characterCount  Int?
+  computedCostUsd Decimal   @db.Decimal(12, 6)
+  createdAt       DateTime  @default(now())
+
+  @@index([userId, feature, createdAt])
+  @@index([feature, createdAt])
 }
 
 model UserLessonProgress {

@@ -25,7 +25,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const text = await transcribeAudio(file);
+    // Anonymous flow — no userId to attribute AI cost to, so duration is
+    // discarded here rather than logged (unlike the authenticated route).
+    const { text } = await transcribeAudio(file);
     return NextResponse.json({ text });
   } catch (err) {
     const message = err instanceof TranscriptionError ? err.message : "Transcription failed";

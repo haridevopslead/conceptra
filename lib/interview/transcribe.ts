@@ -4,9 +4,11 @@ export class TranscriptionError extends Error {}
 // this, but guard against a runaway recording anyway.
 const MAX_FILE_SIZE_BYTES = 25 * 1024 * 1024;
 
+export type TranscriptionResult = { text: string; durationSeconds: number };
+
 // Single source of truth for calling Groq's Whisper transcription endpoint.
 // Used by both the authenticated practice flow and the public /try flow.
-export async function transcribeAudio(audioBlob: Blob): Promise<string> {
+export async function transcribeAudio(audioBlob: Blob): Promise<TranscriptionResult> {
   if (audioBlob.size === 0) {
     throw new TranscriptionError("No audio was recorded.");
   }
@@ -19,7 +21,10 @@ export async function transcribeAudio(audioBlob: Blob): Promise<string> {
   form.append("file", audioBlob, `answer.${ext}`);
   form.append("model", "whisper-large-v3-turbo");
   form.append("language", "en");
-  form.append("response_format", "json");
+  // verbose_json (Groq's OpenAI-compatible response format) adds a top-level
+  // "duration" field with the actual processed audio length in seconds —
+  // used to log real AI cost instead of estimating from blob size.
+  form.append("response_format", "verbose_json");
 
   const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
     method: "POST",
@@ -36,5 +41,8 @@ export async function transcribeAudio(audioBlob: Blob): Promise<string> {
     throw new TranscriptionError("Malformed transcription response");
   }
 
-  return data.text;
+  return {
+    text: data.text,
+    durationSeconds: typeof data.duration === "number" ? data.duration : 0,
+  };
 }

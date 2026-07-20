@@ -31,11 +31,28 @@ const FLAG_WEAK_CONCEPTS_TOOL: Anthropic.Tool = {
   },
 };
 
+// Job-description mode has no stable topic identity to accumulate history
+// against (a pasted JD is different every session), and is explicitly
+// ephemeral — never written to HariSessionLog/HariWeakArea. Capped
+// server-side regardless of what the client sends, to bound token cost.
+const JD_MAX_LENGTH = 6000;
+const JD_MIN_LENGTH = 30;
+
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session) return new Response("Unauthorized", { status: 401 });
 
-  const { messages, topic, difficulty } = await req.json();
+  const { messages, topic, difficulty, jd } = await req.json();
+
+  const rawJd = typeof jd === "string" ? jd.trim() : "";
+  if (rawJd && rawJd.length < JD_MIN_LENGTH) {
+    return new Response(
+      JSON.stringify({ error: "That job description looks too short to work with — paste more of the actual posting." }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+  const isJdMode = rawJd.length >= JD_MIN_LENGTH;
+  const jdText = isJdMode ? rawJd.slice(0, JD_MAX_LENGTH) : "";
 
   const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true, emailVerified: true } });
 
@@ -49,8 +66,9 @@ export async function POST(req: NextRequest) {
   const plan = dbUser?.plan ?? "FREE";
   // PRO/ENTERPRISE get session memory (no-repeat opening questions); FREE
   // keeps today's stateless behavior and instead sees an upgrade nudge in
-  // the UI (see /api/interview/dev/history).
-  const hasMemory = plan !== "FREE";
+  // the UI (see /api/interview/dev/history). JD-mode sessions never get
+  // memory either way — there's no stable topic to key it against.
+  const hasMemory = plan !== "FREE" && !isJdMode;
 
   // The client always sends the full running conversation history, so the
   // very first call of a new conversation is the only one with exactly one
@@ -123,6 +141,17 @@ export async function POST(req: NextRequest) {
     ? `\n\nWhen (and only when) you give your final SCORE/STRONG/IMPROVE/SENIOR_ANSWER feedback in this response, also call the flag_weak_concepts tool with 3-5 short, specific concepts the candidate genuinely struggled with in this conversation, based on their actual answers. If they answered strongly throughout with no real gaps, call it with the 1-2 most advanced concepts they could still sharpen. Do not call this tool on any other turn.`
     : "";
 
+  // JD mode: ground every question in the pasted posting instead of a fixed
+  // topic. The client resends the JD text on every turn (not just the
+  // opening one), so this block is present in the system prompt for the
+  // whole conversation, not just the first message.
+  const topicOrJdLine = isJdMode
+    ? `Difficulty: ${difficulty}`
+    : `Topic: ${topic} | Difficulty: ${difficulty}`;
+  const jdInstruction = isJdMode
+    ? `\n\nJOB DESCRIPTION MODE — the candidate pasted this real job posting instead of picking a fixed topic. Read it, identify the specific technical areas, tools, and skills it emphasizes, and ground the entire interview in it: every question, not just the opening one, should reference real details, tools, or requirements from this posting rather than drifting into generic questions unrelated to it. Draw on a different part of the JD across the 5-6 exchanges so you're not stuck repeating the same line item.\n\nJOB DESCRIPTION:\n"""\n${jdText}\n"""`
+    : "";
+
   const systemPrompt = `You are Hari, an AI mentor trained on a real Lead DevOps Engineer's interview experience, conducting a mock interview.
 Be direct, warm, and honest. Ask ONE question at a time.
 Follow up naturally based on the candidate's answer.
@@ -154,7 +183,7 @@ scoring, good or bad. This does not apply to answers that are merely weak,
 confused, or wrong but still genuinely trying to address the question — grade
 those normally, same as any other real attempt.
 
-Topic: ${topic} | Difficulty: ${difficulty}${memoryInstruction}${weakAreaInstruction}${weakConceptsInstruction}`;
+${topicOrJdLine}${jdInstruction}${memoryInstruction}${weakAreaInstruction}${weakConceptsInstruction}`;
 
   const msgStream = anthropic.messages.stream({
     model: "claude-haiku-4-5-20251001",
@@ -181,7 +210,10 @@ Topic: ${topic} | Difficulty: ${difficulty}${memoryInstruction}${weakAreaInstruc
         controller.close();
         // Fire-and-forget — logged for every plan (not just PRO) so the data
         // exists regardless of tier, without delaying the streamed response.
-        if (isNewConversation) {
+        // Skipped entirely for JD-mode sessions: there's no stable topic
+        // identity to key this log against, and JD sessions are deliberately
+        // ephemeral (never surfaced on the Growth page or reused as memory).
+        if (isNewConversation && !isJdMode) {
           db.hariSessionLog
             .create({ data: { userId: session.user.id, topic, difficulty, openingQuestion: openingText } })
             .catch(() => {});

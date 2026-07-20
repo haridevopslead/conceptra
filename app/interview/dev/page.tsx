@@ -45,7 +45,28 @@ const TOPIC_CODE: Record<string, string> = {
 const DIFFICULTIES = ["Beginner", "Intermediate", "Senior"] as const;
 type Difficulty = typeof DIFFICULTIES[number];
 
+type Mode = "topic" | "jd";
+
+// Bounded to control token cost and prevent abuse; the minimum is just a
+// sanity floor to catch empty/junk input, not a quality bar — a genuinely
+// short JD should still make it to Hari rather than being rejected.
+const JD_MAX_LENGTH = 6000;
+const JD_MIN_LENGTH = 40;
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+// Best-effort label for the feedback screen / chat header when there's no
+// fixed topic to show — most real postings open with a title line ("Senior
+// DevOps Engineer", "Job Title: SRE II"). Falls back to a generic label
+// rather than guessing wrong on an unusual format.
+function extractJdTitle(jd: string): string {
+  const firstLine = jd
+    .split("\n")
+    .map((l) => l.trim())
+    .find((l) => l.length > 0) ?? "";
+  const cleaned = firstLine.replace(/^(job title|title|position|role)\s*:\s*/i, "").trim();
+  return cleaned.length >= 3 && cleaned.length <= 70 ? cleaned : "Job description session";
+}
 
 function stripMarkdown(text: string): string {
   return text
@@ -118,6 +139,18 @@ export default function DevInterviewPage() {
   const [cameFromPractice, setCameFromPractice] = useState(false);
   const [topic, setTopic] = useState<string>("Docker");
   const [difficulty, setDifficulty] = useState<Difficulty>("Intermediate");
+
+  // JD-paste mode: an alternative to the fixed topic picker. Session-only —
+  // the pasted JD is never persisted, and JD sessions don't feed the
+  // HariSessionLog/HariWeakArea memory system (see route.ts).
+  const [mode, setMode] = useState<Mode>("topic");
+  const [jdText, setJdText] = useState("");
+  const [jdError, setJdError] = useState("");
+  // Set only once a JD session actually starts — distinct from jdText (which
+  // keeps whatever's in the textarea) so mid-chat display/requests use a
+  // stable snapshot even if the user could otherwise edit the source text.
+  const [activeJd, setActiveJd] = useState<string | null>(null);
+  const [roleLabel, setRoleLabel] = useState("");
 
   // FREE-plan upgrade nudge: "you've done this topic before" — only ever
   // set for FREE users (PRO gets real memory instead, see route.ts). Tracks
@@ -195,7 +228,7 @@ export default function DevInterviewPage() {
   // only surfaces the nudge for FREE users (PRO doesn't need it, it gets
   // real memory instead). Runs on the setup screen only.
   useEffect(() => {
-    if (checkingHandoff || screen !== "setup") return;
+    if (checkingHandoff || screen !== "setup" || mode !== "topic") return;
     let cancelled = false;
     fetch(`/api/interview/dev/history?topic=${encodeURIComponent(topic)}`)
       .then((res) => (res.ok ? res.json() : null))
@@ -209,7 +242,7 @@ export default function DevInterviewPage() {
     return () => {
       cancelled = true;
     };
-  }, [topic, screen, checkingHandoff]);
+  }, [topic, screen, checkingHandoff, mode]);
 
   function dismissPriorTopicNudge() {
     dismissedNudgeTopicsRef.current.add(topic);
@@ -222,12 +255,13 @@ export default function DevInterviewPage() {
     apiMessages: Message[],
     topicArg: string,
     difficultyArg: string,
+    jdArg: string | undefined,
     onChunk: (accumulated: string) => void,
   ): Promise<string> {
     const res = await fetch("/api/interview/dev", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: apiMessages, topic: topicArg, difficulty: difficultyArg }),
+      body: JSON.stringify({ messages: apiMessages, topic: topicArg, difficulty: difficultyArg, jd: jdArg }),
     });
 
     if (!res.ok || !res.body) {
@@ -258,8 +292,8 @@ export default function DevInterviewPage() {
   // ── Start interview ──────────────────────────────────────────────────────────
 
   // Shared by the normal setup flow and the Quick-Practice handoff — only the
-  // kickoff text and topic/difficulty differ.
-  async function beginChat(kickoffContent: string, topicArg: string, difficultyArg: string) {
+  // kickoff text and topic/difficulty/jd differ.
+  async function beginChat(kickoffContent: string, topicArg: string, difficultyArg: string, jdArg?: string) {
     setError("");
     setFeedback(null);
     setVisibleMessages([]);
@@ -274,7 +308,7 @@ export default function DevInterviewPage() {
     setVisibleMessages([{ role: "assistant", content: "" }]);
 
     try {
-      const devText = await fetchStream(apiHistoryRef.current, topicArg, difficultyArg, (acc) => {
+      const devText = await fetchStream(apiHistoryRef.current, topicArg, difficultyArg, jdArg, (acc) => {
         setVisibleMessages([{ role: "assistant", content: acc }]);
       });
 
@@ -288,6 +322,27 @@ export default function DevInterviewPage() {
   }
 
   function startInterview() {
+    if (mode === "jd") {
+      const trimmed = jdText.trim();
+      if (!trimmed) {
+        setJdError("Paste a job description to get started.");
+        return;
+      }
+      if (trimmed.length < JD_MIN_LENGTH) {
+        setJdError(`That's too short to work with — paste more of the actual job posting (at least ${JD_MIN_LENGTH} characters).`);
+        return;
+      }
+      setJdError("");
+      setActiveJd(trimmed);
+      setRoleLabel(extractJdTitle(trimmed));
+      beginChat(
+        `Hi Hari! I'd like to practice for this role at ${difficulty} level. I've pasted the job description — please read it, then ask me your first question grounded in what it actually asks for.`,
+        topic,
+        difficulty,
+        trimmed,
+      );
+      return;
+    }
     beginChat(
       `Hi Hari! I'm ready for my ${topic} interview at ${difficulty} level. Please ask me your first question.`,
       topic,
@@ -343,7 +398,7 @@ export default function DevInterviewPage() {
     setStreaming(true);
 
     try {
-      const devText = await fetchStream(nextApiHistory, topic, difficulty, (acc) => {
+      const devText = await fetchStream(nextApiHistory, topic, difficulty, activeJd ?? undefined, (acc) => {
         setVisibleMessages((prev) => [
           ...prev.slice(0, -1),
           { role: "assistant", content: acc },
@@ -429,19 +484,54 @@ export default function DevInterviewPage() {
 
         {error && <p className="dev-error">{error}</p>}
 
-        <p className="dev-label">Choose a topic</p>
-        <div className="dev-topic-grid">
-          {TOPICS.map((t) => (
-            <button
-              key={t}
-              onClick={() => setTopic(t)}
-              className={`dev-topic-btn${topic === t ? " active" : ""}`}
-            >
-              <span className="dev-topic-code">{TOPIC_CODE[t]}</span>
-              {t}
-            </button>
-          ))}
+        <div className="dev-mode-tabs">
+          <button
+            onClick={() => setMode("topic")}
+            className={`dev-mode-tab${mode === "topic" ? " active" : ""}`}
+          >
+            Choose a topic
+          </button>
+          <button
+            onClick={() => setMode("jd")}
+            className={`dev-mode-tab${mode === "jd" ? " active" : ""}`}
+          >
+            Paste a job description instead
+          </button>
         </div>
+
+        {mode === "topic" ? (
+          <>
+            <p className="dev-label">Choose a topic</p>
+            <div className="dev-topic-grid">
+              {TOPICS.map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTopic(t)}
+                  className={`dev-topic-btn${topic === t ? " active" : ""}`}
+                >
+                  <span className="dev-topic-code">{TOPIC_CODE[t]}</span>
+                  {t}
+                </button>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="dev-jd-block">
+            <p className="dev-label">Paste the job description</p>
+            <textarea
+              value={jdText}
+              onChange={(e) => {
+                setJdText(e.target.value.slice(0, JD_MAX_LENGTH));
+                setJdError("");
+              }}
+              placeholder="Paste a real job posting here — Hari will read it and ask questions grounded in what it actually asks for…"
+              rows={8}
+              className="dev-jd-textarea"
+            />
+            <p className="dev-jd-counter">{jdText.length}/{JD_MAX_LENGTH}</p>
+            {jdError && <p className="dev-error">{jdError}</p>}
+          </div>
+        )}
 
         <p className="dev-label">Difficulty</p>
         <div className="dev-pills">
@@ -456,7 +546,7 @@ export default function DevInterviewPage() {
           ))}
         </div>
 
-        {priorTopicNudge && (
+        {mode === "topic" && priorTopicNudge && (
           <div className="dev-nudge">
             <span>
               You&apos;ve practiced {topic} before — <Link href="/pricing">upgrade to Pro</Link> so Hari
@@ -522,6 +612,29 @@ export default function DevInterviewPage() {
             color: #F5A623; font-weight: 700;
           }
           .dev-topic-code { font-family: monospace; font-size: 0.6rem; opacity: 0.6; }
+          .dev-mode-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
+          .dev-mode-tab {
+            padding: 0.5rem 1rem; border-radius: 999px;
+            border: 2px solid transparent;
+            background: #23201E; color: #9E8E85;
+            font-size: 0.8rem; cursor: pointer; transition: all 0.15s;
+          }
+          .dev-mode-tab.active {
+            border-color: #F5A623; background: #2C2420;
+            color: #F5A623; font-weight: 700;
+          }
+          .dev-jd-block { width: 100%; max-width: 520px; margin-bottom: 1.5rem; }
+          .dev-jd-textarea {
+            width: 100%; min-height: 160px;
+            background: #23201E; border: 1px solid #3D3530; border-radius: 12px;
+            color: #E7DDD5; padding: 0.75rem 1rem;
+            font-size: 0.875rem; line-height: 1.6; resize: vertical;
+            outline: none; font-family: inherit;
+          }
+          .dev-jd-textarea:focus { border-color: #F5A623; }
+          .dev-jd-counter {
+            text-align: right; font-size: 0.7rem; color: #9E8E85; margin: 0.35rem 0 0;
+          }
           .dev-pills { display: flex; gap: 0.5rem; margin-bottom: 2rem; }
           .dev-pill {
             padding: 0.5rem 1.25rem; border-radius: 999px;
@@ -575,7 +688,7 @@ export default function DevInterviewPage() {
           <div className="fb-score-ring" style={{ color: scoreColor }}>
             {feedback.score}
           </div>
-          <p className="fb-byline">Hari&apos;s honest feedback</p>
+          <p className="fb-byline">Hari&apos;s honest feedback · {mode === "jd" ? roleLabel : topic}</p>
 
           {[
             { label: "What You Did Well", value: feedback.strong, icon: "✅", bg: "#4ADE8018", border: "#4ADE8033" },
@@ -649,7 +762,7 @@ export default function DevInterviewPage() {
           <p className="chat-dev-role">AI Mentor · trained on Hari&apos;s interview experience</p>
         </div>
         <div className="chat-badges">
-          <span className="chat-badge gold">{topic}</span>
+          <span className="chat-badge gold">{mode === "jd" ? roleLabel : topic}</span>
           <span className="chat-badge muted">{difficulty}</span>
         </div>
       </div>

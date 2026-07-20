@@ -110,6 +110,16 @@ function meaningful(value: string): string {
   return /[a-zA-Z0-9]/.test(value) ? value : "";
 }
 
+// True once the model has actually reached the final feedback turn.
+// SENIOR_ANSWER is deliberately matched as a bare token (no required
+// trailing colon) — the model sometimes writes "**SENIOR_ANSWER** (to
+// "..."):" instead of "SENIOR_ANSWER:", and requiring the colon
+// immediately after the label silently missed that variant, leaving the
+// feedback rendered as a plain chat bubble instead of the scored screen.
+function isFeedbackTurn(text: string): boolean {
+  return /SCORE\s*:/.test(text) && /SENIOR_ANSWER\b/.test(text);
+}
+
 function parseFeedback(text: string): FeedbackData {
   // Strip markdown from the whole response first. The model sometimes bolds the
   // field labels themselves (e.g. "**STRONG:**\nbody..." instead of the requested
@@ -118,13 +128,16 @@ function parseFeedback(text: string): FeedbackData {
   const clean = stripMarkdown(text);
   const score = clean.match(/SCORE:\s*(.+)/)?.[1]?.trim() ?? "";
   const strong = meaningful(
-    clean.match(/STRONG:\s*([\s\S]*?)(?=\s*IMPROVE:|\s*SENIOR_ANSWER:|$)/)?.[1]?.trim() ?? ""
+    clean.match(/STRONG:\s*([\s\S]*?)(?=\s*IMPROVE:|\s*SENIOR_ANSWER\b|$)/)?.[1]?.trim() ?? ""
   );
   const improve = meaningful(
-    clean.match(/IMPROVE:\s*([\s\S]*?)(?=\s*SENIOR_ANSWER:|$)/)?.[1]?.trim() ?? ""
+    clean.match(/IMPROVE:\s*([\s\S]*?)(?=\s*SENIOR_ANSWER\b|$)/)?.[1]?.trim() ?? ""
   );
+  // SENIOR_ANSWER may be followed by extra text before the real colon (e.g.
+  // "SENIOR_ANSWER (to \"...\"):") — [^:]* skips over that instead of
+  // requiring the colon immediately after the label.
   const seniorAnswer = meaningful(
-    clean.match(/SENIOR_ANSWER:\s*([\s\S]+)/)?.[1]?.trim() ?? ""
+    clean.match(/SENIOR_ANSWER\b[^:]*:\s*([\s\S]+)/)?.[1]?.trim() ?? ""
   );
   return { score, strong, improve, seniorAnswer };
 }
@@ -408,7 +421,7 @@ export default function DevInterviewPage() {
       apiHistoryRef.current = [...nextApiHistory, { role: "assistant", content: devText }];
 
       // Switch to feedback screen if Hari's response contains structured feedback
-      if (devText.includes("SCORE:") && devText.includes("SENIOR_ANSWER:")) {
+      if (isFeedbackTurn(devText)) {
         const parsed = parseFeedback(devText);
         setFeedback(parsed);
         setScreen("feedback");

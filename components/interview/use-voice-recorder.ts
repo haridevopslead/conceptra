@@ -149,9 +149,28 @@ export function useVoiceRecorder(
         };
         // "no-speech" and other errors are common and non-fatal for a
         // best-effort layer — just stop contributing live text quietly.
+        // onend follows either way, which is where restart is decided.
         recognition.onerror = () => {};
         recognition.onend = () => {
-          recognitionRef.current = null;
+          // Some browsers end a recognition session on their own — a pause
+          // in speech, an internal timeout — even with continuous=true.
+          // Without this, the live captions silently freeze while the user
+          // keeps talking, they think the mic died, and clicking it (since
+          // micState is still "recording") actually stops the real
+          // MediaRecorder mid-answer. Restart transparently unless the user
+          // has genuinely stopped/cancelled: stopRecording/cancelRecording
+          // both null mediaRecorderRef *before* calling recognition.stop(),
+          // so its absence here reliably means an intentional stop, not an
+          // unexpected one.
+          if (cancelledRef.current || !mediaRecorderRef.current) {
+            recognitionRef.current = null;
+            return;
+          }
+          try {
+            recognition.start();
+          } catch {
+            recognitionRef.current = null;
+          }
         };
 
         recognition.start();

@@ -249,7 +249,14 @@ ${topicOrJdLine}${jdInstruction}${memoryInstruction}${weakAreaInstruction}${weak
             .then((finalMsg) => {
               const textBlock = finalMsg.content.find((b): b is Anthropic.TextBlock => b.type === "text");
               const fullText = textBlock?.text ?? "";
-              const isFeedbackTurn = fullText.includes("SCORE:") && fullText.includes("SENIOR_ANSWER:");
+              // SENIOR_ANSWER matched as a bare token (no required trailing
+              // colon) — the model sometimes writes "**SENIOR_ANSWER** (to
+              // "..."):" instead of "SENIOR_ANSWER:". Requiring the colon
+              // immediately after the label silently failed this check,
+              // which returns before even looking for the tool call — so a
+              // feedback turn that used this formatting quietly wrote zero
+              // HariWeakArea rows, with no error logged anywhere.
+              const isFeedbackTurn = /SCORE\s*:/.test(fullText) && /SENIOR_ANSWER\b/.test(fullText);
               if (!isFeedbackTurn) return;
 
               const toolBlock = finalMsg.content.find(

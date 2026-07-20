@@ -495,9 +495,17 @@ export default function DevInterviewPage() {
             onClick={() => setMode("jd")}
             className={`dev-mode-tab${mode === "jd" ? " active" : ""}`}
           >
-            Paste a job description instead
+            Paste a job description
+            <span className="dev-mode-badge">New</span>
           </button>
         </div>
+
+        {mode === "topic" && (
+          <p className="dev-jd-callout">
+            ✨ New: paste a real job posting instead — Hari will tailor every
+            question to that exact role.
+          </p>
+        )}
 
         {mode === "topic" ? (
           <>
@@ -612,16 +620,34 @@ export default function DevInterviewPage() {
             color: #F5A623; font-weight: 700;
           }
           .dev-topic-code { font-family: monospace; font-size: 0.6rem; opacity: 0.6; }
-          .dev-mode-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.25rem; }
-          .dev-mode-tab {
-            padding: 0.5rem 1rem; border-radius: 999px;
-            border: 2px solid transparent;
-            background: #23201E; color: #9E8E85;
-            font-size: 0.8rem; cursor: pointer; transition: all 0.15s;
+          .dev-mode-tabs {
+            display: flex; gap: 0.6rem; margin-bottom: 0.85rem;
+            width: 100%; max-width: 520px;
           }
+          .dev-mode-tab {
+            flex: 1; padding: 0.7rem 1rem; border-radius: 12px;
+            border: 2px solid #3D3530;
+            background: #23201E; color: #C9B8AE;
+            font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
+            display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+          }
+          .dev-mode-tab:hover { border-color: #4A403A; }
           .dev-mode-tab.active {
             border-color: #F5A623; background: #2C2420;
             color: #F5A623; font-weight: 700;
+          }
+          .dev-mode-badge {
+            font-size: 0.6rem; font-weight: 800; letter-spacing: 0.04em;
+            text-transform: uppercase; color: #1C1917; background: #F5A623;
+            padding: 0.15rem 0.4rem; border-radius: 999px; line-height: 1.4;
+          }
+          .dev-jd-callout {
+            width: 100%; max-width: 520px;
+            padding: 0.6rem 0.9rem; margin: 0 0 1.25rem;
+            font-size: 0.78rem; line-height: 1.5; color: #F5A623;
+            background: rgba(245,166,35,0.1);
+            border: 1px solid rgba(245,166,35,0.25);
+            border-radius: 10px; text-align: center;
           }
           .dev-jd-block { width: 100%; max-width: 520px; margin-bottom: 1.5rem; }
           .dev-jd-textarea {

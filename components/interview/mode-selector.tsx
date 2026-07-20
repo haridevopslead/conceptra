@@ -33,8 +33,9 @@ export default function ModeSelector() {
           <p className="ms-card-desc">
             Have a real back-and-forth conversation with Hari — an AI mentor
             trained on a real Lead DevOps Engineer&apos;s interview experience.
-            He&apos;ll probe your answers, follow up naturally, and give you
-            honest holistic feedback.
+            Pick a topic, or paste a real job posting for questions tailored
+            to that exact role, and he&apos;ll give you honest holistic
+            feedback.
           </p>
           <span className="ms-card-cta ms-card-cta-gold">Meet Hari →</span>
         </Link>

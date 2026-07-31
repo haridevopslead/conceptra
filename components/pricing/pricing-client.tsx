@@ -25,6 +25,14 @@ const PRO_FEATURES = [
   "Priority support",
 ];
 
+type PlanDurationKey = "monthly" | "quarterly" | "annual";
+
+const DURATIONS: { key: PlanDurationKey; label: string; price: string; sublabel: string }[] = [
+  { key: "monthly", label: "1 Month", price: "₹699", sublabel: "Billed monthly" },
+  { key: "quarterly", label: "3 Months", price: "₹2,000", sublabel: "₹667/month" },
+  { key: "annual", label: "12 Months", price: "₹2,999", sublabel: "₹250/month · best value" },
+];
+
 type Props = {
   userName: string;
   userEmail: string;
@@ -33,6 +41,7 @@ type Props = {
 };
 
 export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }: Props) {
+  const [duration, setDuration] = useState<PlanDurationKey>("annual");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -47,19 +56,25 @@ export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }
     setError(null);
 
     try {
-      const orderRes = await fetch("/api/payment/create-order", { method: "POST" });
+      const orderRes = await fetch("/api/payment/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: duration }),
+      });
       if (!orderRes.ok) {
         const data = await orderRes.json();
         throw new Error(data.error ?? "Failed to create order.");
       }
       const { orderId, amount, currency, keyId } = await orderRes.json();
 
+      const selected = DURATIONS.find((d) => d.key === duration)!;
+
       const options = {
         key: keyId,
         amount,
         currency,
         name: "Conceptra",
-        description: "Pro Plan — Annual Subscription",
+        description: `Pro Plan — ${selected.label}`,
         order_id: orderId,
         prefill: { name: userName, email: userEmail },
         theme: { color: "#F5A623" },
@@ -112,6 +127,8 @@ export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }
     );
   }
 
+  const selectedDuration = DURATIONS.find((d) => d.key === duration)!;
+
   return (
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
@@ -124,7 +141,7 @@ export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }
           <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(28px, 6vw, 46px)", fontWeight: 500, color: "#FDF6E3", lineHeight: 1.15 }}>
             Simple, honest pricing.
           </h1>
-          <p style={{ fontSize: 16, color: "#8A8073", marginTop: 10 }}>One plan. Everything included.</p>
+          <p style={{ fontSize: 16, color: "#8A8073", marginTop: 10 }}>One plan. Pick how long you want it for.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -171,11 +188,39 @@ export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }
             <div>
               <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "#F5A623", textTransform: "uppercase", marginBottom: 8 }}>Pro</p>
               <div className="flex items-baseline gap-2">
-                <p style={{ fontFamily: "'Newsreader', serif", fontSize: 36, fontWeight: 500, color: "#FDF6E3" }}>₹2,999</p>
-                <span style={{ fontSize: 14, color: "#8A8073" }}>/ year</span>
+                <p style={{ fontFamily: "'Newsreader', serif", fontSize: 36, fontWeight: 500, color: "#FDF6E3" }}>{selectedDuration.price}</p>
+                <span style={{ fontSize: 14, color: "#8A8073" }}>/ {selectedDuration.label.toLowerCase()}</span>
               </div>
-              <p style={{ fontSize: 13, color: "#6E665C", marginTop: 4 }}>Billed annually · ₹250/month</p>
+              <p style={{ fontSize: 13, color: "#6E665C", marginTop: 4 }}>{selectedDuration.sublabel}</p>
             </div>
+
+            {!isPro && (
+              <div className="flex gap-2" role="radiogroup" aria-label="Plan duration">
+                {DURATIONS.map((d) => (
+                  <button
+                    key={d.key}
+                    type="button"
+                    role="radio"
+                    aria-checked={duration === d.key}
+                    onClick={() => setDuration(d.key)}
+                    disabled={loading}
+                    className="flex-1 rounded-lg text-center transition-colors"
+                    style={{
+                      padding: "9px 6px",
+                      fontFamily: "inherit",
+                      fontSize: 12.5,
+                      fontWeight: 700,
+                      cursor: loading ? "not-allowed" : "pointer",
+                      background: duration === d.key ? "#F5A623" : "rgba(253,246,227,0.05)",
+                      color: duration === d.key ? "#1C1917" : "#B3A799",
+                      border: duration === d.key ? "1px solid #F5A623" : "1px solid rgba(253,246,227,0.1)",
+                    }}
+                  >
+                    {d.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <ul className="flex flex-col gap-3 flex-1">
               {PRO_FEATURES.map((f) => (
@@ -204,7 +249,7 @@ export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }
                 className="w-full py-3.5 rounded-xl font-bold text-sm transition-opacity"
                 style={{ background: "#F5A623", color: "#1C1917", opacity: loading ? 0.7 : 1, cursor: loading ? "not-allowed" : "pointer", fontFamily: "inherit" }}
               >
-                {loading ? "Opening checkout…" : isLoggedIn ? "Upgrade to Pro — ₹2,999/year" : "Sign up to get started"}
+                {loading ? "Opening checkout…" : isLoggedIn ? `Upgrade to Pro — ${selectedDuration.price}` : "Sign up to get started"}
               </button>
             )}
 

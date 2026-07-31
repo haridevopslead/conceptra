@@ -616,7 +616,7 @@ export default function DevInterviewPage() {
             font-size: 2rem;
             margin-bottom: 1rem;
           }
-          .dev-title { font-size: 1.75rem; font-weight: 700; margin: 0 0 0.35rem; }
+          .dev-title { font-size: 1.875rem; font-weight: 700; margin: 0 0 0.35rem; }
           .dev-subtitle {
             color: #9E8E85; text-align: center;
             max-width: 400px; margin: 0 0 2rem; line-height: 1.6;
@@ -817,32 +817,40 @@ export default function DevInterviewPage() {
 
       {/* Messages */}
       <div className="chat-messages">
-        {visibleMessages.map((msg, i) => {
-          const isLast = i === visibleMessages.length - 1;
-          const isPlaceholder = msg.role === "assistant" && msg.content === "" && streaming && isLast;
+        {/* Pushed to the bottom of the scroll container via margin-top:auto —
+            keeps a short conversation hugging the input instead of floating
+            near the top, without the classic flexbox trap where combining
+            overflow-y:auto with justify-content:flex-end on the same element
+            makes overflow content unscrollable once it's taller than the
+            viewport. */}
+        <div className="chat-messages-inner">
+          {visibleMessages.map((msg, i) => {
+            const isLast = i === visibleMessages.length - 1;
+            const isPlaceholder = msg.role === "assistant" && msg.content === "" && streaming && isLast;
 
-          return (
-            <div
-              key={i}
-              className={`chat-row ${msg.role === "user" ? "user-row" : "dev-row"}`}
-            >
-              {msg.role === "assistant" && (
-                <div className="chat-bubble-avatar">🤖</div>
-              )}
-              <div className={`chat-bubble ${msg.role === "user" ? "user-bubble" : "dev-bubble"}`}>
-                {isPlaceholder ? (
-                  <span className="chat-typing">●●●</span>
-                ) : msg.role === "assistant" ? (
-                  stripMarkdown(msg.content)
-                ) : (
-                  msg.content
+            return (
+              <div
+                key={i}
+                className={`chat-row ${msg.role === "user" ? "user-row" : "dev-row"}`}
+              >
+                {msg.role === "assistant" && (
+                  <div className="chat-bubble-avatar">🤖</div>
                 )}
+                <div className={`chat-bubble ${msg.role === "user" ? "user-bubble" : "dev-bubble"}`}>
+                  {isPlaceholder ? (
+                    <span className="chat-typing">●●●</span>
+                  ) : msg.role === "assistant" ? (
+                    stripMarkdown(msg.content)
+                  ) : (
+                    msg.content
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-        {(error || voiceError) && <p className="chat-error">{error || voiceError}</p>}
-        <div ref={messagesEndRef} />
+            );
+          })}
+          {(error || voiceError) && <p className="chat-error">{error || voiceError}</p>}
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
       {/* Input area */}
@@ -882,7 +890,7 @@ export default function DevInterviewPage() {
 
       <style>{`
         .chat-root {
-          min-height: 100%; background: #1C1917; color: #E7DDD5;
+          height: 100%; background: #1C1917; color: #E7DDD5;
           display: flex; flex-direction: column;
         }
         .chat-back-link {
@@ -916,8 +924,13 @@ export default function DevInterviewPage() {
         .chat-badge.muted { background: #23201E; color: #9E8E85; }
 
         .chat-messages {
+          flex: 1; min-height: 0; overflow-y: auto;
           padding: 1.25rem;
+          display: flex; flex-direction: column;
+        }
+        .chat-messages-inner {
           display: flex; flex-direction: column; gap: 1rem;
+          margin-top: auto;
         }
         .chat-row { display: flex; align-items: flex-end; gap: 0.5rem; }
         .user-row { justify-content: flex-end; }
@@ -945,7 +958,6 @@ export default function DevInterviewPage() {
         .chat-error { color: #F87171; font-size: 0.85rem; text-align: center; }
 
         .chat-input-area {
-          position: sticky; bottom: 0;
           padding: 1rem 1.25rem;
           border-top: 1px solid #2C2420;
           background: #1C1917;

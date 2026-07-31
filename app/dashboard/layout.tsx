@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getEffectivePlan } from "@/lib/plan";
 import Sidebar from "@/components/dashboard/sidebar";
 import BottomNav from "@/components/dashboard/bottom-nav";
 
@@ -13,11 +13,13 @@ export default async function DashboardLayout({
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
-  // Fetch plan fresh from DB so the sidebar reflects upgrades immediately
+  // Fetch plan fresh from DB (and live-check expiry) so the sidebar
+  // reflects upgrades/lapses immediately, not just after re-login or the
+  // next cron run.
   let freshPlan = session.user.plan;
   try {
-    const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } });
-    if (dbUser) freshPlan = dbUser.plan;
+    const { plan } = await getEffectivePlan(session.user.id);
+    freshPlan = plan;
   } catch {
     // fall back to JWT plan
   }
@@ -25,7 +27,7 @@ export default async function DashboardLayout({
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar user={{ ...session.user, plan: freshPlan }} />
-      <main className="flex-1 overflow-auto pb-20 md:pb-0 w-full max-w-5xl mx-auto">{children}</main>
+      <main className="flex-1 overflow-auto pb-20 md:pb-0 w-full max-w-7xl mx-auto">{children}</main>
       <BottomNav plan={freshPlan} />
     </div>
   );

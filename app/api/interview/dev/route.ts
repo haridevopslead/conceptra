@@ -5,6 +5,7 @@ import { anthropic } from "@/lib/ai";
 import { db } from "@/lib/db";
 import { checkDevChatQuota, recordDevChatUsage, quotaErrorMessage } from "@/lib/ai-quota";
 import { logHariChatCost } from "@/lib/ai-cost";
+import { effectivePlan } from "@/lib/plan";
 import type Anthropic from "@anthropic-ai/sdk";
 
 // PRO only — lets the model report weak concepts as a separate tool_use
@@ -67,7 +68,7 @@ export async function POST(req: NextRequest) {
   const isJdMode = rawJd.length >= JD_MIN_LENGTH;
   const jdText = isJdMode ? rawJd.slice(0, JD_MAX_LENGTH) : "";
 
-  const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true, emailVerified: true } });
+  const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true, planExpiresAt: true, emailVerified: true } });
 
   if (!dbUser?.emailVerified) {
     return new Response(
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const plan = dbUser?.plan ?? "FREE";
+  const plan = effectivePlan(dbUser?.plan ?? "FREE", dbUser?.planExpiresAt ?? null);
   // PRO/ENTERPRISE get session memory (no-repeat opening questions); FREE
   // keeps today's stateless behavior and instead sees an upgrade nudge in
   // the UI (see /api/interview/dev/history). JD-mode sessions never get

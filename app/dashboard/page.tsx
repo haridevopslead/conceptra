@@ -6,6 +6,7 @@ import Link from "next/link";
 import WelcomeBanner from "@/components/dashboard/welcome-banner";
 import VerifyEmailBanner from "@/components/dashboard/verify-email-banner";
 import { computeReadinessScore, READINESS_WINDOW } from "@/lib/readiness";
+import { effectivePlan } from "@/lib/plan";
 
 const DAY_INITIAL = ["S", "M", "T", "W", "T", "F", "S"]; // indexed by getUTCDay() (0=Sun)
 
@@ -83,7 +84,7 @@ export default async function DashboardPage() {
   let totalLessons = 8;
   try {
     const [dbUser, dbInterviews, dbProgress, dbLessonCount] = await Promise.all([
-      db.user.findUnique({ where: { id: user.id }, select: { plan: true, currentStreak: true, emailVerified: true, email: true } }),
+      db.user.findUnique({ where: { id: user.id }, select: { plan: true, planExpiresAt: true, currentStreak: true, emailVerified: true, email: true } }),
       db.interviewSession.findMany({
         where: { userId: user.id },
         select: {
@@ -103,7 +104,7 @@ export default async function DashboardPage() {
       db.lesson.count({ where: { published: true } }),
     ]);
     if (dbUser) {
-      freshPlan = dbUser.plan;
+      freshPlan = effectivePlan(dbUser.plan, dbUser.planExpiresAt);
       streak = dbUser.currentStreak;
       emailVerified = dbUser.emailVerified;
       if (dbUser.email) currentEmail = dbUser.email;
@@ -146,7 +147,7 @@ export default async function DashboardPage() {
   const isFirstTimeUser = interviewCount === 0 && lessonCount === 0;
 
   return (
-    <div className="dash-page" style={{ maxWidth: 920, margin: "0 auto", padding: "56px 64px 80px", display: "flex", flexDirection: "column", gap: 26 }}>
+    <div className="dash-page" style={{ maxWidth: 1200, margin: "0 auto", padding: "56px 64px 80px", display: "flex", flexDirection: "column", gap: 26 }}>
 
       {isFirstTimeUser && <WelcomeBanner />}
       {!emailVerified && currentEmail && <VerifyEmailBanner email={currentEmail} />}
@@ -157,7 +158,7 @@ export default async function DashboardPage() {
           <p style={{ fontSize: 13, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--muted)", fontWeight: 600, marginBottom: 10 }}>
             {dayLabel}{streak > 0 ? ` · 🔥 ${streak}-day streak` : ""}
           </p>
-          <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 40, fontWeight: 500, color: "var(--foreground)", letterSpacing: "-0.01em", lineHeight: 1.1 }}>
+          <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 30, fontWeight: 500, color: "var(--foreground)", letterSpacing: "-0.01em", lineHeight: 1.2 }}>
             {greeting()}, {user.name ?? user.email?.split("@")[0]}.
           </h1>
           <p style={{ fontSize: 17, color: "var(--muted)", marginTop: 8 }}>

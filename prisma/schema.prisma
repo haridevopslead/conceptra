@@ -30,6 +30,12 @@ enum AiFeature {
   TRANSCRIBE
 }
 
+enum PlanDuration {
+  MONTHLY
+  QUARTERLY
+  ANNUAL
+}
+
 // ---------------------------------------------------------------------------
 // Core models
 // ---------------------------------------------------------------------------
@@ -60,6 +66,7 @@ model User {
   hariSessionLogs   HariSessionLog[]
   hariWeakAreas     HariWeakArea[]
   aiCostLogs        AiCostLog[]
+  payments          Payment[]
 }
 
 model Session {
@@ -218,6 +225,27 @@ model AiCostLog {
 
   @@index([userId, feature, createdAt])
   @@index([feature, createdAt])
+}
+
+// One row per successfully processed Razorpay payment — written once, by
+// whichever of verify (client-side, fires right after checkout) or webhook
+// (payment.captured, Razorpay's server-to-server backstop) gets there first.
+// razorpayPaymentId is unique specifically so that path can double as the
+// idempotency guard: both call sites attempt to insert here before ever
+// touching User.plan/planExpiresAt, so a duplicate webhook delivery or a
+// verify+webhook race for the same payment applies the upgrade exactly once.
+// See lib/apply-pro-upgrade.ts.
+model Payment {
+  id                String       @id @default(cuid())
+  userId            String
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  razorpayOrderId   String
+  razorpayPaymentId String       @unique
+  amountPaise       Int
+  duration          PlanDuration
+  createdAt         DateTime     @default(now())
+
+  @@index([userId])
 }
 
 model UserLessonProgress {

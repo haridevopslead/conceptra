@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getEffectivePlan } from "@/lib/plan";
 
 export const metadata = { title: "Your Growth — Conceptra" };
 
@@ -161,20 +162,20 @@ export default async function GrowthPage() {
 
   let plan = session.user.plan;
   try {
-    const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } });
-    if (dbUser) plan = dbUser.plan;
+    const effective = await getEffectivePlan(session.user.id);
+    plan = effective.plan;
   } catch {
     // fall back to JWT plan
   }
   const hasAccess = plan !== "FREE";
 
   return (
-    <div style={{ maxWidth: 820, margin: "0 auto", padding: "56px 64px 80px", display: "flex", flexDirection: "column", gap: 26 }}>
+    <div style={{ maxWidth: 1100, margin: "0 auto", padding: "56px 64px 80px", display: "flex", flexDirection: "column", gap: 26 }}>
       <div>
         <p style={{ fontSize: 13, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--muted)", fontWeight: 600, marginBottom: 10 }}>
           Interview with Hari
         </p>
-        <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 36, fontWeight: 500, color: "var(--foreground)", letterSpacing: "-0.01em" }}>
+        <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 30, fontWeight: 500, color: "var(--foreground)", letterSpacing: "-0.01em" }}>
           Your Growth
         </h1>
         <p style={{ fontSize: 15, color: "var(--muted)", marginTop: 8, maxWidth: 560, lineHeight: 1.55 }}>

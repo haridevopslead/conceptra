@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { effectivePlan } from "@/lib/plan";
 import LessonsClient from "@/components/lessons/lessons-client";
 
 export const metadata = {
@@ -23,13 +24,13 @@ export default async function LessonsPage() {
     // visitor sees the same full topic list, just without those extras.
     if (session?.user?.id) {
       const [dbUser, progress] = await Promise.all([
-        db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } }),
+        db.user.findUnique({ where: { id: session.user.id }, select: { plan: true, planExpiresAt: true } }),
         db.userLessonProgress.findMany({
           where: { userId: session.user.id },
           select: { lessonSlug: true },
         }),
       ]);
-      if (dbUser) plan = dbUser.plan;
+      if (dbUser) plan = effectivePlan(dbUser.plan, dbUser.planExpiresAt);
       visitedSlugs = progress.map((p) => p.lessonSlug);
     }
   } catch {

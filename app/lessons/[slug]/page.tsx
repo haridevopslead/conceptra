@@ -5,6 +5,7 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isPublicLesson } from "@/lib/public-lessons";
+import { effectivePlan } from "@/lib/plan";
 import LessonTracker from "@/components/lessons/lesson-tracker";
 import LessonComplete from "@/components/lessons/lesson-complete";
 import CopyButton from "@/components/lessons/copy-button";
@@ -287,7 +288,7 @@ export default async function LessonDetailPage({
   try {
     const [dbUser, , nextLessonRow] = await Promise.all([
       session?.user?.id
-        ? db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } })
+        ? db.user.findUnique({ where: { id: session.user.id }, select: { plan: true, planExpiresAt: true } })
         : Promise.resolve(null),
       session?.user?.id
         ? db.userLessonProgress
@@ -299,7 +300,7 @@ export default async function LessonDetailPage({
         orderBy: { order: "asc" },
       }),
     ]);
-    if (dbUser) plan = dbUser.plan;
+    if (dbUser) plan = effectivePlan(dbUser.plan, dbUser.planExpiresAt);
     nextLesson = nextLessonRow;
   } catch {
     // DB unavailable — show content without completion/next-lesson state

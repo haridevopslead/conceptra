@@ -6,6 +6,7 @@ import { evaluateAnswer, EvaluationError } from "@/lib/interview/evaluate";
 import { recordPracticeStreak } from "@/lib/streak";
 import { checkEvaluateQuota, quotaErrorMessage } from "@/lib/ai-quota";
 import { logQuickPracticeCost } from "@/lib/ai-cost";
+import { effectivePlan } from "@/lib/plan";
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -17,9 +18,11 @@ export async function POST(req: NextRequest) {
   }
 
   // Fetch fresh from DB rather than trusting the JWT — session.user.plan can
-  // be stale until re-login if the user upgraded mid-session.
-  const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true, emailVerified: true } });
-  const plan = dbUser?.plan ?? "FREE";
+  // be stale until re-login if the user upgraded mid-session. Also treat a
+  // lapsed planExpiresAt as FREE live, not just after the daily downgrade
+  // cron next runs (see lib/plan.ts).
+  const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true, planExpiresAt: true, emailVerified: true } });
+  const plan = effectivePlan(dbUser?.plan ?? "FREE", dbUser?.planExpiresAt ?? null);
 
   if (!dbUser?.emailVerified) {
     return NextResponse.json(

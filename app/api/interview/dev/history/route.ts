@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getEffectivePlan } from "@/lib/plan";
 
 // Backs the FREE-plan upgrade nudge on the Interview with Hari setup screen:
 // "you've done this topic before" without exposing the PRO no-repeat memory
@@ -14,8 +15,7 @@ export async function GET(req: NextRequest) {
   const topic = req.nextUrl.searchParams.get("topic");
   if (!topic) return new Response("Missing topic", { status: 400 });
 
-  const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } });
-  const plan = dbUser?.plan ?? "FREE";
+  const { plan } = await getEffectivePlan(session.user.id);
 
   let hasPriorSession = false;
   if (plan === "FREE") {

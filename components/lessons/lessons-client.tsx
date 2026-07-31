@@ -180,11 +180,11 @@ export default function LessonsClient({ plan, visitedSlugs, lessons, anonymous }
   const gatedCount = filtered.length - openCount;
 
   return (
-    <div className="p-4 sm:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="p-4 sm:p-8 max-w-7xl mx-auto space-y-6">
 
       {/* ── Header ── */}
       <div>
-        <h1 className="text-2xl font-bold" style={{ color: "var(--foreground)", fontFamily: "'Newsreader', serif", fontWeight: 500 }}>Interview Prep Briefs</h1>
+        <h1 style={{ fontSize: 30, color: "var(--foreground)", fontFamily: "'Newsreader', serif", fontWeight: 500, letterSpacing: "-0.01em" }}>Interview Prep Briefs</h1>
         <p className="text-sm mt-1" style={{ color: "var(--muted)" }}>
           Know exactly what to say when they ask about Docker, Kubernetes, AWS, and more. Built for engineers who already work in DevOps — not beginners starting from scratch.
         </p>

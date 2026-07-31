@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getEffectivePlan } from "@/lib/plan";
 import PricingClient from "@/components/pricing/pricing-client";
 
 const PRICING_TITLE = "Pricing — Conceptra";
@@ -31,6 +32,11 @@ export default async function PricingPage() {
   const session = await getServerSession(authOptions);
   const user = session?.user;
 
+  // Live-checked rather than trusting session.user.plan (stale JWT, and
+  // doesn't account for planExpiresAt) — a lapsed Pro account should see the
+  // upgrade button again, not "You're on Pro".
+  const { plan: effective } = user?.id ? await getEffectivePlan(user.id) : { plan: "FREE" };
+
   return (
     <main style={{ backgroundColor: "#1C1917", minHeight: "100vh", fontFamily: "'Hanken Grotesk', system-ui, sans-serif" }}>
       {/* Nav */}
@@ -44,7 +50,7 @@ export default async function PricingPage() {
         userName={user?.name ?? ""}
         userEmail={user?.email ?? ""}
         isLoggedIn={!!user}
-        isPro={user?.plan === "PRO"}
+        isPro={effective === "PRO"}
       />
     </main>
   );

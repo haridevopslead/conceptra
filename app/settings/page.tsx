@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getEffectivePlan } from "@/lib/plan";
 import SettingsClient from "@/components/settings/settings-client";
 
 export const metadata = { title: "Settings — Conceptra" };
@@ -11,8 +11,8 @@ export default async function SettingsPage() {
 
   let freshPlan = user.plan ?? "FREE";
   try {
-    const dbUser = await db.user.findUnique({ where: { id: user.id }, select: { plan: true } });
-    if (dbUser) freshPlan = dbUser.plan ?? "FREE";
+    const { plan } = await getEffectivePlan(user.id);
+    freshPlan = plan;
   } catch {
     // fall back to JWT plan
   }

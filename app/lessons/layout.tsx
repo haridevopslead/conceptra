@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import Link from "next/link";
 import { authOptions } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getEffectivePlan } from "@/lib/plan";
 import Sidebar from "@/components/dashboard/sidebar";
 import BottomNav from "@/components/dashboard/bottom-nav";
 
@@ -35,16 +35,17 @@ export default async function LessonsLayout({
             <Link href="/register" style={{ background: "var(--accent)", color: "var(--accent-contrast)", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 9, textDecoration: "none" }}>Get Started</Link>
           </div>
         </nav>
-        <main className="w-full max-w-5xl mx-auto">{children}</main>
+        <main className="w-full max-w-7xl mx-auto">{children}</main>
       </div>
     );
   }
 
-  // Fetch plan fresh from DB so the sidebar reflects upgrades immediately
+  // Fetch plan fresh from DB (and live-check expiry) so the sidebar
+  // reflects upgrades/lapses immediately.
   let freshPlan = session.user.plan;
   try {
-    const dbUser = await db.user.findUnique({ where: { id: session.user.id }, select: { plan: true } });
-    if (dbUser) freshPlan = dbUser.plan;
+    const { plan } = await getEffectivePlan(session.user.id);
+    freshPlan = plan;
   } catch {
     // fall back to JWT plan
   }
@@ -52,7 +53,7 @@ export default async function LessonsLayout({
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: "var(--background)" }}>
       <Sidebar user={{ ...session.user, plan: freshPlan }} />
-      <main className="flex-1 overflow-auto pb-20 md:pb-0 w-full max-w-5xl mx-auto">{children}</main>
+      <main className="flex-1 overflow-auto pb-20 md:pb-0 w-full max-w-7xl mx-auto">{children}</main>
       <BottomNav />
     </div>
   );

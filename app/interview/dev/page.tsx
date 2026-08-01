@@ -5,6 +5,9 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useVoiceRecorder } from "@/components/interview/use-voice-recorder";
 import MicButton from "@/components/interview/mic-button";
+import CodeAnswerInput from "@/components/interview/code-answer-input";
+import { useCopyGuard } from "@/components/interview/use-copy-guard";
+import { splitHariMeta } from "@/lib/interview/hari-meta";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -187,6 +190,12 @@ export default function DevInterviewPage() {
   const [isLiveText, setIsLiveText] = useState(false);
   const [feedback, setFeedback] = useState<FeedbackData | null>(null);
   const [error, setError] = useState("");
+  // Set from Hari's flag_code_question tool call (relayed by the server as a
+  // trailing meta sentinel, stripped from `visibleMessages` before it ever
+  // renders — see splitHariMeta) — true only when the question just asked
+  // genuinely expects a written code/script/config answer, switching the
+  // answer box into CodeAnswerInput instead of the plain textarea.
+  const [expectsCode, setExpectsCode] = useState(false);
 
   // Full API conversation history (includes the hidden kickoff)
   const apiHistoryRef = useRef<Message[]>([]);
@@ -205,6 +214,10 @@ export default function DevInterviewPage() {
   // briefly here rather than silently eaten.
   const [pasteBlocked, setPasteBlocked] = useState(false);
   const pasteBlockedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Lets a candidate re-paste text they copied/cut from their own answer
+  // (e.g. reusing a variable name) without reopening the door to pasting in
+  // a whole answer from outside the app — see use-copy-guard.ts.
+  const { trackCopy, isTrackedPaste } = useCopyGuard();
 
   useEffect(() => {
     return () => {
@@ -212,11 +225,19 @@ export default function DevInterviewPage() {
     };
   }, []);
 
-  function blockPaste(e: React.ClipboardEvent<HTMLTextAreaElement> | React.DragEvent<HTMLTextAreaElement>) {
-    e.preventDefault();
+  function showPasteBlocked() {
     setPasteBlocked(true);
     if (pasteBlockedTimeoutRef.current) clearTimeout(pasteBlockedTimeoutRef.current);
     pasteBlockedTimeoutRef.current = setTimeout(() => setPasteBlocked(false), 3000);
+  }
+
+  function blockPaste(e: React.ClipboardEvent<HTMLTextAreaElement> | React.DragEvent<HTMLTextAreaElement>) {
+    if (e.type === "paste") {
+      const pasted = (e as React.ClipboardEvent<HTMLTextAreaElement>).clipboardData.getData("text/plain");
+      if (isTrackedPaste(pasted)) return;
+    }
+    e.preventDefault();
+    showPasteBlocked();
   }
 
   useEffect(() => {
@@ -304,7 +325,13 @@ export default function DevInterviewPage() {
       const { done, value } = await reader.read();
       if (done) break;
       full += decoder.decode(value, { stream: true });
-      onChunk(full);
+      // The server appends a trailing meta sentinel (see hari-meta.ts) once
+      // the message is done — strip it so it never flashes into the visible
+      // chat bubble text, even for the split second before the full
+      // sentinel has arrived. The raw `full` (meta included) is still what
+      // this function returns, so the caller can read the meta once after
+      // the stream ends.
+      onChunk(splitHariMeta(full).text);
     }
 
     return full;
@@ -318,6 +345,9 @@ export default function DevInterviewPage() {
     setError("");
     setFeedback(null);
     setVisibleMessages([]);
+    // Default to the plain text box until the opening question's meta
+    // arrives — a fresh conversation should never open in code mode.
+    setExpectsCode(false);
 
     const kickoff: Message = { role: "user", content: kickoffContent };
     apiHistoryRef.current = [kickoff];
@@ -333,7 +363,9 @@ export default function DevInterviewPage() {
         setVisibleMessages([{ role: "assistant", content: acc }]);
       });
 
-      apiHistoryRef.current = [kickoff, { role: "assistant", content: devText }];
+      const { text: cleanText, meta } = splitHariMeta(devText);
+      apiHistoryRef.current = [kickoff, { role: "assistant", content: cleanText }];
+      setExpectsCode(meta?.expectsCode ?? false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Couldn't reach Hari. Check your connection and try again.");
       setScreen("setup");
@@ -426,11 +458,13 @@ export default function DevInterviewPage() {
         ]);
       });
 
-      apiHistoryRef.current = [...nextApiHistory, { role: "assistant", content: devText }];
+      const { text: cleanText, meta } = splitHariMeta(devText);
+      apiHistoryRef.current = [...nextApiHistory, { role: "assistant", content: cleanText }];
+      setExpectsCode(meta?.expectsCode ?? false);
 
       // Switch to feedback screen if Hari's response contains structured feedback
-      if (isFeedbackTurn(devText)) {
-        const parsed = parseFeedback(devText);
+      if (isFeedbackTurn(cleanText)) {
+        const parsed = parseFeedback(cleanText);
         setFeedback(parsed);
         setScreen("feedback");
       }
@@ -792,6 +826,11 @@ export default function DevInterviewPage() {
 
   // ── Chat screen ──────────────────────────────────────────────────────────────
 
+  // Hari's most recently completed question — used only to pick a
+  // reasonable syntax highlighter (Dockerfile vs. generic shell) for the
+  // code editor; see code-answer-input.tsx.
+  const lastQuestionText = [...visibleMessages].reverse().find((m) => m.role === "assistant")?.content ?? "";
+
   return (
     <div className="chat-root">
       {/* Back to Quick Practice — only shown when this chat came from that
@@ -827,6 +866,12 @@ export default function DevInterviewPage() {
           {visibleMessages.map((msg, i) => {
             const isLast = i === visibleMessages.length - 1;
             const isPlaceholder = msg.role === "assistant" && msg.content === "" && streaming && isLast;
+            // The model occasionally responds with only a tool call and no
+            // visible text (see flag_code_question's prompt instruction) —
+            // once streaming for this turn is actually done, a still-empty
+            // assistant bubble would otherwise render as blank/broken.
+            const isEmptyFinalAssistant =
+              msg.role === "assistant" && msg.content.trim() === "" && !isPlaceholder;
 
             return (
               <div
@@ -839,6 +884,8 @@ export default function DevInterviewPage() {
                 <div className={`chat-bubble ${msg.role === "user" ? "user-bubble" : "dev-bubble"}`}>
                   {isPlaceholder ? (
                     <span className="chat-typing">●●●</span>
+                  ) : isEmptyFinalAssistant ? (
+                    "Go ahead and write your answer below."
                   ) : msg.role === "assistant" ? (
                     stripMarkdown(msg.content)
                   ) : (
@@ -853,35 +900,66 @@ export default function DevInterviewPage() {
         </div>
       </div>
 
-      {/* Input area */}
-      <div className="chat-input-area">
-        <MicButton micState={micState} onToggle={handleMicToggle} />
-        <textarea
-          ref={textareaRef}
-          value={input}
-          onChange={(e) => {
-            setInput(e.target.value);
-            setIsLiveText(false);
-          }}
-          onKeyDown={handleKeyDown}
-          onPaste={blockPaste}
-          onDrop={blockPaste}
-          placeholder="Type your answer… or press the mic"
-          rows={3}
-          disabled={streaming}
-          className="chat-textarea"
-          style={{ fontStyle: isLiveText ? "italic" : "normal", opacity: isLiveText ? 0.7 : 1 }}
-        />
-        <div className="chat-actions">
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || streaming || micState !== "idle"}
-            className="chat-icon-btn chat-send-btn"
-          >
-            ↑
-          </button>
+      {/* Input area — Hari's flag_code_question signal (see hari-meta.ts)
+          switches this between the normal chat textarea+mic and a
+          CodeMirror editor for questions that genuinely expect written
+          code. Voice input doesn't make sense for dictating code, so the
+          mic is simply omitted here — it's untouched for every other turn
+          in the same session. */}
+      {expectsCode ? (
+        <div className="chat-input-area code-mode">
+          <div className="chat-code-wrap">
+            <CodeAnswerInput
+              value={input}
+              onChange={setInput}
+              questionText={lastQuestionText}
+              disabled={streaming}
+              onPasteBlocked={showPasteBlocked}
+            />
+            <div className="chat-code-actions">
+              <span className="chat-code-hint">Code mode — Enter adds a new line</span>
+              <button
+                onClick={sendMessage}
+                disabled={!input.trim() || streaming}
+                className="chat-code-send-btn"
+              >
+                Send →
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="chat-input-area">
+          <MicButton micState={micState} onToggle={handleMicToggle} />
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              setIsLiveText(false);
+            }}
+            onKeyDown={handleKeyDown}
+            onCopy={trackCopy}
+            onCut={trackCopy}
+            onPaste={blockPaste}
+            onDrop={blockPaste}
+            placeholder="Type your answer… or press the mic"
+            rows={3}
+            disabled={streaming}
+            className="chat-textarea"
+            style={{ fontStyle: isLiveText ? "italic" : "normal", opacity: isLiveText ? 0.7 : 1 }}
+          />
+          <div className="chat-actions">
+            <button
+              onClick={sendMessage}
+              disabled={!input.trim() || streaming || micState !== "idle"}
+              className="chat-icon-btn chat-send-btn"
+            >
+              ↑
+            </button>
+          </div>
+        </div>
+      )}
       {pasteBlocked && (
         <p className="chat-paste-blocked">
           Paste is disabled here — type your answer to practice for the real thing.
@@ -995,6 +1073,21 @@ export default function DevInterviewPage() {
           background: #F5A623; border-color: #F5A623; color: var(--accent-contrast);
         }
         .chat-send-btn:disabled { cursor: not-allowed; opacity: 0.4; }
+
+        .chat-input-area.code-mode { align-items: stretch; }
+        .chat-code-wrap { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+        .chat-code-actions {
+          display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+        }
+        .chat-code-hint { font-size: 0.75rem; color: var(--muted); }
+        .chat-code-send-btn {
+          padding: 0.5rem 1.1rem; border-radius: 10px; border: none;
+          background: #F5A623; color: var(--accent-contrast);
+          font-weight: 700; font-size: 0.85rem; cursor: pointer;
+          transition: opacity 0.15s; flex-shrink: 0;
+        }
+        .chat-code-send-btn:disabled { cursor: not-allowed; opacity: 0.4; }
+        .chat-code-send-btn:not(:disabled):hover { opacity: 0.9; }
       `}</style>
     </div>
   );

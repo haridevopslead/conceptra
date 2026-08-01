@@ -7,6 +7,7 @@ import SeniorAnswerBox, { RichText } from "./senior-answer-box";
 import CompareAnswer from "./compare-answer";
 import MicButton from "./mic-button";
 import { useVoiceRecorder } from "./use-voice-recorder";
+import { useCopyGuard } from "./use-copy-guard";
 import { getBriefForTopic } from "@/lib/interview/topic-briefs";
 
 // ── Question bank ─────────────────────────────────────────────────────────────
@@ -652,6 +653,10 @@ export default function Evaluator() {
   // briefly here rather than silently eaten.
   const [pasteBlocked, setPasteBlocked] = useState(false);
   const pasteBlockedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Lets a candidate re-paste text they copied/cut from their own answer
+  // (e.g. reusing a variable name) without reopening the door to pasting in
+  // a whole answer from outside the app — see use-copy-guard.ts.
+  const { trackCopy, isTrackedPaste } = useCopyGuard();
 
   useEffect(() => {
     return () => {
@@ -660,6 +665,10 @@ export default function Evaluator() {
   }, []);
 
   function blockPaste(e: React.ClipboardEvent<HTMLTextAreaElement> | React.DragEvent<HTMLTextAreaElement>) {
+    if (e.type === "paste") {
+      const pasted = (e as React.ClipboardEvent<HTMLTextAreaElement>).clipboardData.getData("text/plain");
+      if (isTrackedPaste(pasted)) return;
+    }
     e.preventDefault();
     setPasteBlocked(true);
     if (pasteBlockedTimeoutRef.current) clearTimeout(pasteBlockedTimeoutRef.current);
@@ -1039,6 +1048,8 @@ export default function Evaluator() {
             setAnswer(e.target.value);
             setIsLiveText(false);
           }}
+          onCopy={trackCopy}
+          onCut={trackCopy}
           onPaste={blockPaste}
           onDrop={blockPaste}
           disabled={phase !== "idle"}

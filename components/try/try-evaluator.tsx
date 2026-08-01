@@ -6,6 +6,7 @@ import SeniorAnswerBox, { RichText } from "@/components/interview/senior-answer-
 import CompareAnswer from "@/components/interview/compare-answer";
 import MicButton from "@/components/interview/mic-button";
 import { useVoiceRecorder } from "@/components/interview/use-voice-recorder";
+import { useCopyGuard } from "@/components/interview/use-copy-guard";
 
 const TRY_QUESTION = "What happens when you run kubectl apply -f deployment.yaml?";
 
@@ -93,6 +94,10 @@ export default function TryEvaluator() {
   // briefly here rather than silently eaten.
   const [pasteBlocked, setPasteBlocked] = useState(false);
   const pasteBlockedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Lets a candidate re-paste text they copied/cut from their own answer
+  // (e.g. reusing a variable name) without reopening the door to pasting in
+  // a whole answer from outside the app — see use-copy-guard.ts.
+  const { trackCopy, isTrackedPaste } = useCopyGuard();
 
   useEffect(() => {
     return () => {
@@ -101,6 +106,10 @@ export default function TryEvaluator() {
   }, []);
 
   function blockPaste(e: React.ClipboardEvent<HTMLTextAreaElement> | React.DragEvent<HTMLTextAreaElement>) {
+    if (e.type === "paste") {
+      const pasted = (e as React.ClipboardEvent<HTMLTextAreaElement>).clipboardData.getData("text/plain");
+      if (isTrackedPaste(pasted)) return;
+    }
     e.preventDefault();
     setPasteBlocked(true);
     if (pasteBlockedTimeoutRef.current) clearTimeout(pasteBlockedTimeoutRef.current);
@@ -248,6 +257,8 @@ export default function TryEvaluator() {
             setAnswer(e.target.value);
             setIsLiveText(false);
           }}
+          onCopy={trackCopy}
+          onCut={trackCopy}
           onPaste={blockPaste}
           onDrop={blockPaste}
           disabled={phase !== "idle"}

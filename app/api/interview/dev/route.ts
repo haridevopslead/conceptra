@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { checkDevChatQuota, recordDevChatUsage, quotaErrorMessage } from "@/lib/ai-quota";
 import { logHariChatCost } from "@/lib/ai-cost";
 import { effectivePlan } from "@/lib/plan";
+import { encodeHariMeta } from "@/lib/interview/hari-meta";
 import type Anthropic from "@anthropic-ai/sdk";
 
 // PRO only — lets the model report weak concepts as a separate tool_use
@@ -29,6 +30,31 @@ const FLAG_WEAK_CONCEPTS_TOOL: Anthropic.Tool = {
       },
     },
     required: ["concepts"],
+  },
+};
+
+// All plans, every turn — lets the client switch the candidate's answer box
+// into a code editor for questions that genuinely require writing code, a
+// script, or a config/resource block, instead of fragile keyword-matching
+// on the streamed question text. Reported as a separate tool_use content
+// block (same mechanism as flag_weak_concepts below), so it never leaks
+// into the prose the chat bubble renders — the server relays it to the
+// client as a trailing sentinel appended after the real message text (see
+// encodeHariMeta / on("end") below), which the client strips before display.
+const FLAG_CODE_QUESTION_TOOL: Anthropic.Tool = {
+  name: "flag_code_question",
+  description:
+    "Call this on every turn where you ask the candidate a new question — never on the final SCORE/STRONG/IMPROVE/SENIOR_ANSWER feedback turn. Tells the client whether to show a code editor instead of a plain text box for the candidate's next answer.",
+  input_schema: {
+    type: "object",
+    properties: {
+      expects_code: {
+        type: "boolean",
+        description:
+          "true ONLY if the question you just asked requires the candidate to actually write literal code, a script, or a config/resource block as their answer — e.g. \"write a Dockerfile that...\", \"write a bash script to...\", \"write the Terraform resource block for...\", \"write the Kubernetes manifest for...\". false for every conceptual, explain-this, walk-me-through, or debugging-approach question, even one that references specific commands or tools by name — those should be answered in prose, not code. Most interview questions are conceptual and should be false.",
+      },
+    },
+    required: ["expects_code"],
   },
 };
 
@@ -155,6 +181,9 @@ export async function POST(req: NextRequest) {
     ? `\n\nWhen (and only when) you give your final SCORE/STRONG/IMPROVE/SENIOR_ANSWER feedback in this response, also call the flag_weak_concepts tool with 3-5 short, specific concepts the candidate genuinely struggled with in this conversation, based on their actual answers. If they answered strongly throughout with no real gaps, call it with the 1-2 most advanced concepts they could still sharpen. Do not call this tool on any other turn.`
     : "";
 
+  // All plans, every turn — see FLAG_CODE_QUESTION_TOOL above.
+  const codeQuestionInstruction = `\n\nAfter every question you ask (every turn except your final feedback turn), call the flag_code_question tool to say whether that question genuinely requires the candidate to write actual code, a script, or a config/resource block as their answer, as opposed to a conceptual or verbal explanation. Most questions are conceptual — only flag true when you are explicitly asking the candidate to write something (a Dockerfile, a bash script, a Terraform resource block, a Kubernetes manifest, etc.), not just when the topic happens to involve tools or commands. Calling this tool is never a substitute for your actual message — always write out your real question or response as visible text in the same turn; never respond with only a tool call and no text (e.g. if the candidate asks you to demonstrate something, respond with a short line handing it back to them to write, such as "Good instinct — go ahead and write that out." rather than staying silent).`;
+
   // JD mode: ground every question in the pasted posting instead of a fixed
   // topic. The client resends the JD text on every turn (not just the
   // opening one), so this block is present in the system prompt for the
@@ -203,7 +232,12 @@ scoring, good or bad. This does not apply to answers that are merely weak,
 confused, or wrong but still genuinely trying to address the question — grade
 those normally, same as any other real attempt.
 
-${topicOrJdLine}${jdInstruction}${memoryInstruction}${weakAreaInstruction}${weakConceptsInstruction}`;
+${topicOrJdLine}${jdInstruction}${memoryInstruction}${weakAreaInstruction}${weakConceptsInstruction}${codeQuestionInstruction}`;
+
+  // flag_code_question is available to every plan; flag_weak_concepts stays
+  // PRO-only exactly as before.
+  const tools: Anthropic.Tool[] = [FLAG_CODE_QUESTION_TOOL];
+  if (hasMemory) tools.push(FLAG_WEAK_CONCEPTS_TOOL);
 
   const msgStream = anthropic.messages.stream({
     model: "claude-haiku-4-5-20251001",
@@ -213,8 +247,7 @@ ${topicOrJdLine}${jdInstruction}${memoryInstruction}${weakAreaInstruction}${weak
     // PRO only — bumps variety so repeated sessions don't land on the same
     // phrasing even when the memory instruction above doesn't fully steer it.
     ...(hasMemory ? { temperature: 0.9 } : {}),
-    // PRO only — Free gets zero extra tokens/capability offered to the model.
-    ...(hasMemory ? { tools: [FLAG_WEAK_CONCEPTS_TOOL] } : {}),
+    tools,
   });
 
   const encoder = new TextEncoder();
@@ -227,46 +260,51 @@ ${topicOrJdLine}${jdInstruction}${memoryInstruction}${weakAreaInstruction}${weak
         if (isNewConversation) openingText += text;
       });
       msgStream.on("end", () => {
-        controller.close();
-        // Fire-and-forget — logged for every plan (not just PRO) so the data
-        // exists regardless of tier, without delaying the streamed response.
-        // Skipped entirely for JD-mode sessions: there's no stable topic
-        // identity to key this log against, and JD sessions are deliberately
-        // ephemeral (never surfaced on the Growth page or reused as memory).
-        if (isNewConversation && !isJdMode) {
-          db.hariSessionLog
-            .create({ data: { userId: session.user.id, topic, difficulty, openingQuestion: openingText } })
-            .catch(() => {});
-        }
-
-        // Fire-and-forget, one row per Claude call (every turn, not just the
-        // opening one) — real usage.input_tokens/output_tokens from the
-        // Anthropic streaming response's accumulated final message, not an
-        // estimate from string length. finalMessage() is safe to call again
-        // below (it resolves from already-accumulated stream state, no
-        // second API call), so this doesn't interfere with the weak-concepts
-        // extraction that also reads it.
+        // finalMessage() resolves from state already accumulated over the
+        // course of the stream (the "end" event itself means the message is
+        // complete) — no extra network round trip, so awaiting it here
+        // before closing adds no perceptible delay. Read once and reused
+        // below for cost logging and weak-area extraction, instead of the
+        // two separate finalMessage() calls this used to make.
         msgStream
           .finalMessage()
           .then((finalMsg) => {
+            const codeToolBlock = finalMsg.content.find(
+              (b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === "flag_code_question"
+            );
+            const codeInput = codeToolBlock?.input as { expects_code?: unknown } | null;
+            const expectsCode = codeInput?.expects_code === true;
+            controller.enqueue(encoder.encode(encodeHariMeta({ expectsCode })));
+            controller.close();
+
+            // Fire-and-forget — logged for every plan (not just PRO) so the
+            // data exists regardless of tier, without delaying the streamed
+            // response. Skipped entirely for JD-mode sessions: there's no
+            // stable topic identity to key this log against, and JD sessions
+            // are deliberately ephemeral (never surfaced on the Growth page
+            // or reused as memory).
+            if (isNewConversation && !isJdMode) {
+              db.hariSessionLog
+                .create({ data: { userId: session.user.id, topic, difficulty, openingQuestion: openingText } })
+                .catch(() => {});
+            }
+
+            // Fire-and-forget, one row per Claude call (every turn, not just
+            // the opening one) — real usage.input_tokens/output_tokens from
+            // the accumulated final message, not an estimate from string
+            // length.
             logHariChatCost({
               userId: session.user.id,
               inputTokens: finalMsg.usage?.input_tokens,
               outputTokens: finalMsg.usage?.output_tokens,
             });
-          })
-          .catch((err) => {
-            console.error("[ai-cost] could not read usage from Hari stream", { userId: session.user.id, err });
-          });
 
-        // PRO only, fire-and-forget — weak-area extraction is a best-effort
-        // side effect of the feedback turn, never allowed to affect what the
-        // user actually sees. A malformed/missing tool call is logged (not
-        // swallowed) so a recurring problem here is visible server-side.
-        if (hasMemory) {
-          msgStream
-            .finalMessage()
-            .then((finalMsg) => {
+            // PRO only, fire-and-forget — weak-area extraction is a
+            // best-effort side effect of the feedback turn, never allowed to
+            // affect what the user actually sees. A malformed/missing tool
+            // call is logged (not swallowed) so a recurring problem here is
+            // visible server-side.
+            if (hasMemory) {
               const textBlock = finalMsg.content.find((b): b is Anthropic.TextBlock => b.type === "text");
               const fullText = textBlock?.text ?? "";
               // SENIOR_ANSWER matched as a bare token (no required trailing
@@ -277,43 +315,49 @@ ${topicOrJdLine}${jdInstruction}${memoryInstruction}${weakAreaInstruction}${weak
               // feedback turn that used this formatting quietly wrote zero
               // HariWeakArea rows, with no error logged anywhere.
               const isFeedbackTurn = /SCORE\s*:/.test(fullText) && /SENIOR_ANSWER\b/.test(fullText);
-              if (!isFeedbackTurn) return;
+              if (isFeedbackTurn) {
+                const toolBlock = finalMsg.content.find(
+                  (b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === "flag_weak_concepts"
+                );
+                if (!toolBlock) {
+                  console.error("[hari-weak-areas] feedback turn produced no flag_weak_concepts call", {
+                    userId: session.user.id,
+                    topic,
+                  });
+                } else {
+                  const input = toolBlock.input as { concepts?: unknown } | null;
+                  const concepts = Array.isArray(input?.concepts) ? input.concepts : null;
+                  const cleaned = concepts
+                    ?.filter((c): c is string => typeof c === "string" && c.trim().length > 0)
+                    .map((c) => c.trim())
+                    .slice(0, 5);
 
-              const toolBlock = finalMsg.content.find(
-                (b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === "flag_weak_concepts"
-              );
-              if (!toolBlock) {
-                console.error("[hari-weak-areas] feedback turn produced no flag_weak_concepts call", {
-                  userId: session.user.id,
-                  topic,
-                });
-                return;
+                  if (!cleaned || cleaned.length === 0) {
+                    console.error("[hari-weak-areas] malformed flag_weak_concepts input", {
+                      userId: session.user.id,
+                      topic,
+                      input: toolBlock.input,
+                    });
+                  } else {
+                    db.hariWeakArea
+                      .createMany({ data: cleaned.map((concept) => ({ userId: session.user.id, topic, concept })) })
+                      .catch((err) => {
+                        console.error("[hari-weak-areas] extraction failed", { userId: session.user.id, topic, err });
+                      });
+                  }
+                }
               }
-
-              const input = toolBlock.input as { concepts?: unknown } | null;
-              const concepts = Array.isArray(input?.concepts) ? input.concepts : null;
-              const cleaned = concepts
-                ?.filter((c): c is string => typeof c === "string" && c.trim().length > 0)
-                .map((c) => c.trim())
-                .slice(0, 5);
-
-              if (!cleaned || cleaned.length === 0) {
-                console.error("[hari-weak-areas] malformed flag_weak_concepts input", {
-                  userId: session.user.id,
-                  topic,
-                  input: toolBlock.input,
-                });
-                return;
-              }
-
-              return db.hariWeakArea.createMany({
-                data: cleaned.map((concept) => ({ userId: session.user.id, topic, concept })),
-              });
-            })
-            .catch((err) => {
-              console.error("[hari-weak-areas] extraction failed", { userId: session.user.id, topic, err });
-            });
-        }
+            }
+          })
+          .catch((err) => {
+            console.error("[hari-chat] failed to read final message", { userId: session.user.id, err });
+            try {
+              controller.enqueue(encoder.encode(encodeHariMeta({ expectsCode: false })));
+              controller.close();
+            } catch {
+              // controller already closed/errored — nothing left to do
+            }
+          });
       });
       msgStream.on("error", (err) => {
         controller.error(err);

@@ -26,7 +26,7 @@ function wasMentioned(term: string, userAnswer: string): boolean {
 function HighlightedText({ text, userAnswer }: { text: string; userAnswer: string }) {
   const parts = text.split(/(`[^`\n]+`)/g);
   return (
-    <p className="text-sm text-gray-300 leading-6">
+    <p className="text-sm leading-6" style={{ color: "var(--foreground)" }}>
       {parts.map((part, i) => {
         const match = part.match(/^`([^`\n]+)`$/);
         if (!match) return <span key={i}>{part}</span>;
@@ -62,17 +62,17 @@ export default function CompareAnswer({
   const mentionedCount = terms.filter((t) => wasMentioned(t, userAnswer)).length;
 
   return (
-    <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: "#211C18", borderColor: "rgba(253,246,227,0.08)" }}>
+    <div className="rounded-xl border overflow-hidden" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
       <button
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
         className="w-full flex items-center justify-between gap-3 text-left px-5 py-4"
         style={{ background: "transparent", border: "none", cursor: "pointer" }}
       >
-        <span className="text-sm font-semibold" style={{ color: "#FDF6E3" }}>
+        <span className="text-sm font-semibold" style={{ color: "var(--foreground)" }}>
           Compare with your answer
           {terms.length > 0 && (
-            <span className="ml-2 text-xs font-normal" style={{ color: "#8A8073" }}>
+            <span className="ml-2 text-xs font-normal" style={{ color: "var(--muted)" }}>
               ({mentionedCount}/{terms.length} key terms mentioned)
             </span>
           )}
@@ -88,23 +88,23 @@ export default function CompareAnswer({
       {open && (
         <div className="px-5 pb-5 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Your Answer</p>
+            <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--muted)" }}>Your Answer</p>
             <div
-              className="rounded-lg p-4 text-sm text-gray-300 leading-6 whitespace-pre-wrap"
-              style={{ backgroundColor: "#17130F", border: "1px solid rgba(253,246,227,0.06)" }}
+              className="rounded-lg p-4 text-sm leading-6 whitespace-pre-wrap"
+              style={{ backgroundColor: "var(--nav-bg)", border: "1px solid var(--border)", color: "var(--foreground)" }}
             >
               {userAnswer}
             </div>
           </div>
 
           <div className="space-y-3">
-            <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Senior Answer</p>
-            <div className="rounded-lg p-4 space-y-3" style={{ backgroundColor: "#17130F", border: "1px solid rgba(253,246,227,0.06)" }}>
+            <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--muted)" }}>Senior Answer</p>
+            <div className="rounded-lg p-4 space-y-3" style={{ backgroundColor: "var(--nav-bg)", border: "1px solid var(--border)" }}>
               <HighlightedText text={concreteExample} userAnswer={userAnswer} />
               <HighlightedText text={seniorInsight} userAnswer={userAnswer} />
             </div>
             {terms.length > 0 && (
-              <div className="flex items-center gap-4 text-[11px]" style={{ color: "#8A8073" }}>
+              <div className="flex items-center gap-4 text-[11px]" style={{ color: "var(--muted)" }}>
                 <span className="flex items-center gap-1.5">
                   <span style={{ width: 8, height: 8, borderRadius: 999, background: "#9CAE86" }} />
                   You mentioned this

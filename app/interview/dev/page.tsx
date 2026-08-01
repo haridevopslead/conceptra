@@ -599,8 +599,8 @@ export default function DevInterviewPage() {
         <style>{`
           .dev-wrap {
             min-height: 100vh;
-            background: #1C1917;
-            color: #E7DDD5;
+            background: var(--background);
+            color: var(--foreground);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -610,7 +610,7 @@ export default function DevInterviewPage() {
           .dev-avatar-ring {
             width: 80px; height: 80px;
             border-radius: 50%;
-            background: #2C2420;
+            background: var(--surface-2);
             border: 3px solid #F5A623;
             display: flex; align-items: center; justify-content: center;
             font-size: 2rem;
@@ -618,13 +618,13 @@ export default function DevInterviewPage() {
           }
           .dev-title { font-size: 1.875rem; font-weight: 700; margin: 0 0 0.35rem; }
           .dev-subtitle {
-            color: #9E8E85; text-align: center;
+            color: var(--muted); text-align: center;
             max-width: 400px; margin: 0 0 2rem; line-height: 1.6;
           }
           .dev-error { color: #F87171; margin-bottom: 1rem; }
           .dev-label {
             font-size: 0.75rem; text-transform: uppercase;
-            letter-spacing: 0.1em; color: #9E8E85; margin-bottom: 0.6rem;
+            letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.6rem;
           }
           .dev-topic-grid {
             display: grid; grid-template-columns: repeat(4, 1fr);
@@ -633,13 +633,13 @@ export default function DevInterviewPage() {
           .dev-topic-btn {
             padding: 0.75rem 0.4rem; border-radius: 10px;
             border: 2px solid transparent;
-            background: #23201E; color: #C9B8AE;
+            background: var(--surface); color: var(--muted);
             font-size: 0.8rem; cursor: pointer; transition: all 0.15s;
             display: flex; flex-direction: column; align-items: center; gap: 2px;
           }
           .dev-topic-btn.active {
-            border-color: #F5A623; background: #2C2420;
-            color: #F5A623; font-weight: 700;
+            border-color: #F5A623; background: var(--surface-2);
+            color: var(--accent-text); font-weight: 700;
           }
           .dev-topic-code { font-family: monospace; font-size: 0.6rem; opacity: 0.6; }
           .dev-mode-tabs {
@@ -648,25 +648,25 @@ export default function DevInterviewPage() {
           }
           .dev-mode-tab {
             flex: 1; padding: 0.7rem 1rem; border-radius: 12px;
-            border: 2px solid #3D3530;
-            background: #23201E; color: #C9B8AE;
+            border: 2px solid var(--scrollbar-thumb);
+            background: var(--surface); color: var(--muted);
             font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.15s;
             display: flex; align-items: center; justify-content: center; gap: 0.4rem;
           }
-          .dev-mode-tab:hover { border-color: #4A403A; }
+          .dev-mode-tab:hover { border-color: var(--muted); }
           .dev-mode-tab.active {
-            border-color: #F5A623; background: #2C2420;
-            color: #F5A623; font-weight: 700;
+            border-color: #F5A623; background: var(--surface-2);
+            color: var(--accent-text); font-weight: 700;
           }
           .dev-mode-badge {
             font-size: 0.6rem; font-weight: 800; letter-spacing: 0.04em;
-            text-transform: uppercase; color: #1C1917; background: #F5A623;
+            text-transform: uppercase; color: var(--accent-contrast); background: #F5A623;
             padding: 0.15rem 0.4rem; border-radius: 999px; line-height: 1.4;
           }
           .dev-jd-callout {
             width: 100%; max-width: 520px;
             padding: 0.6rem 0.9rem; margin: 0 0 1.25rem;
-            font-size: 0.78rem; line-height: 1.5; color: #F5A623;
+            font-size: 0.78rem; line-height: 1.5; color: var(--accent-text);
             background: rgba(245,166,35,0.1);
             border: 1px solid rgba(245,166,35,0.25);
             border-radius: 10px; text-align: center;
@@ -674,29 +674,29 @@ export default function DevInterviewPage() {
           .dev-jd-block { width: 100%; max-width: 520px; margin-bottom: 1.5rem; }
           .dev-jd-textarea {
             width: 100%; min-height: 160px;
-            background: #23201E; border: 1px solid #3D3530; border-radius: 12px;
-            color: #E7DDD5; padding: 0.75rem 1rem;
+            background: var(--surface); border: 1px solid var(--scrollbar-thumb); border-radius: 12px;
+            color: var(--foreground); padding: 0.75rem 1rem;
             font-size: 0.875rem; line-height: 1.6; resize: vertical;
             outline: none; font-family: inherit;
           }
           .dev-jd-textarea:focus { border-color: #F5A623; }
           .dev-jd-counter {
-            text-align: right; font-size: 0.7rem; color: #9E8E85; margin: 0.35rem 0 0;
+            text-align: right; font-size: 0.7rem; color: var(--muted); margin: 0.35rem 0 0;
           }
           .dev-pills { display: flex; gap: 0.5rem; margin-bottom: 2rem; }
           .dev-pill {
             padding: 0.5rem 1.25rem; border-radius: 999px;
             border: 2px solid transparent;
-            background: #23201E; color: #9E8E85;
+            background: var(--surface); color: var(--muted);
             font-size: 0.875rem; cursor: pointer; transition: all 0.15s;
           }
           .dev-pill.active {
-            border-color: #F5A623; background: #2C2420;
-            color: #F5A623; font-weight: 600;
+            border-color: #F5A623; background: var(--surface-2);
+            color: var(--accent-text); font-weight: 600;
           }
           .dev-start-btn {
             padding: 0.875rem 2.5rem; border-radius: 12px;
-            background: #F5A623; color: #1C1917;
+            background: #F5A623; color: var(--accent-contrast);
             font-weight: 700; font-size: 1rem; border: none; cursor: pointer;
             transition: opacity 0.15s;
           }
@@ -705,16 +705,16 @@ export default function DevInterviewPage() {
             display: flex; align-items: center; gap: 0.75rem;
             width: 100%; max-width: 520px;
             padding: 0.75rem 1rem; margin-bottom: 1.5rem;
-            font-size: 0.8rem; line-height: 1.5; color: #F5A623;
+            font-size: 0.8rem; line-height: 1.5; color: var(--accent-text);
             background: rgba(245,166,35,0.1);
             border: 1px solid rgba(245,166,35,0.25);
             border-radius: 10px;
           }
           .dev-nudge span { flex: 1; }
-          .dev-nudge a { color: #F5A623; font-weight: 700; text-decoration: underline; }
+          .dev-nudge a { color: var(--accent-text); font-weight: 700; text-decoration: underline; }
           .dev-nudge-dismiss {
             flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
-            background: transparent; border: none; color: #F5A623;
+            background: transparent; border: none; color: var(--accent-text);
             font-size: 1.1rem; line-height: 1; cursor: pointer; opacity: 0.7;
           }
           .dev-nudge-dismiss:hover { opacity: 1; }
@@ -759,7 +759,7 @@ export default function DevInterviewPage() {
 
         <style>{`
           .fb-wrap {
-            min-height: 100vh; background: #1C1917; color: #E7DDD5;
+            min-height: 100vh; background: var(--background); color: var(--foreground);
             display: flex; flex-direction: column; align-items: center;
             padding: 3rem 1rem;
           }
@@ -768,19 +768,19 @@ export default function DevInterviewPage() {
             font-size: 4rem; font-weight: 900; text-align: center;
             margin-bottom: 0.25rem;
           }
-          .fb-byline { color: #9E8E85; text-align: center; margin: 0 0 1.75rem; }
+          .fb-byline { color: var(--muted); text-align: center; margin: 0 0 1.75rem; }
           .fb-card {
             border-radius: 12px; border: 1px solid;
             padding: 1.25rem; margin-bottom: 1rem;
           }
           .fb-card-label {
             font-size: 0.7rem; text-transform: uppercase;
-            letter-spacing: 0.1em; color: #9E8E85; margin: 0 0 0.5rem;
+            letter-spacing: 0.1em; color: var(--muted); margin: 0 0 0.5rem;
           }
           .fb-card-body { line-height: 1.7; margin: 0; white-space: pre-wrap; }
           .fb-restart-btn {
             width: 100%; padding: 0.875rem; border-radius: 12px;
-            background: #F5A623; color: #1C1917;
+            background: #F5A623; color: var(--accent-contrast);
             font-weight: 700; font-size: 1rem; border: none; cursor: pointer;
             margin-top: 0.5rem; transition: opacity 0.15s;
           }
@@ -890,38 +890,38 @@ export default function DevInterviewPage() {
 
       <style>{`
         .chat-root {
-          height: 100%; background: #1C1917; color: #E7DDD5;
+          height: 100%; background: var(--background); color: var(--foreground);
           display: flex; flex-direction: column;
         }
         .chat-back-link {
           display: block; flex-shrink: 0;
           padding: 0.6rem 1.25rem;
-          font-size: 0.8rem; color: #9E8E85;
-          background: #1C1917; border-bottom: 1px solid #2C2420;
+          font-size: 0.8rem; color: var(--muted);
+          background: var(--background); border-bottom: 1px solid var(--surface-2);
           text-decoration: none; transition: color 0.15s;
         }
-        .chat-back-link:hover { color: #F5A623; }
+        .chat-back-link:hover { color: var(--accent-text); }
         .chat-header {
           display: flex; align-items: center; gap: 0.75rem;
           padding: 0.875rem 1.25rem;
-          border-bottom: 1px solid #2C2420;
-          background: #1C1917; flex-shrink: 0;
+          border-bottom: 1px solid var(--surface-2);
+          background: var(--background); flex-shrink: 0;
         }
         .chat-avatar {
           width: 40px; height: 40px; border-radius: 50%;
-          background: #2C2420; border: 2px solid #F5A623;
+          background: var(--surface-2); border: 2px solid #F5A623;
           display: flex; align-items: center; justify-content: center;
           font-size: 1.1rem; flex-shrink: 0;
         }
-        .chat-dev-name { font-weight: 700; color: #E7DDD5; margin: 0; font-size: 0.9rem; }
-        .chat-dev-role { font-size: 0.7rem; color: #9E8E85; margin: 0; }
+        .chat-dev-name { font-weight: 700; color: var(--foreground); margin: 0; font-size: 0.9rem; }
+        .chat-dev-role { font-size: 0.7rem; color: var(--muted); margin: 0; }
         .chat-badges { margin-left: auto; display: flex; gap: 0.5rem; }
         .chat-badge {
           padding: 0.2rem 0.65rem; border-radius: 999px;
           font-size: 0.7rem; font-weight: 600;
         }
-        .chat-badge.gold { background: #2C2420; color: #F5A623; }
-        .chat-badge.muted { background: #23201E; color: #9E8E85; }
+        .chat-badge.gold { background: var(--surface-2); color: var(--accent-text); }
+        .chat-badge.muted { background: var(--surface); color: var(--muted); }
 
         .chat-messages {
           flex: 1; min-height: 0; overflow-y: auto;
@@ -937,21 +937,21 @@ export default function DevInterviewPage() {
         .dev-row { justify-content: flex-start; }
         .chat-bubble-avatar {
           width: 30px; height: 30px; border-radius: 50%;
-          background: #2C2420; border: 1px solid #F5A623;
+          background: var(--surface-2); border: 1px solid #F5A623;
           display: flex; align-items: center; justify-content: center;
           font-size: 0.8rem; flex-shrink: 0;
         }
         .chat-bubble {
           max-width: 75%; padding: 0.875rem 1rem;
           line-height: 1.7; white-space: pre-wrap;
-          font-size: 0.9rem; color: #E7DDD5;
+          font-size: 0.9rem; color: var(--foreground);
         }
         .dev-bubble {
-          background: #2C2420;
+          background: var(--surface-2);
           border-radius: 16px 16px 16px 4px;
         }
         .user-bubble {
-          background: #3D3530;
+          background: var(--scrollbar-thumb);
           border-radius: 16px 16px 4px 16px;
         }
         .chat-typing { opacity: 0.4; letter-spacing: 3px; }
@@ -959,14 +959,14 @@ export default function DevInterviewPage() {
 
         .chat-input-area {
           padding: 1rem 1.25rem;
-          border-top: 1px solid #2C2420;
-          background: #1C1917;
+          border-top: 1px solid var(--surface-2);
+          background: var(--background);
           display: flex; gap: 0.75rem; align-items: flex-end; flex-shrink: 0;
         }
         .chat-textarea {
-          flex: 1; background: #23201E;
-          border: 1px solid #3D3530; border-radius: 12px;
-          color: #E7DDD5; padding: 0.75rem 1rem;
+          flex: 1; background: var(--surface);
+          border: 1px solid var(--scrollbar-thumb); border-radius: 12px;
+          color: var(--foreground); padding: 0.75rem 1rem;
           font-size: 0.9rem; resize: none; outline: none;
           line-height: 1.5; font-family: inherit;
           transition: opacity 200ms ease-out;
@@ -977,7 +977,7 @@ export default function DevInterviewPage() {
         .chat-paste-blocked {
           margin: 0 1.25rem 0.75rem;
           padding: 0.6rem 0.9rem;
-          font-size: 0.8rem; color: #F5A623;
+          font-size: 0.8rem; color: var(--accent-text);
           background: rgba(245,166,35,0.1);
           border: 1px solid rgba(245,166,35,0.25);
           border-radius: 8px;
@@ -986,13 +986,13 @@ export default function DevInterviewPage() {
         .chat-actions { display: flex; flex-direction: column; gap: 0.5rem; }
         .chat-icon-btn {
           width: 44px; height: 44px; border-radius: 50%;
-          background: #2C2420; border: 2px solid #3D3530;
-          color: #9E8E85; font-size: 1.1rem; cursor: pointer;
+          background: var(--surface-2); border: 2px solid var(--scrollbar-thumb);
+          color: var(--muted); font-size: 1.1rem; cursor: pointer;
           display: flex; align-items: center; justify-content: center;
           transition: all 0.15s; flex-shrink: 0;
         }
         .chat-send-btn:not(:disabled) {
-          background: #F5A623; border-color: #F5A623; color: #1C1917;
+          background: #F5A623; border-color: #F5A623; color: var(--accent-contrast);
         }
         .chat-send-btn:disabled { cursor: not-allowed; opacity: 0.4; }
       `}</style>

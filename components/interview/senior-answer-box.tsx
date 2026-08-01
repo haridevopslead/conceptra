@@ -50,7 +50,7 @@ function InlineCode({ children }: { children: ReactNode }) {
   return (
     <code
       className="font-mono text-[0.85em] px-1.5 py-0.5 rounded"
-      style={{ backgroundColor: "rgba(253,246,227,0.08)", color: "#F0C987" }}
+      style={{ backgroundColor: "var(--border)", color: "var(--accent-text)" }}
     >
       {children}
     </code>
@@ -61,9 +61,9 @@ function CodeBlock({ code }: { code: string }) {
   return (
     <pre
       className="rounded-lg overflow-x-auto text-[12.5px] leading-relaxed"
-      style={{ backgroundColor: "#130F0C", padding: "12px 14px", border: "1px solid rgba(253,246,227,0.06)" }}
+      style={{ backgroundColor: "var(--code-bg)", padding: "12px 14px", border: "1px solid var(--border)" }}
     >
-      <code className="font-mono" style={{ color: "#E8DFC8" }}>{code}</code>
+      <code className="font-mono" style={{ color: "var(--foreground)" }}>{code}</code>
     </pre>
   );
 }
@@ -78,7 +78,7 @@ export function RichText({ text }: { text: string }) {
   const flushInline = (key: string) => {
     if (inlineBuffer.length > 0) {
       nodes.push(
-        <p key={key} className="text-sm text-gray-300 leading-6">
+        <p key={key} className="text-sm leading-6" style={{ color: "var(--foreground)" }}>
           {inlineBuffer}
         </p>
       );
@@ -130,7 +130,7 @@ function Beat({
       }}
     >
       <div className="flex items-center justify-between gap-2">
-        <p className="flex items-center gap-1.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+        <p className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
           <Icon size={12} style={{ color: accent }} />
           {label}
         </p>
@@ -138,7 +138,8 @@ function Beat({
           <button
             onClick={handleCopy}
             aria-label={`Copy ${label} code`}
-            className="text-gray-500 hover:text-gray-300 transition-colors"
+            className="transition-colors hover:text-[var(--foreground)]"
+            style={{ color: "var(--muted)" }}
           >
             {copied ? <Check size={13} /> : <Copy size={13} />}
           </button>

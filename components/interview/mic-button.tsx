@@ -23,15 +23,15 @@ export default function MicButton({ micState, onToggle }: { micState: MicState; 
         onClick={onToggle}
         disabled={transcribing}
         aria-label={recording ? "Stop recording" : transcribing ? "Transcribing" : "Start voice input"}
-        className="relative flex items-center justify-center w-12 h-12 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0A0E1A] disabled:cursor-not-allowed"
+        className="relative flex items-center justify-center w-12 h-12 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background)] disabled:cursor-not-allowed"
         style={{
-          backgroundColor: recording ? "#EF4444" : transcribing ? "#2C2420" : "rgba(245,166,35,0.12)",
+          backgroundColor: recording ? "#EF4444" : transcribing ? "var(--surface-2)" : "rgba(245,166,35,0.12)",
           border: recording
             ? "2px solid #EF4444"
             : transcribing
-            ? "2px solid rgba(255,255,255,0.15)"
+            ? "2px solid var(--border)"
             : "2px solid rgba(245,166,35,0.4)",
-          color: recording ? "#fff" : transcribing ? "#9CA3AF" : "#F5A623",
+          color: recording ? "#fff" : transcribing ? "var(--muted)" : "var(--accent-text)",
         }}
       >
         {recording && (
@@ -49,7 +49,7 @@ export default function MicButton({ micState, onToggle }: { micState: MicState; 
           <MicIcon className="w-5 h-5 relative z-10" />
         )}
       </button>
-      <p className="text-xs text-gray-500">
+      <p className="text-xs" style={{ color: "var(--muted)" }}>
         {recording ? "Listening… (refined once you stop)" : transcribing ? "Transcribing…" : "Click to speak your answer"}
       </p>
     </div>

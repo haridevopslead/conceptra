@@ -161,9 +161,9 @@ function SubScore({ label, score }: { label: string; score: number }) {
     >
       <span className="text-xl font-black" style={{ color }}>
         {score}
-        <span className="text-sm font-medium text-gray-500">/10</span>
+        <span className="text-sm font-medium" style={{ color: "var(--muted)" }}>/10</span>
       </span>
-      <span className="text-[11px] text-gray-400 mt-0.5 text-center leading-tight">{label}</span>
+      <span className="text-[11px] mt-0.5 text-center leading-tight" style={{ color: "var(--muted)" }}>{label}</span>
     </div>
   );
 }
@@ -191,7 +191,7 @@ function ConceptExplanationCard({ topic, explanation }: { topic: string | null; 
       className="rounded-2xl border p-6 space-y-3"
       style={{ backgroundColor: "rgba(59,130,246,0.06)", borderColor: "rgba(59,130,246,0.25)", borderLeft: "3px solid #3B82F6" }}
     >
-      <p className="text-xs font-bold tracking-widest" style={{ color: "#3B82F6" }}>
+      <p className="text-xs font-bold tracking-widest" style={{ color: "var(--info-text)" }}>
         📘 LET&apos;S COVER THE CONCEPT
       </p>
       <RichText text={explanation} />
@@ -199,7 +199,7 @@ function ConceptExplanationCard({ topic, explanation }: { topic: string | null; 
         <Link
           href={`/lessons/${brief.slug}#concept`}
           className="inline-block text-sm font-semibold hover:underline"
-          style={{ color: "#3B82F6" }}
+          style={{ color: "var(--info-text)" }}
         >
           Want the full breakdown? Read the {brief.title} brief →
         </Link>
@@ -230,8 +230,8 @@ function GoDeeperButton({ ctx }: { ctx: DevHandoffContext }) {
         sessionStorage.setItem(DEV_HANDOFF_KEY, JSON.stringify(ctx));
         router.push("/interview/dev");
       }}
-      className="w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:bg-white/5"
-      style={{ borderColor: "rgba(245,166,35,0.35)", color: "#F5A623", background: "transparent" }}
+      className="w-full py-3 rounded-xl font-semibold text-sm border transition-colors hover:bg-[var(--hover-overlay)]"
+      style={{ borderColor: "rgba(245,166,35,0.35)", color: "var(--accent-text)", background: "transparent" }}
     >
       Ask Hari to go deeper on this →
     </button>
@@ -280,7 +280,7 @@ function BookmarkButton({
       title={bookmarked ? "Saved for review" : "Save for review"}
       className="flex items-center justify-center w-9 h-9 rounded-lg transition-colors disabled:opacity-50 shrink-0"
       style={{
-        color: bookmarked ? "#F5A623" : "#8A8073",
+        color: bookmarked ? "var(--accent-text)" : "var(--muted)",
         background: bookmarked ? "rgba(245,166,35,0.12)" : "transparent",
       }}
     >
@@ -326,21 +326,21 @@ function QuestionNav({
                 ? "rgba(16,185,129,0.12)"
                 : isActive
                 ? "rgba(245,166,35,0.08)"
-                : "#211C18",
+                : "var(--surface)",
               color: isSelected
-                ? "#1C1917"
+                ? "var(--accent-contrast)"
                 : isDone
-                ? "#10B981"
+                ? "var(--success-text)"
                 : isActive
-                ? "#F5A623"
-                : "#374151",
+                ? "var(--accent-text)"
+                : "var(--muted)",
               border: isSelected
                 ? "none"
                 : isDone
                 ? "1px solid rgba(16,185,129,0.25)"
                 : isActive
                 ? "1px solid rgba(245,166,35,0.25)"
-                : "1px solid rgba(255,255,255,0.05)",
+                : "1px solid var(--border)",
               cursor: isFuture ? "not-allowed" : "pointer",
             }}
           >
@@ -348,7 +348,7 @@ function QuestionNav({
           </button>
         );
       })}
-      <span className="text-xs text-gray-600 ml-1">
+      <span className="text-xs ml-1" style={{ color: "var(--muted)" }}>
         {completedCount}/{total} done
       </span>
     </div>
@@ -364,15 +364,15 @@ function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: strin
   return (
     <div className="interview-page p-4 sm:p-8 w-full max-w-[860px] space-y-8">
       <div>
-        <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623", letterSpacing: "0.22em", textTransform: "uppercase" }}>Today&apos;s coaching session</p>
-        <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(26px, 6vw, 38px)", fontWeight: 500, color: "#FDF6E3", letterSpacing: "-0.01em", marginTop: 14 }}>Choose your focus for today</h1>
-        <p className="text-sm mt-2.5 max-w-lg leading-relaxed" style={{ color: "#C9BFB2" }}>
+        <p className="text-xs font-bold tracking-widest" style={{ color: "var(--accent-text)", letterSpacing: "0.22em", textTransform: "uppercase" }}>Today&apos;s coaching session</p>
+        <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(26px, 6vw, 38px)", fontWeight: 500, color: "var(--foreground)", letterSpacing: "-0.01em", marginTop: 14 }}>Choose your focus for today</h1>
+        <p className="text-sm mt-2.5 max-w-lg leading-relaxed" style={{ color: "var(--muted)" }}>
           Pick a topic and difficulty. Your coach will ask seven questions and give honest, specific feedback — the way a senior engineer would.
         </p>
       </div>
 
       <div>
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Topic</p>
+        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--muted)" }}>Topic</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {Object.entries(TOPIC_META).map(([id, meta]) => {
             const isSelected = selectedTopic === id;
@@ -382,14 +382,14 @@ function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: strin
                 onClick={() => setSelectedTopic(id)}
                 className="flex flex-col items-start gap-2 p-4 rounded-xl border text-left transition-all"
                 style={{
-                  backgroundColor: isSelected ? "rgba(245,166,35,0.1)" : "#2C2420",
-                  borderColor: isSelected ? "#F5A623" : "rgba(253,246,227,0.07)",
+                  backgroundColor: isSelected ? "rgba(245,166,35,0.1)" : "var(--surface-2)",
+                  borderColor: isSelected ? "#F5A623" : "var(--border)",
                 }}
               >
-                <span style={{ fontFamily: "ui-monospace, monospace", fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(245,166,35,0.14)", color: "#F5A623" }}>{meta.code}</span>
+                <span style={{ fontFamily: "ui-monospace, monospace", fontSize: 12, fontWeight: 700, letterSpacing: "0.05em", width: 30, height: 30, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(245,166,35,0.14)", color: "var(--accent-text)" }}>{meta.code}</span>
                 <div style={{ minHeight: 40 }}>
-                  <p style={{ fontSize: 14, fontFamily: "'Newsreader', serif", fontWeight: 500, color: isSelected ? "#F5A623" : "#FDF6E3" }}>{id}</p>
-                  <p className="text-xs mt-0.5" style={{ color: "#8A8073" }}>{meta.desc}</p>
+                  <p style={{ fontSize: 14, fontFamily: "'Newsreader', serif", fontWeight: 500, color: isSelected ? "var(--accent-text)" : "var(--foreground)" }}>{id}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--muted)" }}>{meta.desc}</p>
                 </div>
               </button>
             );
@@ -398,7 +398,7 @@ function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: strin
       </div>
 
       <div>
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Difficulty</p>
+        <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--muted)" }}>Difficulty</p>
         <div className="flex gap-3">
           {DIFFICULTIES.map((d) => {
             const isSelected = difficulty === d;
@@ -408,9 +408,9 @@ function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: strin
                 onClick={() => setDifficulty(d)}
                 className="px-5 py-2.5 rounded-xl text-sm font-semibold border transition-all"
                 style={{
-                  backgroundColor: isSelected ? "rgba(245,166,35,0.1)" : "#211C18",
-                  borderColor: isSelected ? "#F5A623" : "rgba(255,255,255,0.1)",
-                  color: isSelected ? "#F5A623" : "#9CA3AF",
+                  backgroundColor: isSelected ? "rgba(245,166,35,0.1)" : "var(--surface)",
+                  borderColor: isSelected ? "#F5A623" : "var(--border)",
+                  color: isSelected ? "var(--accent-text)" : "var(--muted)",
                 }}
               >
                 {d}
@@ -425,8 +425,8 @@ function TopicSelector({ onStart }: { onStart: (topic: string, difficulty: strin
         disabled={!selectedTopic}
         className="w-full py-4 rounded-xl font-bold text-sm transition-all"
         style={{
-          backgroundColor: selectedTopic ? "#F5A623" : "#2D2A1F",
-          color: selectedTopic ? "#1C1917" : "#6B5E2A",
+          backgroundColor: selectedTopic ? "#F5A623" : "var(--surface-2)",
+          color: selectedTopic ? "var(--accent-contrast)" : "var(--muted)",
           border: selectedTopic ? "none" : "1px solid rgba(245,166,35,0.15)",
           cursor: selectedTopic ? "pointer" : "not-allowed",
         }}
@@ -517,23 +517,23 @@ function SessionSummary({
       {/* Heading */}
       <div className="text-center space-y-2">
         <div className="text-5xl">🎉</div>
-        <h1 className="text-3xl font-black text-white">Session Complete!</h1>
+        <h1 className="text-3xl font-black" style={{ color: "var(--foreground)" }}>Session Complete!</h1>
         <div className="flex items-center justify-center gap-2">
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "#F5A623" }}>{topic}</span>
-          <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full" style={{ backgroundColor: "#2C2420" }}>{difficulty}</span>
-          <span className="text-xs text-gray-500 px-2.5 py-1 rounded-full" style={{ backgroundColor: "#2C2420" }}>{scores.length} questions</span>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "var(--accent-text)" }}>{topic}</span>
+          <span className="text-xs px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--surface-2)", color: "var(--muted)" }}>{difficulty}</span>
+          <span className="text-xs px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--surface-2)", color: "var(--muted)" }}>{scores.length} questions</span>
         </div>
       </div>
 
       {/* Big score */}
       <div
-        className="rounded-2xl border border-white/10 p-8 text-center space-y-2"
-        style={{ backgroundColor: "#211C18" }}
+        className="rounded-2xl border p-8 text-center space-y-2"
+        style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}
       >
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Average Score</p>
+        <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--muted)" }}>Average Score</p>
         <div className="text-6xl font-black mt-1" style={{ color: scoreColor(avgOverall) }}>
           {avgOverall}
-          <span className="text-3xl font-bold text-gray-500">/10</span>
+          <span className="text-3xl font-bold" style={{ color: "var(--muted)" }}>/10</span>
         </div>
         <p className="text-lg font-semibold mt-1" style={{ color: scoreColor(avgOverall) }}>
           {scoreLabel(avgOverall)}
@@ -553,11 +553,11 @@ function SessionSummary({
           className="rounded-xl border p-5 space-y-1"
           style={{ backgroundColor: "rgba(16,185,129,0.07)", borderColor: "rgba(16,185,129,0.2)" }}
         >
-          <p className="text-xs font-bold tracking-wider" style={{ color: "#10B981" }}>
+          <p className="text-xs font-bold tracking-wider" style={{ color: "var(--success-text)" }}>
             ✓ STRONGEST DIMENSION
           </p>
-          <p className="text-base font-bold text-white">{strongest.label}</p>
-          <p className="text-sm text-gray-400">Avg {strongest.val}/10 — this is your confidence zone</p>
+          <p className="text-base font-bold" style={{ color: "var(--foreground)" }}>{strongest.label}</p>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>Avg {strongest.val}/10 — this is your confidence zone</p>
         </div>
         <div
           className="rounded-xl border p-5 space-y-1"
@@ -566,17 +566,17 @@ function SessionSummary({
           <p className="text-xs font-bold tracking-wider" style={{ color: "#EF4444" }}>
             ⚠ WEAKEST DIMENSION
           </p>
-          <p className="text-base font-bold text-white">{weakest.label}</p>
-          <p className="text-sm text-gray-400">Avg {weakest.val}/10 — focus your next study session here</p>
+          <p className="text-base font-bold" style={{ color: "var(--foreground)" }}>{weakest.label}</p>
+          <p className="text-sm" style={{ color: "var(--muted)" }}>Avg {weakest.val}/10 — focus your next study session here</p>
         </div>
       </div>
 
       {/* Per-question scores */}
       <div
-        className="rounded-xl border border-white/10 overflow-hidden"
-        style={{ backgroundColor: "#211C18" }}
+        className="rounded-xl border overflow-hidden"
+        style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}
       >
-        <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-5 py-3 border-b border-white/5">
+        <p className="text-xs font-semibold uppercase tracking-wider px-5 py-3 border-b" style={{ color: "var(--muted)", borderColor: "var(--border)" }}>
           Question breakdown
         </p>
         {scores.map((s, i) => {
@@ -584,11 +584,12 @@ function SessionSummary({
           return (
             <div
               key={i}
-              className="flex items-center justify-between px-5 py-3 border-b border-white/5 last:border-0"
+              className="flex items-center justify-between px-5 py-3 border-b last:border-0"
+              style={{ borderColor: "var(--border)" }}
             >
-              <span className="text-sm text-gray-400">Question {i + 1}</span>
+              <span className="text-sm" style={{ color: "var(--muted)" }}>Question {i + 1}</span>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-gray-500">{s.depth}/{s.accuracy}/{s.production}</span>
+                <span className="text-xs" style={{ color: "var(--muted)" }}>{s.depth}/{s.accuracy}/{s.production}</span>
                 <span
                   className="text-sm font-bold px-2.5 py-0.5 rounded-full"
                   style={{ backgroundColor: `${color}20`, color }}
@@ -606,13 +607,14 @@ function SessionSummary({
         <button
           onClick={onRestart}
           className="flex-1 py-3.5 rounded-xl font-bold text-sm transition-opacity hover:opacity-90"
-          style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
+          style={{ backgroundColor: "#F5A623", color: "var(--accent-contrast)" }}
         >
           Start New Session
         </button>
         <Link
           href="/dashboard"
-          className="flex-1 py-3.5 rounded-xl font-bold text-sm text-center border border-white/20 text-white hover:border-white/40 transition-colors"
+          className="flex-1 py-3.5 rounded-xl font-bold text-sm text-center border transition-colors hover:border-[var(--muted)]"
+          style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
         >
           Go to Dashboard
         </Link>
@@ -895,11 +897,11 @@ export default function Evaluator() {
   const headerBlock = (
     <div className="interview-header flex items-start justify-between gap-4">
       <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-white">AI Mock Interview</h1>
+        <h1 className="text-xl sm:text-2xl font-bold" style={{ color: "var(--foreground)" }}>AI Mock Interview</h1>
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "#F5A623" }}>{topic}</span>
-          <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "#2C2420", color: "#9CA3AF" }}>{difficulty}</span>
-          <button onClick={restart} className="text-xs text-gray-600 hover:text-gray-400 transition-colors underline">Change</button>
+          <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: "rgba(245,166,35,0.12)", color: "var(--accent-text)" }}>{topic}</span>
+          <span className="text-xs font-medium px-2.5 py-1 rounded-full" style={{ backgroundColor: "var(--surface-2)", color: "var(--muted)" }}>{difficulty}</span>
+          <button onClick={restart} className="text-xs transition-colors underline hover:text-[var(--foreground)]" style={{ color: "var(--muted)" }}>Change</button>
         </div>
       </div>
     </div>
@@ -914,19 +916,19 @@ export default function Evaluator() {
         <QuestionNav total={questions.length} completedCount={history.length} viewIndex={viewIndex} onView={setViewIndex} />
 
         {/* Reviewed question */}
-        <div className="rounded-2xl border border-white/10 p-6 space-y-2" style={{ backgroundColor: "#211C18", borderLeft: "3px solid #10B981" }}>
-          <p className="text-xs font-bold tracking-widest" style={{ color: "#10B981" }}>
+        <div className="rounded-2xl border p-6 space-y-2" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", borderLeft: "3px solid #10B981" }}>
+          <p className="text-xs font-bold tracking-widest" style={{ color: "var(--success-text)" }}>
             QUESTION {viewIndex + 1} OF {questions.length} · REVIEW
           </p>
-          <p className="text-base font-medium text-white leading-relaxed">{entry.question}</p>
+          <p className="text-base font-medium leading-relaxed" style={{ color: "var(--foreground)" }}>{entry.question}</p>
         </div>
 
         {/* Read-only answer */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Your Answer</label>
+          <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--muted)" }}>Your Answer</label>
           <div
-            className="w-full rounded-xl px-4 py-3 text-sm text-gray-300 border border-white/10 leading-relaxed whitespace-pre-wrap min-h-[80px]"
-            style={{ backgroundColor: "#211C18" }}
+            className="w-full rounded-xl px-4 py-3 text-sm border leading-relaxed whitespace-pre-wrap min-h-[80px]"
+            style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", color: "var(--foreground)" }}
           >
             {entry.answer}
           </div>
@@ -938,23 +940,23 @@ export default function Evaluator() {
         )}
 
         {/* Score */}
-        <div className="rounded-2xl border border-white/10 p-6" style={{ backgroundColor: "#211C18" }}>
+        <div className="rounded-2xl border p-6" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
           <div className="flex items-center gap-6 flex-wrap">
             <div className="text-center shrink-0">
               <div
                 className="text-5xl font-black leading-none"
-                style={{ color: r.is_dont_know ? "#3B82F6" : scoreColor(r.overall_score) }}
+                style={{ color: r.is_dont_know ? "var(--info-text)" : scoreColor(r.overall_score) }}
               >
-                {r.overall_score}<span className="text-2xl font-bold text-gray-500">/10</span>
+                {r.overall_score}<span className="text-2xl font-bold" style={{ color: "var(--muted)" }}>/10</span>
               </div>
               <p
                 className="text-sm font-semibold mt-1"
-                style={{ color: r.is_dont_know ? "#3B82F6" : scoreColor(r.overall_score) }}
+                style={{ color: r.is_dont_know ? "var(--info-text)" : scoreColor(r.overall_score) }}
               >
                 {r.is_dont_know ? "Knowledge gap, not a wrong answer" : scoreLabel(r.overall_score)}
               </p>
             </div>
-            <div className="w-px h-14 bg-white/10 shrink-0 hidden sm:block" />
+            <div className="w-px h-14 shrink-0 hidden sm:block" style={{ backgroundColor: "var(--border)" }} />
             <div className="flex-1 grid grid-cols-3 gap-3">
               <SubScore label="Depth" score={r.depth_score} />
               <SubScore label="Accuracy" score={r.accuracy_score} />
@@ -971,10 +973,10 @@ export default function Evaluator() {
             />
           </div>
         </div>
-        <ResultBox color="#9CAE86" bg="rgba(156,174,134,0.06)" border="rgba(156,174,134,0.2)" icon="✓" label="WHAT LANDED WELL" body={r.what_was_strong} />
-        <ResultBox color="#C57B6B" bg="rgba(197,123,107,0.06)" border="rgba(197,123,107,0.22)" icon="⚠" label="WHERE YOU CAN GROW" body={r.what_was_weak} />
+        <ResultBox color="var(--success-text)" bg="rgba(156,174,134,0.06)" border="rgba(156,174,134,0.2)" icon="✓" label="WHAT LANDED WELL" body={r.what_was_strong} />
+        <ResultBox color="var(--danger-text)" bg="rgba(197,123,107,0.06)" border="rgba(197,123,107,0.22)" icon="⚠" label="WHERE YOU CAN GROW" body={r.what_was_weak} />
         <SeniorAnswerBox
-          color="#F5A623" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
+          color="var(--accent-text)" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
           directAnswer={r.direct_answer} concreteExample={r.concrete_example} seniorInsight={r.senior_insight}
         />
         <CompareAnswer userAnswer={entry.answer} concreteExample={r.concrete_example} seniorInsight={r.senior_insight} />
@@ -982,7 +984,8 @@ export default function Evaluator() {
 
         <button
           onClick={() => setViewIndex(null)}
-          className="w-full py-3.5 rounded-xl font-bold text-sm border border-white/20 text-white hover:border-white/40 transition-colors"
+          className="w-full py-3.5 rounded-xl font-bold text-sm border transition-colors hover:border-[var(--muted)]"
+          style={{ borderColor: "var(--border)", color: "var(--foreground)" }}
         >
           ← Back to Question {history.length + 1}
         </button>
@@ -1001,19 +1004,19 @@ export default function Evaluator() {
 
       {/* Question card */}
       <div
-        className="rounded-2xl border border-white/10 p-6 space-y-2"
-        style={{ backgroundColor: "#211C18", borderLeft: "3px solid #F5A623" }}
+        className="rounded-2xl border p-6 space-y-2"
+        style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", borderLeft: "3px solid #F5A623" }}
       >
-        <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623" }}>
+        <p className="text-xs font-bold tracking-widest" style={{ color: "var(--accent-text)" }}>
           QUESTION {qIndex + 1} OF {questions.length}
         </p>
-        <p className="text-base font-medium text-white leading-relaxed">{question}</p>
+        <p className="text-base font-medium leading-relaxed" style={{ color: "var(--foreground)" }}>{question}</p>
       </div>
 
       {/* Answer area */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
             Your Answer
           </label>
           {micState === "recording" && (
@@ -1023,7 +1026,7 @@ export default function Evaluator() {
             </span>
           )}
           {micState === "transcribing" && (
-            <span className="text-xs font-semibold" style={{ color: "#F5A623" }}>
+            <span className="text-xs font-semibold" style={{ color: "var(--accent-text)" }}>
               Transcribing…
             </span>
           )}
@@ -1041,10 +1044,11 @@ export default function Evaluator() {
           disabled={phase !== "idle"}
           rows={8}
           placeholder="Type your answer here — or use the mic below to speak it. Aim for the depth a senior engineer would give: trade-offs, failure modes, production consequences."
-          className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 border focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent resize-none disabled:opacity-50 transition-[background-color,border-color,opacity] duration-200 ease-out"
+          className="w-full rounded-xl px-4 py-3 text-sm placeholder:text-[var(--muted)] border focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent resize-none disabled:opacity-50 transition-[background-color,border-color,opacity] duration-200 ease-out"
           style={{
-            backgroundColor: "#2C2420",
-            borderColor: micState === "recording" ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.1)",
+            backgroundColor: "var(--surface-2)",
+            color: "var(--foreground)",
+            borderColor: micState === "recording" ? "rgba(239,68,68,0.5)" : "var(--border)",
             fontStyle: isLiveText ? "italic" : "normal",
             opacity: isLiveText ? 0.7 : 1,
             minHeight: "11.5rem",
@@ -1056,7 +1060,7 @@ export default function Evaluator() {
         {pasteBlocked && (
           <p
             className="text-sm px-4 py-3 rounded-lg border"
-            style={{ color: "#F5A623", backgroundColor: "rgba(245,166,35,0.1)", borderColor: "rgba(245,166,35,0.25)" }}
+            style={{ color: "var(--accent-text)", backgroundColor: "rgba(245,166,35,0.1)", borderColor: "rgba(245,166,35,0.25)" }}
           >
             Paste is disabled here — type your answer to practice for the real thing.
           </p>
@@ -1080,19 +1084,19 @@ export default function Evaluator() {
               style={{
                 backgroundColor:
                   phase === "submitting"
-                    ? "#2C2420"
+                    ? "var(--surface-2)"
                     : answer.trim()
                     ? "#F5A623"
                     : "transparent",
                 color:
                   phase === "submitting"
-                    ? "#9CA3AF"
+                    ? "var(--muted)"
                     : answer.trim()
-                    ? "#1C1917"
+                    ? "var(--accent-contrast)"
                     : "rgba(245,166,35,0.55)",
                 border:
                   phase === "submitting"
-                    ? "1px solid rgba(255,255,255,0.1)"
+                    ? "1px solid var(--border)"
                     : answer.trim()
                     ? "none"
                     : "1px solid rgba(245,166,35,0.45)",
@@ -1111,7 +1115,7 @@ export default function Evaluator() {
               )}
             </button>
             {phase === "idle" && !answer.trim() && (
-              <p className="text-xs text-center" style={{ color: "#6E665C" }}>
+              <p className="text-xs text-center" style={{ color: "var(--muted)" }}>
                 Type or speak your answer above to submit
               </p>
             )}
@@ -1131,26 +1135,26 @@ export default function Evaluator() {
 
           {/* Score banner */}
           <div
-            className="rounded-2xl border border-white/10 p-6"
-            style={{ backgroundColor: "#211C18" }}
+            className="rounded-2xl border p-6"
+            style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}
           >
             <div className="flex items-center gap-6 flex-wrap">
               <div className="text-center shrink-0">
                 <div
                   className="text-5xl font-black leading-none"
-                  style={{ color: result.is_dont_know ? "#3B82F6" : scoreColor(result.overall_score) }}
+                  style={{ color: result.is_dont_know ? "var(--info-text)" : scoreColor(result.overall_score) }}
                 >
                   {result.overall_score}
-                  <span className="text-2xl font-bold text-gray-500">/10</span>
+                  <span className="text-2xl font-bold" style={{ color: "var(--muted)" }}>/10</span>
                 </div>
                 <p
                   className="text-sm font-semibold mt-1"
-                  style={{ color: result.is_dont_know ? "#3B82F6" : scoreColor(result.overall_score) }}
+                  style={{ color: result.is_dont_know ? "var(--info-text)" : scoreColor(result.overall_score) }}
                 >
                   {result.is_dont_know ? "Knowledge gap, not a wrong answer" : scoreLabel(result.overall_score)}
                 </p>
               </div>
-              <div className="w-px h-14 bg-white/10 shrink-0 hidden sm:block" />
+              <div className="w-px h-14 shrink-0 hidden sm:block" style={{ backgroundColor: "var(--border)" }} />
               <div className="flex-1 grid grid-cols-3 gap-3">
                 <SubScore label="Depth" score={result.depth_score} />
                 <SubScore label="Accuracy" score={result.accuracy_score} />
@@ -1165,15 +1169,15 @@ export default function Evaluator() {
           </div>
 
           <ResultBox
-            color="#9CAE86" bg="rgba(156,174,134,0.06)" border="rgba(156,174,134,0.2)"
+            color="var(--success-text)" bg="rgba(156,174,134,0.06)" border="rgba(156,174,134,0.2)"
             icon="✓" label="WHAT LANDED WELL" body={result.what_was_strong}
           />
           <ResultBox
-            color="#C57B6B" bg="rgba(197,123,107,0.06)" border="rgba(197,123,107,0.22)"
+            color="var(--danger-text)" bg="rgba(197,123,107,0.06)" border="rgba(197,123,107,0.22)"
             icon="⚠" label="WHERE YOU CAN GROW" body={result.what_was_weak}
           />
           <SeniorAnswerBox
-            color="#F5A623" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
+            color="var(--accent-text)" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
             directAnswer={result.direct_answer} concreteExample={result.concrete_example} seniorInsight={result.senior_insight}
           />
           <CompareAnswer userAnswer={answer} concreteExample={result.concrete_example} seniorInsight={result.senior_insight} />
@@ -1182,7 +1186,7 @@ export default function Evaluator() {
           <button
             onClick={next}
             className="w-full py-3.5 rounded-xl font-bold text-sm transition-opacity hover:opacity-90"
-            style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
+            style={{ backgroundColor: "#F5A623", color: "var(--accent-contrast)" }}
           >
             {isLast ? "See Session Results →" : "Next Question →"}
           </button>

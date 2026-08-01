@@ -52,9 +52,9 @@ function SubScore({ label, score }: { label: string; score: number }) {
     >
       <span className="text-xl font-black" style={{ color }}>
         {score}
-        <span className="text-sm font-medium text-gray-500">/10</span>
+        <span className="text-sm font-medium" style={{ color: "var(--muted)" }}>/10</span>
       </span>
-      <span className="text-[11px] text-gray-400 mt-0.5 text-center leading-tight">{label}</span>
+      <span className="text-[11px] mt-0.5 text-center leading-tight" style={{ color: "var(--muted)" }}>{label}</span>
     </div>
   );
 }
@@ -203,29 +203,29 @@ export default function TryEvaluator() {
   return (
     <div className="p-4 sm:p-8 w-full max-w-[860px] mx-auto space-y-6">
       <div>
-        <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623", letterSpacing: "0.22em", textTransform: "uppercase" }}>
+        <p className="text-xs font-bold tracking-widest" style={{ color: "var(--accent-text)", letterSpacing: "0.22em", textTransform: "uppercase" }}>
           Try it — no signup required
         </p>
-        <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(24px, 5vw, 34px)", fontWeight: 500, color: "#FDF6E3", letterSpacing: "-0.01em", marginTop: 10 }}>
+        <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(24px, 5vw, 34px)", fontWeight: 500, color: "var(--foreground)", letterSpacing: "-0.01em", marginTop: 10 }}>
           Answer this question the way you would in a real interview
         </h1>
       </div>
 
       {/* Question card — same styling as the logged-in practice flow */}
       <div
-        className="rounded-2xl border border-white/10 p-6 space-y-2"
-        style={{ backgroundColor: "#211C18", borderLeft: "3px solid #F5A623" }}
+        className="rounded-2xl border p-6 space-y-2"
+        style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", borderLeft: "3px solid #F5A623" }}
       >
-        <p className="text-xs font-bold tracking-widest" style={{ color: "#F5A623" }}>
+        <p className="text-xs font-bold tracking-widest" style={{ color: "var(--accent-text)" }}>
           KUBERNETES · SAMPLE QUESTION
         </p>
-        <p className="text-base font-medium text-white leading-relaxed">{TRY_QUESTION}</p>
+        <p className="text-base font-medium leading-relaxed" style={{ color: "var(--foreground)" }}>{TRY_QUESTION}</p>
       </div>
 
       {/* Answer area */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
+          <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--muted)" }}>
             Your Answer
           </label>
           {micState === "recording" && (
@@ -235,7 +235,7 @@ export default function TryEvaluator() {
             </span>
           )}
           {micState === "transcribing" && (
-            <span className="text-xs font-semibold" style={{ color: "#F5A623" }}>
+            <span className="text-xs font-semibold" style={{ color: "var(--accent-text)" }}>
               Transcribing…
             </span>
           )}
@@ -253,10 +253,11 @@ export default function TryEvaluator() {
           disabled={phase !== "idle"}
           rows={8}
           placeholder="Type your answer here — or use the mic below to speak it. Aim for the depth a senior engineer would give: trade-offs, failure modes, production consequences."
-          className="w-full rounded-xl px-4 py-3 text-sm text-white placeholder-gray-600 border focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent resize-none disabled:opacity-50 transition-[background-color,border-color,opacity] duration-200 ease-out"
+          className="w-full rounded-xl px-4 py-3 text-sm placeholder:text-[var(--muted)] border focus:outline-none focus:ring-2 focus:ring-[#F5A623] focus:border-transparent resize-none disabled:opacity-50 transition-[background-color,border-color,opacity] duration-200 ease-out"
           style={{
-            backgroundColor: "#2C2420",
-            borderColor: micState === "recording" ? "rgba(239,68,68,0.5)" : "rgba(255,255,255,0.1)",
+            backgroundColor: "var(--surface-2)",
+            color: "var(--foreground)",
+            borderColor: micState === "recording" ? "rgba(239,68,68,0.5)" : "var(--border)",
             fontStyle: isLiveText ? "italic" : "normal",
             opacity: isLiveText ? 0.7 : 1,
             minHeight: "11.5rem",
@@ -268,7 +269,7 @@ export default function TryEvaluator() {
         {pasteBlocked && (
           <p
             className="text-sm px-4 py-3 rounded-lg border"
-            style={{ color: "#F5A623", backgroundColor: "rgba(245,166,35,0.1)", borderColor: "rgba(245,166,35,0.25)" }}
+            style={{ color: "var(--accent-text)", backgroundColor: "rgba(245,166,35,0.1)", borderColor: "rgba(245,166,35,0.25)" }}
           >
             Paste is disabled here — type your answer to practice for the real thing.
           </p>
@@ -291,19 +292,19 @@ export default function TryEvaluator() {
               style={{
                 backgroundColor:
                   phase === "submitting"
-                    ? "#2C2420"
+                    ? "var(--surface-2)"
                     : answer.trim()
                     ? "#F5A623"
                     : "transparent",
                 color:
                   phase === "submitting"
-                    ? "#9CA3AF"
+                    ? "var(--muted)"
                     : answer.trim()
-                    ? "#1C1917"
+                    ? "var(--accent-contrast)"
                     : "rgba(245,166,35,0.55)",
                 border:
                   phase === "submitting"
-                    ? "1px solid rgba(255,255,255,0.1)"
+                    ? "1px solid var(--border)"
                     : answer.trim()
                     ? "none"
                     : "1px solid rgba(245,166,35,0.45)",
@@ -322,7 +323,7 @@ export default function TryEvaluator() {
               )}
             </button>
             {phase === "idle" && !answer.trim() && (
-              <p className="text-xs text-center" style={{ color: "#6E665C" }}>
+              <p className="text-xs text-center" style={{ color: "var(--muted)" }}>
                 Type or speak your answer above to submit
               </p>
             )}
@@ -333,18 +334,18 @@ export default function TryEvaluator() {
       {/* Results */}
       {phase === "done" && result && (
         <div className="space-y-4">
-          <div className="rounded-2xl border border-white/10 p-6" style={{ backgroundColor: "#211C18" }}>
+          <div className="rounded-2xl border p-6" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
             <div className="flex items-center gap-6 flex-wrap">
               <div className="text-center shrink-0">
                 <div className="text-5xl font-black leading-none" style={{ color: scoreColor(result.overall_score) }}>
                   {result.overall_score}
-                  <span className="text-2xl font-bold text-gray-500">/10</span>
+                  <span className="text-2xl font-bold" style={{ color: "var(--muted)" }}>/10</span>
                 </div>
                 <p className="text-sm font-semibold mt-1" style={{ color: scoreColor(result.overall_score) }}>
                   {scoreLabel(result.overall_score)}
                 </p>
               </div>
-              <div className="w-px h-14 bg-white/10 shrink-0 hidden sm:block" />
+              <div className="w-px h-14 shrink-0 hidden sm:block" style={{ backgroundColor: "var(--border)" }} />
               <div className="flex-1 grid grid-cols-3 gap-3">
                 <SubScore label="Depth" score={result.depth_score} />
                 <SubScore label="Accuracy" score={result.accuracy_score} />
@@ -354,15 +355,15 @@ export default function TryEvaluator() {
           </div>
 
           <ResultBox
-            color="#9CAE86" bg="rgba(156,174,134,0.06)" border="rgba(156,174,134,0.2)"
+            color="var(--success-text)" bg="rgba(156,174,134,0.06)" border="rgba(156,174,134,0.2)"
             icon="✓" label="WHAT LANDED WELL" body={result.what_was_strong}
           />
           <ResultBox
-            color="#C57B6B" bg="rgba(197,123,107,0.06)" border="rgba(197,123,107,0.22)"
+            color="var(--danger-text)" bg="rgba(197,123,107,0.06)" border="rgba(197,123,107,0.22)"
             icon="⚠" label="WHERE YOU CAN GROW" body={result.what_was_weak}
           />
           <SeniorAnswerBox
-            color="#F5A623" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
+            color="var(--accent-text)" bg="rgba(245,166,35,0.06)" border="rgba(245,166,35,0.25)"
             directAnswer={result.direct_answer} concreteExample={result.concrete_example} seniorInsight={result.senior_insight}
           />
           <CompareAnswer userAnswer={answer} concreteExample={result.concrete_example} seniorInsight={result.senior_insight} />
@@ -371,8 +372,8 @@ export default function TryEvaluator() {
               than bouncing an anonymous visitor through a login wall. */}
           <Link
             href="/register"
-            className="block w-full text-center py-3 rounded-xl font-semibold text-sm border transition-colors hover:bg-white/5"
-            style={{ borderColor: "rgba(245,166,35,0.35)", color: "#F5A623", background: "transparent", textDecoration: "none" }}
+            className="block w-full text-center py-3 rounded-xl font-semibold text-sm border transition-colors hover:bg-[var(--hover-overlay)]"
+            style={{ borderColor: "rgba(245,166,35,0.35)", color: "var(--accent-text)", background: "transparent", textDecoration: "none" }}
           >
             Sign up to ask Hari to go deeper on this →
           </Link>
@@ -382,13 +383,13 @@ export default function TryEvaluator() {
             className="rounded-2xl border p-6 text-center space-y-3"
             style={{ backgroundColor: "rgba(245,166,35,0.08)", borderColor: "rgba(245,166,35,0.3)" }}
           >
-            <p style={{ fontFamily: "'Newsreader', serif", fontSize: 20, fontWeight: 500, color: "#FDF6E3" }}>
+            <p style={{ fontFamily: "'Newsreader', serif", fontSize: 20, fontWeight: 500, color: "var(--foreground)" }}>
               That&apos;s 1 of 8 Kubernetes questions like this.
             </p>
             <Link
               href="/register"
               className="inline-block font-semibold"
-              style={{ background: "#F5A623", color: "#1C1917", fontSize: 15, padding: "13px 28px", borderRadius: 10, textDecoration: "none" }}
+              style={{ background: "#F5A623", color: "var(--accent-contrast)", fontSize: 15, padding: "13px 28px", borderRadius: 10, textDecoration: "none" }}
             >
               Sign up to unlock 7 more questions like this
             </Link>

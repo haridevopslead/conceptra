@@ -29,6 +29,14 @@
   /* A hover tint that lightens on dark surfaces and darkens on light ones —
      the same rgba(255,255,255,0.05) used for both would be invisible here. */
   --hover-overlay: rgba(28, 25, 23, 0.05);
+  /* Same problem as --accent-text: the bright status greens/reds/blues used
+     for result-card labels (Quick Practice / Hari feedback) read fine on a
+     dark surface but fail contrast as small text on a light one. Darkened
+     text-only variants; the tinted card backgrounds/borders keep the bright
+     values since those don't need to change. */
+  --success-text: #4B7A3E;
+  --danger-text: #B84A38;
+  --info-text: #1D4ED8;
 }
 
 .dark {
@@ -46,6 +54,9 @@
   --nav-bg: #17130F;
   --nav-bg-translucent: rgba(28, 25, 23, 0.82);
   --hover-overlay: rgba(255, 255, 255, 0.05);
+  --success-text: #9CAE86;
+  --danger-text: #C57B6B;
+  --info-text: #3B82F6;
 }
 
 body {

@@ -43,7 +43,7 @@ export default function ModeSelector() {
 
       <style>{`
         .ms-wrap {
-          min-height: 100vh; background: #1C1917; color: #E7DDD5;
+          min-height: 100vh; background: var(--background); color: var(--foreground);
           display: flex; flex-direction: column; align-items: center;
           justify-content: center; padding: 2rem 1rem;
         }
@@ -52,7 +52,7 @@ export default function ModeSelector() {
           text-align: center;
         }
         .ms-sub {
-          color: #9E8E85; margin: 0 0 2.5rem; text-align: center;
+          color: var(--muted); margin: 0 0 2.5rem; text-align: center;
         }
         .ms-grid {
           display: grid; grid-template-columns: 1fr 1fr;
@@ -62,31 +62,31 @@ export default function ModeSelector() {
           .ms-grid { grid-template-columns: 1fr; }
         }
         .ms-card {
-          background: #23201E; border: 2px solid #2C2420;
+          background: var(--surface); border: 2px solid var(--surface-2);
           border-radius: 16px; padding: 1.75rem 1.5rem;
           text-align: left; cursor: pointer; transition: all 0.2s;
           display: flex; flex-direction: column; gap: 0.5rem;
           text-decoration: none; color: inherit;
         }
         .ms-card:hover {
-          border-color: #4A403A; background: #272320;
+          border-color: var(--muted); background: var(--surface-2);
           transform: translateY(-2px);
         }
-        .ms-card-gold { border-color: #3D3018; }
+        .ms-card-gold { border-color: rgba(245,166,35,0.25); }
         .ms-card-gold:hover { border-color: #F5A623; }
-        .ms-card-icon { color: #C9B8AE; }
-        .ms-card-icon-gold { color: #F5A623; }
+        .ms-card-icon { color: var(--muted); }
+        .ms-card-icon-gold { color: var(--accent-text); }
         .ms-card-title {
-          font-size: 1.15rem; font-weight: 700; margin: 0; color: #E7DDD5;
+          font-size: 1.15rem; font-weight: 700; margin: 0; color: var(--foreground);
         }
         .ms-card-desc {
-          font-size: 0.85rem; color: #9E8E85;
+          font-size: 0.85rem; color: var(--muted);
           line-height: 1.65; margin: 0; flex: 1;
         }
         .ms-card-cta {
-          font-size: 0.85rem; font-weight: 600; color: #C9B8AE; margin-top: 0.5rem;
+          font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-top: 0.5rem;
         }
-        .ms-card-cta-gold { color: #F5A623; }
+        .ms-card-cta-gold { color: var(--accent-text); }
       `}</style>
     </div>
   );

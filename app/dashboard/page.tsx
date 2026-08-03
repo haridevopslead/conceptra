@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import Link from "next/link";
+import { Flame, Mic2, BookOpen } from "lucide-react";
 import WelcomeBanner from "@/components/dashboard/welcome-banner";
 import VerifyEmailBanner from "@/components/dashboard/verify-email-banner";
 import { computeReadinessScore, READINESS_WINDOW } from "@/lib/readiness";
@@ -149,8 +150,15 @@ export default async function DashboardPage() {
       {/* Header */}
       <div className="dash-header" style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20 }}>
         <div>
-          <p style={{ fontSize: 13, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--muted)", fontWeight: 600, marginBottom: 10 }}>
-            {dayLabel}{streak > 0 ? ` · 🔥 ${streak}-day streak` : ""}
+          <p style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--muted)", fontWeight: 600, marginBottom: 10 }}>
+            {dayLabel}
+            {streak > 0 && (
+              <>
+                <span aria-hidden>·</span>
+                <Flame size={13} strokeWidth={2.2} style={{ color: "var(--accent-text)" }} />
+                <span style={{ color: "var(--accent-text)" }}>{streak}-day streak</span>
+              </>
+            )}
           </p>
           <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: 30, fontWeight: 500, color: "var(--foreground)", letterSpacing: "-0.01em", lineHeight: 1.2 }}>
             {greeting()}, {user.name ?? user.email?.split("@")[0]}.
@@ -177,8 +185,10 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* Readiness Score — the primary number a returning user sees */}
-      <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 20, padding: "30px 32px" }}>
+      {/* Readiness Score — the primary number a returning user sees, so it
+          gets the most visual weight on the page: elevated with a shadow and
+          more generous padding than every other card below it. */}
+      <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 20, padding: "36px 36px", boxShadow: "0 14px 36px rgba(0,0,0,0.16)" }}>
         {readiness ? (
           <>
             <p style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(26px, 4vw, 34px)", fontWeight: 500, color: "var(--foreground)", lineHeight: 1.25 }}>
@@ -210,11 +220,13 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* Streak tracker */}
-      <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 20, padding: "30px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 36, flexWrap: "wrap" }}>
+      {/* Streak tracker — secondary to the Readiness card: no shadow, tighter
+          padding, and the big number reads as neutral text rather than gold
+          (gold here would just be decorating a stat, not marking a state). */}
+      <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 20, padding: "24px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 36, flexWrap: "wrap" }}>
         <div className="dash-streak-inner" style={{ display: "flex", alignItems: "center", gap: 22 }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-            <span style={{ fontFamily: "'Newsreader', serif", fontSize: 64, fontWeight: 600, color: "var(--accent-text)", lineHeight: 1 }}>{streak}</span>
+            <span style={{ fontFamily: "'Newsreader', serif", fontSize: 48, fontWeight: 600, color: "var(--foreground)", lineHeight: 1 }}>{streak}</span>
             <span style={{ fontSize: 14, color: "var(--muted)", fontWeight: 500, marginTop: 4 }}>day streak</span>
           </div>
           <div className="dash-streak-divider" style={{ width: 1, height: 54, background: "var(--border)" }} />
@@ -257,12 +269,14 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Today's focus */}
-      <div className="dash-focus-inner" style={{ background: "var(--surface-2)", border: "1px solid rgba(245,166,35,0.22)", borderLeft: "3px solid var(--accent)", borderRadius: 18, padding: "26px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
+      {/* Today's focus — the left accent stripe is the one gold touch that
+          carries meaning ("this is worth doing today"); the label/pill text
+          stay neutral so the card doesn't compete with the CTA button below. */}
+      <div className="dash-focus-inner" style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderLeft: "3px solid var(--accent)", borderRadius: 18, padding: "22px 26px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" }}>
         <div style={{ maxWidth: 560 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 9 }}>
-            <p style={{ fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--accent-text)", fontWeight: 600, margin: 0 }}>Today&rsquo;s focus</p>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: "rgba(245,166,35,0.14)", color: "var(--accent-text)" }}>~15 min</span>
+            <p style={{ fontSize: 12, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--muted)", fontWeight: 600, margin: 0 }}>Today&rsquo;s focus</p>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, background: "var(--surface)", color: "var(--muted)" }}>~15 min</span>
           </div>
           <p style={{ fontFamily: "'Newsreader', serif", fontSize: 20, color: "var(--foreground)", lineHeight: 1.35, marginBottom: 6 }}>
             {interviewCount === 0 ? "Run your first mock interview." : "Sharpen your production awareness."}
@@ -278,16 +292,14 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      {/* Quick actions */}
+      {/* Quick actions — same hand-drawn-SVG-vs-Lucide inconsistency existed
+          here as elsewhere in the app; both now use Lucide, matching the
+          sidebar. Only the mock-interview CTA (the core value prop) keeps
+          gold; the lessons CTA reads as an equally real but secondary option. */}
       <div className="dash-quick-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-        <Link href="/interview" className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" style={{ textDecoration: "none", textAlign: "left", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 18, padding: 28, cursor: "pointer", display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ color: "var(--accent-text)" }}>
-            <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-              <line x1="12" y1="19" x2="12" y2="23" />
-              <line x1="8" y1="23" x2="16" y2="23" />
-            </svg>
+        <Link href="/interview" className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" style={{ textDecoration: "none", textAlign: "left", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 18, padding: 24, cursor: "pointer", display: "flex", flexDirection: "column", gap: 14 }}>
+          <div style={{ color: "var(--muted)" }}>
+            <Mic2 size={24} strokeWidth={1.8} />
           </div>
           <div>
             <p style={{ fontFamily: "'Newsreader', serif", fontSize: 20, color: "var(--foreground)", fontWeight: 500 }}>Start today&rsquo;s mock interview</p>
@@ -295,18 +307,15 @@ export default async function DashboardPage() {
           </div>
           <span style={{ fontSize: 14, fontWeight: 600, color: "var(--accent-text)", marginTop: 2 }}>Begin session →</span>
         </Link>
-        <Link href="/lessons" className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" style={{ textDecoration: "none", textAlign: "left", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 18, padding: 28, cursor: "pointer", display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ color: "var(--accent-text)" }}>
-            <svg width="26" height="26" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-            </svg>
+        <Link href="/lessons" className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg" style={{ textDecoration: "none", textAlign: "left", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 18, padding: 24, cursor: "pointer", display: "flex", flexDirection: "column", gap: 14 }}>
+          <div style={{ color: "var(--muted)" }}>
+            <BookOpen size={24} strokeWidth={1.8} />
           </div>
           <div>
             <p style={{ fontFamily: "'Newsreader', serif", fontSize: 20, color: "var(--foreground)", fontWeight: 500 }}>Continue learning</p>
             <p style={{ fontSize: 14, color: "var(--muted)", marginTop: 5, lineHeight: 1.5 }}>Pick up where you left off across {totalLessons} interview briefs.</p>
           </div>
-          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--accent-text)", marginTop: 2 }}>Browse interview briefs →</span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: "var(--foreground)", marginTop: 2 }}>Browse interview briefs →</span>
         </Link>
       </div>
 
@@ -324,8 +333,11 @@ export default async function DashboardPage() {
           </div>
           {avgScore !== null && (
             <div>
-              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 38, fontWeight: 500, color: "var(--accent-text)", lineHeight: 1 }}>
-                {avgScore}<span style={{ fontSize: 18, color: "var(--accent-text)" }}>/10</span>
+              {/* Colored by the same score tier used in Recent activity below —
+                  gold only appears here when the average is actually excellent,
+                  not as a permanent decoration regardless of the number. */}
+              <p style={{ fontFamily: "'Newsreader', serif", fontSize: 38, fontWeight: 500, color: scoreColor(avgScore), lineHeight: 1 }}>
+                {avgScore}<span style={{ fontSize: 18, color: "var(--muted)" }}>/10</span>
               </p>
               <p style={{ fontSize: 13.5, color: "var(--muted)", marginTop: 6 }}>Average mock score</p>
             </div>
@@ -336,7 +348,7 @@ export default async function DashboardPage() {
           <span style={{ fontSize: 13.5, color: "var(--muted)" }}>{trackPct}%</span>
         </div>
         <div style={{ height: 8, background: "var(--background)", borderRadius: 999, overflow: "hidden" }}>
-          <div style={{ width: `${trackPct}%`, height: "100%", background: "var(--accent)", borderRadius: 999 }} />
+          <div style={{ width: `${trackPct}%`, height: "100%", background: "var(--muted)", borderRadius: 999 }} />
         </div>
       </div>
 

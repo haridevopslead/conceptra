@@ -53,7 +53,7 @@ export default async function HomePage() {
         <div className="flex items-center gap-4 sm:gap-8">
           <ThemeToggle />
           <Link href="/pricing" style={{ color: "var(--muted)", fontSize: 14, textDecoration: "none" }}>Pricing</Link>
-          <Link href="/login" style={{ color: "var(--muted)", fontSize: 14, textDecoration: "none" }}>Sign In</Link>
+          <Link href="/login" style={{ color: "var(--foreground)", fontSize: 14, fontWeight: 500, textDecoration: "none", border: "1px solid var(--border)", padding: "8px 16px", borderRadius: 9 }}>Sign In</Link>
           <Link href="/register" style={{ background: "var(--accent)", color: "var(--accent-contrast)", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 9, textDecoration: "none" }}>Get Started</Link>
         </div>
       </nav>
@@ -97,7 +97,7 @@ export default async function HomePage() {
               </Link>
 
               <div className="flex items-center gap-3 mt-9 text-left">
-                <div className="shrink-0" style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.4)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 13, fontWeight: 600, color: "var(--accent-text)" }}>HN</div>
+                <div className="shrink-0" style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--surface-2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>HN</div>
                 <div>
                   <p style={{ fontFamily: "'Newsreader', serif", fontStyle: "italic", fontSize: 14, color: "var(--muted)", maxWidth: 380, lineHeight: 1.5 }}>&ldquo;Built by the engineer who&rsquo;s been on both sides of the interview table.&rdquo;</p>
                   <p style={{ fontSize: 11.5, color: "var(--muted)", marginTop: 4 }}>Hari N. · Lead DevOps Engineer · 10+ years in production</p>
@@ -105,62 +105,66 @@ export default async function HomePage() {
               </div>
             </div>
 
-            {/* Right: live scored demo — above the fold */}
-            <div className="w-full">
-              <div className="rounded-2xl border" style={{ backgroundColor: "#211C18", borderColor: "rgba(253,246,227,0.08)", padding: "8px" }}>
+            {/* Right: live scored demo — the strongest real product asset on
+                the page, so it gets a visible lift (shadow + slight scale)
+                to read as the hero's centerpiece rather than a supporting
+                panel. Now theme-reactive (was hardcoded dark regardless of
+                light/dark mode). */}
+            <div className="w-full lg:scale-[1.04] lg:origin-center">
+              <div className="rounded-2xl border" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", padding: "8px", boxShadow: "0 24px 60px rgba(0,0,0,0.22)" }}>
                 <div className="flex items-center gap-2 px-4 py-3">
-                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#F5A623" }} />
-                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "#8A8073" }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)" }} />
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--muted)" }}>
                     Live AI feedback — real example from the platform
                   </span>
                 </div>
 
-                <div className="rounded-xl p-5 sm:p-6 space-y-5" style={{ backgroundColor: "#17130F" }}>
+                <div className="rounded-xl p-5 sm:p-6 space-y-5" style={{ backgroundColor: "var(--surface-2)" }}>
                   <div>
-                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "#F5A623", marginBottom: 8 }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>
                       Question
                     </p>
-                    <p style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(16px, 2.5vw, 19px)", color: "#FDF6E3", lineHeight: 1.4, fontWeight: 500 }}>
+                    <p style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(16px, 2.5vw, 19px)", color: "var(--foreground)", lineHeight: 1.4, fontWeight: 500 }}>
                       What happens when you run kubectl apply -f deployment.yaml?
                     </p>
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 p-5 sm:p-6" style={{ backgroundColor: "#211C18" }}>
+                  <div className="rounded-2xl border p-5 sm:p-6" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}>
                     <div className="flex items-center gap-6 flex-wrap">
                       <div className="text-center shrink-0">
-                        <div className="text-5xl font-black leading-none" style={{ color: "#F5A623" }}>
-                          8<span className="text-2xl font-bold text-gray-500">/10</span>
+                        <div className="text-5xl font-black leading-none" style={{ color: "var(--accent-text)" }}>
+                          8<span className="text-2xl font-bold" style={{ color: "var(--muted)" }}>/10</span>
                         </div>
-                        <p className="text-sm font-semibold mt-1" style={{ color: "#F5A623" }}>Excellent</p>
+                        <p className="text-sm font-semibold mt-1" style={{ color: "var(--accent-text)" }}>Excellent</p>
                       </div>
-                      <div className="w-px h-14 bg-white/10 shrink-0 hidden sm:block" />
+                      <div className="w-px h-14 shrink-0 hidden sm:block" style={{ background: "var(--border)" }} />
                       <div className="flex-1 grid grid-cols-3 gap-3">
                         <div className="flex flex-col items-center px-3 py-3 rounded-xl border" style={{ backgroundColor: "rgba(197,123,107,0.06)", borderColor: "rgba(197,123,107,0.22)" }}>
-                          <span className="text-xl font-black" style={{ color: "#C57B6B" }}>7<span className="text-sm font-medium text-gray-500">/10</span></span>
-                          <span className="text-[11px] text-gray-400 mt-0.5 text-center leading-tight">Depth</span>
+                          <span className="text-xl font-black" style={{ color: "var(--danger-text)" }}>7<span className="text-sm font-medium" style={{ color: "var(--muted)" }}>/10</span></span>
+                          <span className="text-[11px] mt-0.5 text-center leading-tight" style={{ color: "var(--muted)" }}>Depth</span>
                         </div>
                         <div className="flex flex-col items-center px-3 py-3 rounded-xl border" style={{ backgroundColor: "rgba(156,174,134,0.06)", borderColor: "rgba(156,174,134,0.2)" }}>
-                          <span className="text-xl font-black" style={{ color: "#9CAE86" }}>9<span className="text-sm font-medium text-gray-500">/10</span></span>
-                          <span className="text-[11px] text-gray-400 mt-0.5 text-center leading-tight">Accuracy</span>
+                          <span className="text-xl font-black" style={{ color: "var(--success-text)" }}>9<span className="text-sm font-medium" style={{ color: "var(--muted)" }}>/10</span></span>
+                          <span className="text-[11px] mt-0.5 text-center leading-tight" style={{ color: "var(--muted)" }}>Accuracy</span>
                         </div>
                         <div className="flex flex-col items-center px-3 py-3 rounded-xl border" style={{ backgroundColor: "rgba(245,166,35,0.06)", borderColor: "rgba(245,166,35,0.25)" }}>
-                          <span className="text-xl font-black" style={{ color: "#F5A623" }}>8<span className="text-sm font-medium text-gray-500">/10</span></span>
-                          <span className="text-[11px] text-gray-400 mt-0.5 text-center leading-tight">Production Awareness</span>
+                          <span className="text-xl font-black" style={{ color: "var(--accent-text)" }}>8<span className="text-sm font-medium" style={{ color: "var(--muted)" }}>/10</span></span>
+                          <span className="text-[11px] mt-0.5 text-center leading-tight" style={{ color: "var(--muted)" }}>Production Awareness</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div className="rounded-xl border p-5 space-y-2" style={{ backgroundColor: "rgba(156,174,134,0.06)", borderColor: "rgba(156,174,134,0.2)" }}>
-                    <p className="text-xs font-bold tracking-wider" style={{ color: "#9CAE86" }}>✓ WHAT WAS STRONG</p>
-                    <p className="text-sm text-gray-300 leading-6">
+                    <p className="text-xs font-bold tracking-wider" style={{ color: "var(--success-text)" }}>✓ WHAT WAS STRONG</p>
+                    <p className="text-sm leading-6" style={{ color: "var(--foreground)" }}>
                       Strong understanding of the declarative model and async nature of kubectl.
                     </p>
                   </div>
 
-                  <div className="rounded-xl border p-5 space-y-2" style={{ backgroundColor: "rgba(245,166,35,0.06)", borderColor: "rgba(245,166,35,0.25)" }}>
-                    <p className="text-xs font-bold tracking-wider" style={{ color: "#F5A623" }}>⚡ WHERE TO IMPROVE</p>
-                    <p className="text-sm text-gray-300 leading-6">
+                  <div className="rounded-xl border p-5 space-y-2" style={{ backgroundColor: "var(--surface-2)", borderColor: "var(--border)" }}>
+                    <p className="text-xs font-bold tracking-wider" style={{ color: "var(--muted)" }}>WHERE TO IMPROVE</p>
+                    <p className="text-sm leading-6" style={{ color: "var(--foreground)" }}>
                       Could mention etcd and the control plane reconciliation loop for a 10/10 answer.
                     </p>
                   </div>
@@ -168,7 +172,7 @@ export default async function HomePage() {
               </div>
 
               <div className="flex justify-center mt-5">
-                <Link href="/try" className="text-center font-semibold" style={{ background: "#F5A623", color: "#1C1917", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
+                <Link href="/try" className="text-center font-semibold" style={{ background: "var(--accent)", color: "var(--accent-contrast)", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
                   Try this question yourself — no signup →
                 </Link>
               </div>
@@ -178,39 +182,70 @@ export default async function HomePage() {
         </div>
       </div>
 
-      {/* Testimonials — compact single-row strip */}
-      <div className="mx-auto px-5 sm:px-10" style={{ maxWidth: 1080, paddingTop: 50, paddingBottom: 10 }}>
-        <div
-          className="flex flex-wrap items-center justify-center gap-x-10 gap-y-5"
-          style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 18, padding: "22px 28px" }}
-        >
-          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--accent-text)", flexShrink: 0 }}>
-            What engineers say
-          </span>
-          {TESTIMONIALS.map(({ initials, name, role }, i) => (
+      {/* Testimonials — one card per person with real breathing room and the
+          actual quote (previously collected in TESTIMONIALS but never
+          rendered — just a name/role/initials strip). The strongest quote
+          (Ananya's, with a concrete outcome) is visually the lead card. */}
+      <div className="mx-auto px-5 sm:px-10" style={{ maxWidth: 1080, paddingTop: 64, paddingBottom: 10 }}>
+        <p style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--muted)", textAlign: "center", marginBottom: 28 }}>
+          What engineers say
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {TESTIMONIALS.map(({ quote, initials, name, role }, i) => (
             <div
               key={name}
-              className="flex items-center gap-2.5"
-              style={i > 0 ? { paddingLeft: 40, borderLeft: "1px solid var(--border)" } : undefined}
+              className={i === 0 ? "md:col-span-1 md:row-span-1" : ""}
+              style={{
+                background: i === 0 ? "var(--surface-2)" : "var(--surface)",
+                border: i === 0 ? "1px solid rgba(245,166,35,0.3)" : "1px solid var(--border)",
+                borderRadius: 18,
+                padding: "26px 24px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 18,
+              }}
             >
-              <div className="shrink-0" style={{ width: 30, height: 30, borderRadius: "50%", background: "rgba(245,166,35,0.14)", border: "1px solid rgba(245,166,35,0.35)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 12, color: "var(--accent-text)" }}>
-                {initials}
-              </div>
-              <div className="text-left">
-                <p style={{ fontSize: 13, color: "var(--foreground)", fontWeight: 600 }}>{name}</p>
-                <p style={{ fontSize: 11.5, color: "var(--muted)" }}>{role}</p>
+              <p style={{ fontFamily: "'Newsreader', serif", fontStyle: "italic", fontSize: 16, lineHeight: 1.55, color: "var(--foreground)", flex: 1 }}>
+                &ldquo;{quote}&rdquo;
+              </p>
+              <div className="flex items-center gap-2.5">
+                <div className="shrink-0" style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--surface-2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 12, color: "var(--foreground)" }}>
+                  {initials}
+                </div>
+                <div className="text-left">
+                  <p style={{ fontSize: 13, color: "var(--foreground)", fontWeight: 600 }}>{name}</p>
+                  <p style={{ fontSize: 11.5, color: "var(--muted)" }}>{role}</p>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Brand logos */}
-      <div className="mx-auto px-5 sm:px-10 flex flex-col items-center gap-6" style={{ maxWidth: 1080, paddingTop: 56, paddingBottom: 28 }}>
+      {/* Brand logos — no real logo assets available, so this leans on
+          typography/spacing/dividers to read as a designed trust element
+          instead of a bare inline text row. Worth sourcing real SVG logos
+          later if that becomes a priority. */}
+      <div className="mx-auto px-5 sm:px-10 flex flex-col items-center gap-7" style={{ maxWidth: 1080, paddingTop: 60, paddingBottom: 30 }}>
         <p style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--muted)", fontWeight: 600, textAlign: "center", maxWidth: 640 }}>Our content is built around real interview patterns from companies like</p>
-        <div className="flex flex-wrap gap-6 sm:gap-12 justify-center items-center">
-          {BRANDS.map(b => (
-            <span key={b} style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(18px, 4vw, 26px)", color: "var(--muted)", fontWeight: 500 }}>{b}</span>
+        <div
+          className="flex flex-wrap justify-center items-stretch"
+          style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 16, overflow: "hidden" }}
+        >
+          {BRANDS.map((b, i) => (
+            <span
+              key={b}
+              style={{
+                fontFamily: "'Newsreader', serif",
+                fontSize: "clamp(16px, 3vw, 21px)",
+                color: "var(--foreground)",
+                fontWeight: 500,
+                padding: "18px 32px",
+                borderLeft: i > 0 ? "1px solid var(--border)" : undefined,
+              }}
+            >
+              {b}
+            </span>
           ))}
         </div>
       </div>
@@ -218,9 +253,9 @@ export default async function HomePage() {
       {/* FAQ */}
       <div className="mx-auto px-5 sm:px-10" style={{ maxWidth: 760, paddingTop: 56, paddingBottom: 30 }}>
         <div className="flex items-center gap-3 justify-center mb-10">
-          <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
-          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--accent-text)" }}>Questions</span>
-          <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
+          <span style={{ width: 28, height: 1, background: "var(--border)" }} />
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--muted)" }}>Questions</span>
+          <span style={{ width: 28, height: 1, background: "var(--border)" }} />
         </div>
         <FaqAccordion items={FAQS} />
       </div>

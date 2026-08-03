@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Script from "next/script";
+import { ShieldCheck } from "lucide-react";
 import { PLAN_PRICING } from "@/lib/plan-pricing";
 
 declare global {
@@ -300,7 +301,8 @@ export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }
               </button>
             )}
 
-            <p style={{ fontSize: 12, color: "var(--muted)", textAlign: "center" }}>
+            <p style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 12, color: "var(--muted)", textAlign: "center" }}>
+              <ShieldCheck size={13} strokeWidth={2} />
               7-day refund policy · Secure payment via Razorpay
             </p>
           </div>

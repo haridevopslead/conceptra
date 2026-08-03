@@ -240,7 +240,7 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
                 ACTIVE
               </span>
             </div>
-            <p style={{ fontSize: 14, color: "#8A8073" }}>Billed annually at ₹2,999</p>
+            <p style={{ fontSize: 14, color: "#8A8073" }}>Your subscription is active. Visit the pricing page for renewal options.</p>
           </div>
         ) : (
           <div>
@@ -251,7 +251,7 @@ export default function SettingsClient({ initialName, email, plan }: Props) {
               href="/pricing"
               style={{ display: "inline-block", background: "#F5A623", color: "#1C1917", fontWeight: 700, fontSize: 14, padding: "11px 22px", borderRadius: 10, textDecoration: "none" }}
             >
-              Upgrade to Pro — ₹2,999/year
+              Upgrade to Pro — from ₹699
             </Link>
           </div>
         )}

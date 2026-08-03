@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   const duration = body?.plan;
 
   if (!isPlanDurationKey(duration)) {
-    return NextResponse.json({ error: "Invalid plan. Choose monthly, quarterly, or annual." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid plan. Choose monthly or quarterly." }, { status: 400 });
   }
 
   // Amount always comes from this server-side lookup, never from the

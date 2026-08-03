@@ -25,12 +25,11 @@ const PRO_FEATURES = [
   "Priority support",
 ];
 
-type PlanDurationKey = "monthly" | "quarterly" | "annual";
+type PlanDurationKey = "monthly" | "quarterly";
 
 const DURATIONS: { key: PlanDurationKey; label: string; price: string; sublabel: string }[] = [
   { key: "monthly", label: "1 Month", price: "₹699", sublabel: "Billed monthly" },
-  { key: "quarterly", label: "3 Months", price: "₹2,000", sublabel: "₹667/month" },
-  { key: "annual", label: "12 Months", price: "₹2,999", sublabel: "₹250/month · best value" },
+  { key: "quarterly", label: "3 Months", price: "₹1,499", sublabel: "₹500/month · best value" },
 ];
 
 type Props = {
@@ -41,7 +40,7 @@ type Props = {
 };
 
 export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }: Props) {
-  const [duration, setDuration] = useState<PlanDurationKey>("annual");
+  const [duration, setDuration] = useState<PlanDurationKey>("quarterly");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);

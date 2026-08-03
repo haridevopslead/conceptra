@@ -57,7 +57,7 @@ export default function TermsPage() {
         <div style={SECTION_STYLE}>
           <h2 style={H2_STYLE}>4. Payment and Subscription</h2>
           <p style={P_STYLE}>
-            Conceptra offers a free tier with limited access and a Pro subscription. Pro is priced at ₹2,999 per year (or as displayed at checkout). All prices are in Indian Rupees and inclusive of applicable taxes unless stated otherwise.
+            Conceptra offers a free tier with limited access and a Pro subscription, available as a monthly or 3-month plan (pricing as displayed at checkout). All prices are in Indian Rupees and inclusive of applicable taxes unless stated otherwise.
           </p>
           <p style={P_STYLE}>
             Payments are processed securely through Razorpay. We do not store your payment card details. Subscriptions renew automatically unless cancelled before the renewal date.

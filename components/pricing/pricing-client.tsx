@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Script from "next/script";
+import { PLAN_PRICING } from "@/lib/plan-pricing";
 
 declare global {
   interface Window {
@@ -29,8 +30,20 @@ type PlanDurationKey = "monthly" | "quarterly";
 
 const DURATIONS: { key: PlanDurationKey; label: string; price: string; sublabel: string }[] = [
   { key: "monthly", label: "1 Month", price: "₹699", sublabel: "Billed monthly" },
-  { key: "quarterly", label: "3 Months", price: "₹1,499", sublabel: "₹500/month · best value" },
+  { key: "quarterly", label: "3 Months", price: "₹1,499", sublabel: "₹500/month" },
 ];
+
+// Derived from the same server-side pricing lookup create-order uses (never
+// a hardcoded "28%" string), so the savings badge can't silently go stale if
+// PLAN_PRICING ever changes. Compared on a per-day basis rather than
+// assuming any duration equals an exact number of "months".
+const MONTHLY_DAILY_RATE = PLAN_PRICING.monthly.amountPaise / PLAN_PRICING.monthly.days;
+function savingsPercentFor(key: PlanDurationKey): number {
+  const { amountPaise, days } = PLAN_PRICING[key];
+  const dailyRate = amountPaise / days;
+  // Floored, not rounded, so the claim never overstates the real saving.
+  return Math.floor((1 - dailyRate / MONTHLY_DAILY_RATE) * 100);
+}
 
 type Props = {
   userName: string;
@@ -138,9 +151,11 @@ export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }
             Pricing
           </p>
           <h1 style={{ fontFamily: "'Newsreader', serif", fontSize: "clamp(28px, 6vw, 46px)", fontWeight: 500, color: "#FDF6E3", lineHeight: 1.15 }}>
-            Simple, honest pricing.
+            Interview prep that pays for itself in one offer.
           </h1>
-          <p style={{ fontSize: 16, color: "#8A8073", marginTop: 10 }}>One plan. Pick how long you want it for.</p>
+          <p style={{ fontSize: 16, color: "#8A8073", marginTop: 10 }}>
+            Unlimited mock interviews with Hari, real feedback after every session. Pick 1 month or 3 — pay once, no auto-renewal.
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -186,40 +201,70 @@ export default function PricingClient({ userName, userEmail, isLoggedIn, isPro }
 
             <div>
               <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", color: "#F5A623", textTransform: "uppercase", marginBottom: 8 }}>Pro</p>
+
+              {!isPro && (
+                <div className="mb-5">
+                  <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#8A8073", marginBottom: 9 }}>
+                    Choose your billing cycle
+                  </p>
+                  <div className="flex gap-3" role="radiogroup" aria-label="Plan duration">
+                    {DURATIONS.map((d) => {
+                      const savings = savingsPercentFor(d.key);
+                      const selected = duration === d.key;
+                      return (
+                        <button
+                          key={d.key}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          onClick={() => setDuration(d.key)}
+                          disabled={loading}
+                          className="flex-1 rounded-xl text-center transition-colors relative"
+                          style={{
+                            padding: "14px 10px",
+                            fontFamily: "inherit",
+                            fontSize: 15,
+                            fontWeight: 800,
+                            cursor: loading ? "not-allowed" : "pointer",
+                            background: selected ? "#F5A623" : "rgba(253,246,227,0.09)",
+                            color: selected ? "#1C1917" : "#E4DCCE",
+                            border: selected ? "2px solid #F5A623" : "2px solid rgba(253,246,227,0.16)",
+                          }}
+                        >
+                          {d.label}
+                          {savings > 0 && (
+                            <span
+                              style={{
+                                position: "absolute",
+                                top: -11,
+                                right: -8,
+                                background: "#9CAE86",
+                                color: "#1C1917",
+                                fontSize: 10.5,
+                                fontWeight: 800,
+                                letterSpacing: "0.01em",
+                                padding: "3px 8px",
+                                borderRadius: 999,
+                                boxShadow: "0 2px 6px rgba(0,0,0,0.35)",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              Save {savings}%
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-baseline gap-2">
                 <p style={{ fontFamily: "'Newsreader', serif", fontSize: 36, fontWeight: 500, color: "#FDF6E3" }}>{selectedDuration.price}</p>
                 <span style={{ fontSize: 14, color: "#8A8073" }}>/ {selectedDuration.label.toLowerCase()}</span>
               </div>
               <p style={{ fontSize: 13, color: "#6E665C", marginTop: 4 }}>{selectedDuration.sublabel}</p>
             </div>
-
-            {!isPro && (
-              <div className="flex gap-2" role="radiogroup" aria-label="Plan duration">
-                {DURATIONS.map((d) => (
-                  <button
-                    key={d.key}
-                    type="button"
-                    role="radio"
-                    aria-checked={duration === d.key}
-                    onClick={() => setDuration(d.key)}
-                    disabled={loading}
-                    className="flex-1 rounded-lg text-center transition-colors"
-                    style={{
-                      padding: "9px 6px",
-                      fontFamily: "inherit",
-                      fontSize: 12.5,
-                      fontWeight: 700,
-                      cursor: loading ? "not-allowed" : "pointer",
-                      background: duration === d.key ? "#F5A623" : "rgba(253,246,227,0.05)",
-                      color: duration === d.key ? "#1C1917" : "#B3A799",
-                      border: duration === d.key ? "1px solid #F5A623" : "1px solid rgba(253,246,227,0.1)",
-                    }}
-                  >
-                    {d.label}
-                  </button>
-                ))}
-              </div>
-            )}
 
             <ul className="flex flex-col gap-3 flex-1">
               {PRO_FEATURES.map((f) => (

@@ -43,7 +43,7 @@ export default async function HomePage() {
       <nav
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
         style={{
-          padding: "18px 20px",
+          padding: "14px 20px",
           background: "var(--nav-bg-translucent)",
           backdropFilter: "blur(14px)",
           borderBottom: "1px solid var(--border)",
@@ -61,29 +61,29 @@ export default async function HomePage() {
       {/* Hero — headline/CTA and the live demo card share the first screen */}
       <div className="relative overflow-hidden">
         <div className="absolute pointer-events-none" style={{ top: 20, left: "50%", transform: "translateX(-50%)", width: "min(1100px, 150vw)", height: 560, borderRadius: "50%", background: "radial-gradient(ellipse at center, rgba(245,166,35,0.15) 0%, rgba(245,166,35,0.05) 38%, rgba(28,25,23,0) 70%)" }} />
-        <div className="relative mx-auto px-5 sm:px-10" style={{ maxWidth: 1180, paddingTop: 128, paddingBottom: 60 }}>
+        <div className="relative mx-auto px-5 sm:px-10" style={{ maxWidth: 1180, paddingTop: 92, paddingBottom: 40 }}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-10 items-center">
 
             {/* Left: headline, subheadline, CTAs, quote */}
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-              <div className="flex items-center gap-3 mb-7">
+              <div className="flex items-center gap-3 mb-5">
                 <span style={{ width: 28, height: 1, background: "rgba(245,166,35,0.5)" }} />
                 <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: "var(--accent-text)" }}>AI-Powered DevOps Coaching</span>
               </div>
 
               <h1
-                className="mb-5"
+                className="mb-4"
                 style={{ fontFamily: "'Newsreader', serif", fontWeight: 500, fontSize: "clamp(36px, 6vw, 62px)", lineHeight: 1.08, color: "var(--foreground)", letterSpacing: "-0.015em" }}
               >
                 Ace Your DevOps{" "}
                 <em style={{ fontStyle: "italic", color: "var(--accent-text)" }}>Interview</em>
               </h1>
 
-              <p className="mb-8" style={{ fontSize: "clamp(15px, 2.2vw, 18px)", lineHeight: 1.6, color: "var(--muted)", maxWidth: 480 }}>
+              <p className="mb-6" style={{ fontSize: "clamp(15px, 2.2vw, 18px)", lineHeight: 1.6, color: "var(--muted)", maxWidth: 480 }}>
                 Coached by a Lead Engineer with 10+ years at top Indian tech companies. Know exactly what Razorpay and PhonePe interviewers want.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mb-5">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto mb-4">
                 <Link href="/try" className="text-center font-semibold" style={{ background: "var(--accent)", color: "var(--accent-contrast)", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
                   Try a real question — no signup
                 </Link>
@@ -96,7 +96,7 @@ export default async function HomePage() {
                 Browse Interview Briefs →
               </Link>
 
-              <div className="flex items-center gap-3 mt-9 text-left">
+              <div className="flex items-center gap-3 mt-6 text-left">
                 <div className="shrink-0" style={{ width: 36, height: 36, borderRadius: "50%", background: "var(--surface-2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Newsreader', serif", fontSize: 13, fontWeight: 600, color: "var(--foreground)" }}>HN</div>
                 <div>
                   <p style={{ fontFamily: "'Newsreader', serif", fontStyle: "italic", fontSize: 14, color: "var(--muted)", maxWidth: 380, lineHeight: 1.5 }}>&ldquo;Built by the engineer who&rsquo;s been on both sides of the interview table.&rdquo;</p>
@@ -112,14 +112,14 @@ export default async function HomePage() {
                 light/dark mode). */}
             <div className="w-full lg:scale-[1.04] lg:origin-center">
               <div className="rounded-2xl border" style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", padding: "8px", boxShadow: "0 24px 60px rgba(0,0,0,0.22)" }}>
-                <div className="flex items-center gap-2 px-4 py-3">
+                <div className="flex items-center gap-2 px-4 py-2.5">
                   <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)" }} />
                   <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--muted)" }}>
                     Live AI feedback — real example from the platform
                   </span>
                 </div>
 
-                <div className="rounded-xl p-5 sm:p-6 space-y-5" style={{ backgroundColor: "var(--surface-2)" }}>
+                <div className="rounded-xl p-5 sm:p-6 space-y-4" style={{ backgroundColor: "var(--surface-2)" }}>
                   <div>
                     <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--muted)", marginBottom: 8 }}>
                       Question
@@ -171,7 +171,7 @@ export default async function HomePage() {
                 </div>
               </div>
 
-              <div className="flex justify-center mt-5">
+              <div className="flex justify-center mt-4">
                 <Link href="/try" className="text-center font-semibold" style={{ background: "var(--accent)", color: "var(--accent-contrast)", fontSize: 16, padding: "15px 32px", borderRadius: 12, textDecoration: "none" }}>
                   Try this question yourself — no signup →
                 </Link>

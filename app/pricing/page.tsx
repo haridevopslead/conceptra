@@ -38,9 +38,9 @@ export default async function PricingPage() {
   const { plan: effective } = user?.id ? await getEffectivePlan(user.id) : { plan: "FREE" };
 
   return (
-    <main style={{ backgroundColor: "#1C1917", minHeight: "100vh", fontFamily: "'Hanken Grotesk', system-ui, sans-serif" }}>
+    <main style={{ backgroundColor: "var(--background)", minHeight: "100vh", fontFamily: "'Hanken Grotesk', system-ui, sans-serif" }}>
       {/* Nav */}
-      <nav style={{ padding: "18px 24px", borderBottom: "1px solid rgba(253,246,227,0.06)" }}>
+      <nav style={{ padding: "18px 24px", borderBottom: "1px solid var(--border)" }}>
         <Link href={user ? "/dashboard" : "/"} style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 600, color: "#F5A623", textDecoration: "none" }}>
           Conceptra
         </Link>

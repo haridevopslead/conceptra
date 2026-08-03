@@ -1,10 +1,15 @@
+// Keys match the Interview-with-Hari topic names exactly (app/interview/dev/page.tsx's
+// TOPICS list) so a brief's category and its corresponding practice topic
+// share one color identity. Terraform/Observability reuse the same colors
+// their pre-rename category strings ("Infrastructure as Code"/"Monitoring")
+// had; Docker and AWS are the two genuinely new entries this palette needed.
 export const CATEGORY_COLOR: Record<string, string> = {
+  Docker: "#6FA8C7",
   Kubernetes: "#8AA0B8",
   "CI/CD": "#A593B5",
-  Cloud: "#8FB0B5",
-  "Infrastructure as Code": "#C99A6A",
-  Monitoring: "#9CAE86",
-  SRE: "#C57B6B",
+  AWS: "#8FB0B5",
+  Terraform: "#C99A6A",
+  Observability: "#9CAE86",
   Linux: "#B5A88F",
   Git: "#B58F8F",
 };

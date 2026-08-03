@@ -10,6 +10,15 @@ import LessonTracker from "@/components/lessons/lesson-tracker";
 import LessonComplete from "@/components/lessons/lesson-complete";
 import CopyButton from "@/components/lessons/copy-button";
 import { codeToHtml } from "shiki";
+import { FileText, PlayCircle, Newspaper, ExternalLink } from "lucide-react";
+
+type Resource = { title: string; url: string; type: "docs" | "video" | "article" };
+
+const RESOURCE_ICON: Record<Resource["type"], typeof FileText> = {
+  docs: FileText,
+  video: PlayCircle,
+  article: Newspaper,
+};
 
 export async function generateStaticParams() {
   const lessons = await db.lesson.findMany({ where: { published: true }, select: { slug: true } });
@@ -321,6 +330,7 @@ export default async function LessonDetailPage({
 
   const categoryColor  = CATEGORY_COLOR[dbLesson.category] ?? FALLBACK_COLOR;
   const difficultyColor = DIFFICULTY_COLOR[dbLesson.difficulty] ?? FALLBACK_COLOR;
+  const resources = (dbLesson.resources as Resource[] | null) ?? [];
 
   return (
     <div className="lesson-detail-page p-4 sm:p-8 w-full max-w-[860px]">
@@ -415,6 +425,33 @@ export default async function LessonDetailPage({
               </div>
             );
           })}
+          {resources.length > 0 && (
+            <div>
+              <p className="text-xs font-bold tracking-widest text-muted mb-3">FURTHER READING</p>
+              <div className="space-y-2">
+                {resources.map((r, i) => {
+                  const Icon = RESOURCE_ICON[r.type] ?? FileText;
+                  return (
+                    <a
+                      key={i}
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 rounded-xl border p-3.5 transition-colors hover:bg-hover-overlay"
+                      style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", textDecoration: "none" }}
+                    >
+                      <span style={{ color: "var(--muted)", flexShrink: 0, display: "flex" }}>
+                        <Icon size={17} strokeWidth={1.8} />
+                      </span>
+                      <span className="flex-1 text-sm text-foreground">{r.title}</span>
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-muted">{r.type}</span>
+                      <ExternalLink size={13} strokeWidth={2} style={{ color: "var(--muted)", flexShrink: 0 }} />
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {session ? (
             <LessonComplete
               slug={params.slug}

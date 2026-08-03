@@ -123,6 +123,11 @@ model Lesson {
   durationMinutes Int      @default(20)
   topics          String[] @default([])
   content         Json
+  // External reference links ({ title, url, type: "docs"|"video"|"article" }[]),
+  // kept as its own column rather than nested in `content` so it can be
+  // queried/edited independently of the layer content. Null/empty for a
+  // brief with no further-reading links yet.
+  resources       Json?
   tier            Plan     @default(FREE)
   order           Int      @default(0)
   published       Boolean  @default(false)

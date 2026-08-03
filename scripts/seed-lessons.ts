@@ -13,7 +13,7 @@ const lessons = [
     title: "Docker Fundamentals",
     description:
       "Master containers from the ground up: images, layers, volumes, networking, and multi-stage builds.",
-    category: "Kubernetes",
+    category: "Docker",
     difficulty: "Beginner",
     durationMinutes: 20,
     topics: ["Dockerfile", "multi-stage builds", "volumes", "networking", "images vs containers"],
@@ -122,7 +122,7 @@ const lessons = [
     title: "AWS Fundamentals for DevOps Engineers",
     description:
       "EC2, S3, VPC, IAM, RDS, and the AWS concepts every DevOps engineer is tested on in interviews.",
-    category: "Cloud",
+    category: "AWS",
     difficulty: "Beginner",
     durationMinutes: 35,
     topics: ["EC2", "S3", "VPC", "IAM", "RDS", "CloudWatch"],
@@ -158,7 +158,7 @@ const lessons = [
     title: "Terraform & Infrastructure as Code",
     description:
       "Write infrastructure as code, manage state, and deploy cloud resources safely without manual console clicking.",
-    category: "Infrastructure as Code",
+    category: "Terraform",
     difficulty: "Intermediate",
     durationMinutes: 30,
     topics: ["HCL", "state file", "remote backend & locking", "modules", "plan/apply/import"],
@@ -269,7 +269,7 @@ const lessons = [
     title: "Observability — Prometheus, Grafana & Loki",
     description:
       "Build monitoring that actually tells you what is wrong before users do. Metrics, logs, traces, and alerting done right.",
-    category: "Monitoring",
+    category: "Observability",
     difficulty: "Advanced",
     durationMinutes: 35,
     topics: ["Prometheus & PromQL", "Loki/LogQL", "tracing", "Grafana dashboards", "SLOs & error budgets"],

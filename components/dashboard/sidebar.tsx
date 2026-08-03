@@ -96,15 +96,21 @@ export default function Sidebar({ user }: Props) {
       aria-hidden={ariaHidden}
       style={{ width: 248, background: "var(--nav-bg)", borderRight: "1px solid var(--border)", position: "sticky", top: 0, height: "100vh" }}
     >
-      {/* Logo */}
-      <div style={{ padding: "28px 26px 22px", borderBottom: "1px solid var(--border)" }}>
+      {/* Logo — flexShrink: 0 so it always renders at full height; only the
+          nav list below scrolls if the viewport is too short. */}
+      <div style={{ flexShrink: 0, padding: "28px 26px 22px", borderBottom: "1px solid var(--border)" }}>
         <Link href="/" style={{ fontFamily: "'Newsreader', serif", fontSize: 23, fontWeight: 600, color: "var(--accent-text)", textDecoration: "none" }}>
           Conceptra
         </Link>
       </div>
 
-      {/* Nav */}
-      <nav aria-label="Primary navigation" style={{ flex: 1, padding: "22px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
+      {/* Nav — the only part of the sidebar that scrolls. minHeight: 0 is
+          required alongside flex: 1 for a flex child to actually shrink and
+          scroll instead of overflowing its parent (the classic flexbox
+          scroll pitfall). This keeps the footer below (incl. Sign out)
+          always fully visible without needing to scroll past the nav list
+          on short viewports. */}
+      <nav aria-label="Primary navigation" style={{ flex: 1, minHeight: 0, overflowY: "auto", overflowX: "hidden", padding: "22px 16px", display: "flex", flexDirection: "column", gap: 6 }}>
         {NAV.map(({ href, label, icon, proOnly }) => {
           const active = pathname === href;
           const hovered = hoveredHref === href;
@@ -139,8 +145,9 @@ export default function Sidebar({ user }: Props) {
         })}
       </nav>
 
-      {/* Footer */}
-      <div style={{ padding: "18px 18px 22px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Footer — flexShrink: 0, always pinned fully visible at the bottom
+          so Sign out is reachable without ever needing to scroll. */}
+      <div style={{ flexShrink: 0, padding: "18px 18px 22px", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: 16 }}>
         {/* Plan badge */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 4px" }}>
           <span style={{ fontSize: 12, color: "var(--muted)" }}>Current plan</span>

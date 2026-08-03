@@ -40,17 +40,17 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
 
   return (
     <div
-      className="rounded-2xl border border-white/10 p-6 mt-5 flex flex-col items-center gap-5 text-center"
-      style={{ backgroundColor: "#211C18" }}
+      className="rounded-2xl border p-6 mt-5 flex flex-col items-center gap-5 text-center"
+      style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}
     >
       {completed ? (
         /* ── Completed state ── */
         <>
           <div style={{ fontSize: 36 }}>✓</div>
-          <p style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 500, color: "#9CAE86" }}>
+          <p style={{ fontFamily: "'Newsreader', serif", fontSize: 22, fontWeight: 500, color: "var(--success-text)" }}>
             Brief Complete!
           </p>
-          <p style={{ fontSize: 14, color: "#8A8073" }}>
+          <p style={{ fontSize: 14, color: "var(--muted)" }}>
             Great work. Keep the momentum going.
           </p>
 
@@ -65,7 +65,7 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
                   borderRadius: 12,
                   background: "transparent",
                   border: "1px solid rgba(245,166,35,0.4)",
-                  color: "#F5A623",
+                  color: "var(--accent-text)",
                   fontWeight: 600,
                   fontSize: 15,
                   textDecoration: "none",
@@ -77,18 +77,18 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
               </Link>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10, marginTop: 8 }}>
                 {nextLesson.topics[0] && (
-                  <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "rgba(245,166,35,0.12)", color: "#F5A623", fontWeight: 600 }}>
+                  <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 999, background: "rgba(245,166,35,0.12)", color: "var(--accent-text)", fontWeight: 600 }}>
                     {nextLesson.topics[0]}
                   </span>
                 )}
-                <span style={{ fontSize: 11, color: "#6E665C" }}>
+                <span style={{ fontSize: 11, color: "var(--muted)" }}>
                   {nextLesson.durationMinutes} min
                 </span>
               </div>
             </div>
           ) : (
             <>
-              <p style={{ fontSize: 14, color: "#B3A799", lineHeight: 1.6 }}>
+              <p style={{ fontSize: 14, color: "var(--muted)", lineHeight: 1.6 }}>
                 You&rsquo;ve completed all available briefs! More coming soon.
               </p>
               <Link
@@ -96,8 +96,8 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
                 style={{
                   padding: "12px 24px",
                   borderRadius: 12,
-                  border: "1px solid rgba(253,246,227,0.15)",
-                  color: "#FDF6E3",
+                  border: "1px solid var(--border)",
+                  color: "var(--foreground)",
                   fontWeight: 600,
                   fontSize: 14,
                   textDecoration: "none",
@@ -112,7 +112,7 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
         /* ── Not yet completed state ── */
         <>
           {error && (
-            <p style={{ fontSize: 13, color: "#C57B6B" }}>✗ {error}</p>
+            <p style={{ fontSize: 13, color: "var(--danger-text)" }}>✗ {error}</p>
           )}
 
           <button
@@ -122,8 +122,8 @@ export default function LessonComplete({ slug, nextLesson, initialCompleted }: P
               width: "100%",
               padding: "15px 24px",
               borderRadius: 12,
-              background: "#F5A623",
-              color: "#1C1917",
+              background: "var(--accent)",
+              color: "var(--accent-contrast)",
               fontWeight: 700,
               fontSize: 15,
               border: "none",

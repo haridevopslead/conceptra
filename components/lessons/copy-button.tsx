@@ -21,9 +21,9 @@ export default function CopyButton({ code }: { code: string }) {
       style={{
         fontSize: 11,
         fontWeight: 600,
-        color: copied ? "#9CAE86" : "#6E665C",
+        color: copied ? "var(--success-text)" : "var(--muted)",
         background: "none",
-        border: `1px solid ${copied ? "rgba(156,174,134,0.3)" : "rgba(253,246,227,0.1)"}`,
+        border: `1px solid ${copied ? "rgba(156,174,134,0.3)" : "var(--border)"}`,
         borderRadius: 6,
         padding: "3px 10px",
         cursor: "pointer",

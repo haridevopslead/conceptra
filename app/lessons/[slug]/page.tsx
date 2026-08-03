@@ -23,11 +23,17 @@ type Layer = {
 };
 
 // ─── Layer config ────────────────────────────────────────────────────────────
-
-const LAYER_CONFIG: Record<string, { color: string; label: string }> = {
-  story:         { color: "#F5A623", label: "THE STORY" },
-  concept:       { color: "#3B82F6", label: "THE CONCEPT" },
-  pressure_test: { color: "#EF4444", label: "PRESSURE TEST" },
+// `color` is the decorative left-border/icon accent — kept as a literal,
+// per-type identity color (same treatment as CATEGORY_COLOR/DIFFICULTY_COLOR
+// in lib/lesson-style.ts), since a saturated border reads fine in either
+// theme. `textColor` is what the label itself is rendered in — routed
+// through the app's text-safe tokens since the same raw hex fails contrast
+// as small text once the surrounding card goes light (the exact problem
+// --accent-text/--danger-text/--info-text already solve elsewhere).
+const LAYER_CONFIG: Record<string, { color: string; textColor: string; label: string }> = {
+  story:         { color: "#F5A623", textColor: "var(--accent-text)", label: "THE STORY" },
+  concept:       { color: "#3B82F6", textColor: "var(--info-text)",   label: "THE CONCEPT" },
+  pressure_test: { color: "#EF4444", textColor: "var(--danger-text)", label: "PRESSURE TEST" },
 };
 
 // ─── Story renderer ──────────────────────────────────────────────────────────
@@ -36,7 +42,7 @@ function StoryContent({ content }: { content: string }) {
   return (
     <div className="space-y-4">
       {content.split("\n\n").filter(Boolean).map((para, i) => (
-        <p key={i} className="text-sm text-gray-300 leading-7">{para}</p>
+        <p key={i} className="text-sm text-muted leading-7">{para}</p>
       ))}
     </div>
   );
@@ -85,7 +91,7 @@ async function CodeBlock({ code }: { code: string }) {
   }
 
   return (
-    <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid rgba(255,255,255,0.06)" }}>
+    <div style={{ borderRadius: 12, overflow: "hidden", border: "1px solid var(--border)" }}>
       {/* Header bar */}
       <div
         style={{
@@ -93,16 +99,18 @@ async function CodeBlock({ code }: { code: string }) {
           alignItems: "center",
           justifyContent: "space-between",
           padding: "7px 14px",
-          backgroundColor: "#1a1410",
-          borderBottom: "1px solid rgba(255,255,255,0.05)",
+          backgroundColor: "var(--code-bg)",
+          borderBottom: "1px solid var(--border)",
         }}
       >
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "#6E665C", textTransform: "uppercase" }}>
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "var(--muted)", textTransform: "uppercase" }}>
           Dockerfile
         </span>
         <CopyButton code={code} />
       </div>
-      {/* Highlighted code */}
+      {/* Highlighted code — Shiki's own "github-dark" syntax theme stays
+          fixed regardless of site theme; a dual light/dark code theme is a
+          separate follow-up, not part of this token cleanup. */}
       <div className="shiki-block" dangerouslySetInnerHTML={{ __html: html }} />
     </div>
   );
@@ -116,13 +124,13 @@ function ConceptContent({ content }: { content: string }) {
         if (chunk.kind === "code") return <CodeBlock key={i} code={chunk.text} />;
         if (chunk.kind === "header") {
           return (
-            <p key={i} className="text-sm font-bold text-white pt-2">
+            <p key={i} className="text-sm font-bold text-foreground pt-2">
               {chunk.text}
             </p>
           );
         }
         return (
-          <p key={i} className="text-sm text-gray-300 leading-7">
+          <p key={i} className="text-sm text-muted leading-7">
             {chunk.text}
           </p>
         );
@@ -156,7 +164,7 @@ function PTBox({
       <p className="text-xs font-bold mb-2" style={{ color }}>
         {icon} {label}
       </p>
-      <p className="text-sm text-gray-300 leading-6">{body}</p>
+      <p className="text-sm text-muted leading-6">{body}</p>
     </div>
   );
 }
@@ -167,7 +175,7 @@ function PressureTestContent({ content }: { content: string }) {
     <div className="space-y-4">
       {chunks.map((chunk, i) => {
         if (chunk === "---") {
-          return <hr key={i} className="border-white/10 my-2" />;
+          return <hr key={i} className="border-border my-2" />;
         }
 
         if (chunk.startsWith("QUESTION")) {
@@ -176,10 +184,10 @@ function PressureTestContent({ content }: { content: string }) {
           const qText  = chunk.slice(colon + 1).trim();
           return (
             <div key={i} className="pt-2">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              <span className="text-xs font-bold text-muted uppercase tracking-widest">
                 {qLabel}
               </span>
-              <p className="text-base font-bold text-white mt-1">{qText}</p>
+              <p className="text-base font-bold text-foreground mt-1">{qText}</p>
             </div>
           );
         }
@@ -189,9 +197,9 @@ function PressureTestContent({ content }: { content: string }) {
           return (
             <PTBox
               key={i}
-              color="#EF4444"
-              bg="rgba(239,68,68,0.07)"
-              border="rgba(239,68,68,0.2)"
+              color="var(--danger-text)"
+              bg="rgba(197,123,107,0.06)"
+              border="rgba(197,123,107,0.22)"
               icon="⚠"
               label={chunk.slice(0, colon)}
               body={chunk.slice(colon + 1).trim()}
@@ -204,9 +212,9 @@ function PressureTestContent({ content }: { content: string }) {
           return (
             <PTBox
               key={i}
-              color="#10B981"
-              bg="rgba(16,185,129,0.07)"
-              border="rgba(16,185,129,0.2)"
+              color="var(--success-text)"
+              bg="rgba(156,174,134,0.06)"
+              border="rgba(156,174,134,0.2)"
               icon="✓"
               label={chunk.slice(0, colon)}
               body={chunk.slice(colon + 1).trim()}
@@ -218,7 +226,7 @@ function PressureTestContent({ content }: { content: string }) {
           return (
             <PTBox
               key={i}
-              color="#F5A623"
+              color="var(--accent-text)"
               bg="rgba(245,166,35,0.07)"
               border="rgba(245,166,35,0.2)"
               icon="⚡"
@@ -232,13 +240,13 @@ function PressureTestContent({ content }: { content: string }) {
           const bullets = chunk.split("\n").filter((l) => l.startsWith("- "));
           return (
             <div key={i} className="pt-2">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">
+              <p className="text-xs font-bold text-muted uppercase tracking-widest mb-3">
                 Follow-Up Probes
               </p>
               <ul className="space-y-2">
                 {bullets.map((b, j) => (
-                  <li key={j} className="flex items-start gap-2 text-sm text-gray-400">
-                    <span className="shrink-0 mt-0.5" style={{ color: "#8A8073" }}>·</span>
+                  <li key={j} className="flex items-start gap-2 text-sm text-muted">
+                    <span className="shrink-0 mt-0.5" style={{ color: "var(--muted)" }}>·</span>
                     <span>{b.replace(/^-\s*/, "")}</span>
                   </li>
                 ))}
@@ -248,7 +256,7 @@ function PressureTestContent({ content }: { content: string }) {
         }
 
         return (
-          <p key={i} className="text-sm text-gray-400 leading-7">{chunk}</p>
+          <p key={i} className="text-sm text-muted leading-7">{chunk}</p>
         );
       })}
     </div>
@@ -262,7 +270,7 @@ function LayerContent({ layer }: { layer: Layer }) {
     case "story":         return <StoryContent content={layer.content} />;
     case "concept":       return <ConceptContent content={layer.content} />;
     case "pressure_test": return <PressureTestContent content={layer.content} />;
-    default:              return <p className="text-sm text-gray-300 leading-7 whitespace-pre-line">{layer.content}</p>;
+    default:              return <p className="text-sm text-muted leading-7 whitespace-pre-line">{layer.content}</p>;
   }
 }
 
@@ -320,7 +328,7 @@ export default async function LessonDetailPage({
       {/* Back */}
       <Link
         href="/lessons"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors mb-6"
+        className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-foreground transition-colors mb-6"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <polyline points="15 18 9 12 15 6" />
@@ -330,8 +338,8 @@ export default async function LessonDetailPage({
 
       {/* Header card */}
       <div
-        className="lesson-header-card rounded-2xl border border-white/10 p-5 sm:p-8 space-y-4 mb-6"
-        style={{ backgroundColor: "#211C18" }}
+        className="lesson-header-card rounded-2xl border p-5 sm:p-8 space-y-4 mb-6"
+        style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}
       >
         <div className="flex items-center gap-2 flex-wrap">
           <span
@@ -346,18 +354,18 @@ export default async function LessonDetailPage({
           >
             {dbLesson.difficulty}
           </span>
-          <span className="text-xs text-gray-500 ml-auto">{dbLesson.durationMinutes} min</span>
+          <span className="text-xs text-muted ml-auto">{dbLesson.durationMinutes} min</span>
         </div>
 
-        <h1 className="text-2xl font-bold text-white">{dbLesson.title}</h1>
-        <p className="text-gray-400">{dbLesson.description}</p>
+        <h1 className="text-2xl font-bold text-foreground">{dbLesson.title}</h1>
+        <p className="text-muted">{dbLesson.description}</p>
 
         <div className="flex flex-wrap gap-2 pt-2">
           {dbLesson.topics.map((t) => (
             <span
               key={t}
-              className="text-xs px-2 py-1 rounded border border-white/10 text-gray-400"
-              style={{ backgroundColor: "#2C2420" }}
+              className="text-xs px-2 py-1 rounded border text-muted"
+              style={{ backgroundColor: "var(--surface-2)", borderColor: "var(--border)" }}
             >
               {t}
             </span>
@@ -368,20 +376,20 @@ export default async function LessonDetailPage({
       {/* Content layers */}
       {locked ? (
         <div
-          className="rounded-2xl border border-white/10 flex flex-col items-center justify-center py-20 text-center gap-4"
-          style={{ backgroundColor: "#211C18" }}
+          className="rounded-2xl border flex flex-col items-center justify-center py-20 text-center gap-4"
+          style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}
         >
           <div
             className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold"
-            style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
+            style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
           >
             Pro Brief
           </div>
-          <p className="text-sm font-medium text-gray-400">Upgrade to Pro to unlock this brief</p>
+          <p className="text-sm font-medium text-muted">Upgrade to Pro to unlock this brief</p>
           <Link
             href="/pricing"
             className="text-xs font-semibold px-4 py-2 rounded-lg transition-opacity hover:opacity-80"
-            style={{ backgroundColor: "#F5A623", color: "#1C1917" }}
+            style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)" }}
           >
             Upgrade to unlock
           </Link>
@@ -389,19 +397,19 @@ export default async function LessonDetailPage({
       ) : layers.length > 0 ? (
         <div className="space-y-5">
           {layers.map((layer, i) => {
-            const cfg = LAYER_CONFIG[layer.type] ?? { color: "#6B7280", label: layer.type.toUpperCase() };
+            const cfg = LAYER_CONFIG[layer.type] ?? { color: "#6B7280", textColor: "var(--muted)", label: layer.type.toUpperCase() };
             return (
               <div
                 key={i}
                 id={layer.type}
-                className="rounded-2xl border border-white/10 p-6 space-y-4 scroll-mt-6"
-                style={{ backgroundColor: "#211C18", borderLeft: `3px solid ${cfg.color}` }}
+                className="rounded-2xl border p-6 space-y-4 scroll-mt-6"
+                style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)", borderLeft: `3px solid ${cfg.color}` }}
               >
                 <div>
-                  <p className="text-xs font-bold tracking-widest" style={{ color: cfg.color }}>
+                  <p className="text-xs font-bold tracking-widest" style={{ color: cfg.textColor }}>
                     {cfg.label}
                   </p>
-                  <h2 className="text-lg font-bold text-white mt-1">{layer.title}</h2>
+                  <h2 className="text-lg font-bold text-foreground mt-1">{layer.title}</h2>
                 </div>
                 <LayerContent layer={layer} />
               </div>
@@ -417,7 +425,7 @@ export default async function LessonDetailPage({
             <Link
               href="/register"
               className="block w-full text-center py-3.5 rounded-xl font-bold text-sm transition-opacity hover:opacity-90"
-              style={{ backgroundColor: "#F5A623", color: "#1C1917", textDecoration: "none" }}
+              style={{ backgroundColor: "var(--accent)", color: "var(--accent-contrast)", textDecoration: "none" }}
             >
               Sign up for the full library + AI-graded practice on this topic →
             </Link>
@@ -425,11 +433,11 @@ export default async function LessonDetailPage({
         </div>
       ) : (
         <div
-          className="rounded-2xl border border-white/10 flex flex-col items-center justify-center py-20 text-center"
-          style={{ backgroundColor: "#211C18" }}
+          className="rounded-2xl border flex flex-col items-center justify-center py-20 text-center"
+          style={{ backgroundColor: "var(--surface)", borderColor: "var(--border)" }}
         >
           <svg
-            className="w-10 h-10 text-gray-600 mb-3"
+            className="w-10 h-10 text-muted mb-3"
             fill="none"
             stroke="currentColor"
             strokeWidth={1.5}
@@ -438,8 +446,8 @@ export default async function LessonDetailPage({
             <path d="M14.752 11.168l-3.197-2.132A1 1 0 0 0 10 9.87v4.263a1 1 0 0 0 1.555.832l3.197-2.132a1 1 0 0 0 0-1.664z" />
             <circle cx="12" cy="12" r="9" />
           </svg>
-          <p className="text-sm font-medium text-gray-400">Brief content coming soon</p>
-          <p className="text-xs text-gray-600 mt-1">
+          <p className="text-sm font-medium text-muted">Brief content coming soon</p>
+          <p className="text-xs text-muted mt-1">
             Full AI-guided brief content will appear here.
           </p>
         </div>

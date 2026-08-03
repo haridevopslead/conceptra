@@ -133,12 +133,6 @@ export default async function DashboardPage() {
     ...lessonProgress.map((l) => new Date(l.visitedAt)),
   ];
 
-  // Debug: visible in Railway deployment logs
-  console.log("sessions:", JSON.stringify(interviews));
-  const practicedDates = allActivityDates.map((d) => new Date(d).toISOString().slice(0, 10));
-  console.log("practicedDates:", JSON.stringify(practicedDates));
-  console.log("weekDays:", JSON.stringify(getWeekDays(allActivityDates).map((d) => `${d.label}:active=${d.active}:today=${d.isToday}`)));
-
   const weekDays = getWeekDays(allActivityDates);
   const recent = interviews.slice(0, 3);
   const trackPct = Math.min(100, Math.round((lessonCount / totalLessons) * 100));
@@ -376,11 +370,6 @@ export default async function DashboardPage() {
               );
             })}
           </div>
-        )}
-        {recent.length > 0 && (
-          <p style={{ display: "inline-block", marginTop: 12, fontSize: 13.5, fontWeight: 600, color: "var(--muted)" }}>
-            View all activity <span style={{ fontWeight: 500 }}>(coming soon)</span>
-          </p>
         )}
       </div>
     </div>

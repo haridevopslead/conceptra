@@ -3,6 +3,7 @@ dotenv.config();
 
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../lib/generated/prisma/client";
+import { lessonResourcesBySlug } from "./lesson-resources-real-links";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const db = new PrismaClient({ adapter });
@@ -20,6 +21,7 @@ const lessons = [
     tier: "FREE" as const,
     order: 1,
     published: true,
+    resources: lessonResourcesBySlug["docker-fundamentals"],
     content: {
       layers: [
         {
@@ -55,6 +57,7 @@ const lessons = [
     tier: "FREE" as const,
     order: 2,
     published: true,
+    resources: lessonResourcesBySlug["kubernetes-architecture"],
     content: {
       layers: [
         {
@@ -92,6 +95,7 @@ const lessons = [
     tier: "PRO" as const,
     order: 3,
     published: true,
+    resources: lessonResourcesBySlug["cicd-pipelines"],
     content: {
       layers: [
         {
@@ -129,6 +133,7 @@ const lessons = [
     tier: "PRO" as const,
     order: 4,
     published: true,
+    resources: lessonResourcesBySlug["aws-fundamentals"],
     content: {
       layers: [
         {
@@ -165,6 +170,7 @@ const lessons = [
     tier: "PRO" as const,
     order: 5,
     published: true,
+    resources: lessonResourcesBySlug["terraform-iac"],
     content: {
       layers: [
         {
@@ -201,6 +207,7 @@ const lessons = [
     tier: "PRO" as const,
     order: 6,
     published: true,
+    resources: lessonResourcesBySlug["linux-fundamentals"],
     content: {
       layers: [
         {
@@ -239,6 +246,7 @@ const lessons = [
     tier: "PRO" as const,
     order: 7,
     published: true,
+    resources: lessonResourcesBySlug["git-version-control"],
     content: {
       layers: [
         {
@@ -276,6 +284,7 @@ const lessons = [
     tier: "PRO" as const,
     order: 8,
     published: true,
+    resources: lessonResourcesBySlug["observability-monitoring"],
     content: {
       layers: [
         {
@@ -321,6 +330,7 @@ async function main() {
         order: lesson.order,
         published: lesson.published,
         content: lesson.content,
+        resources: lesson.resources,
       },
       create: lesson,
     });
